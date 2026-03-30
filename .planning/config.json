@@ -4,7 +4,8 @@
   "model_profile": "quality",
   "model_overrides": {
     "gsd-executor": "sonnet",
-    "gsd-verifier": "opus"
+    "gsd-verifier": "opus",
+    "gsd-synthesizer": "opus"
   },
   "commit_docs": false,
   "parallelization": true,
