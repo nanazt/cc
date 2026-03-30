@@ -1,266 +1,336 @@
-# Technology Stack
+# Technology Stack: v2.0 Universal Consolidation Model
 
 **Project:** cckit (Claude Code Toolkit)
-**Researched:** 2026-03-30
+**Milestone:** v2.0 Universal Consolidation
+**Researched:** 2026-03-31
+**Scope:** Stack additions/changes for universal model. Excludes already-validated v1.0 stack (Deno, unified, remark-parse, hash-sections.ts).
 
-## Recommended Stack
+## Executive Summary
 
-This is a Claude Code plugin project, not a traditional application. The "stack" has two distinct layers: (1) prompt-engineering artifacts (skills, agents) authored as Markdown with YAML frontmatter, and (2) a single Deno TypeScript tool for deterministic section hashing. There is no server, no framework, no build step.
+The universal consolidation model needs **zero new runtime dependencies**. Every change is in the prompt-engineering layer -- skills, agents, and templates -- which are Markdown files consumed by Claude Code. The core design shift: replace 3 hardcoded archetype templates with a single generic template plus a host-project-level override mechanism using the conventions Claude Code already supports.
 
-### Runtime: Deno
+**Key insight:** The v1.0 IMPL-SPEC's biggest technology-specific assumption is not in the tooling -- it is in the vocabulary. "Service", "archetype", "gRPC interface", "gateway" are all baked into the template schemas and agent prompts. Making this universal is a vocabulary and schema design problem, not a technology problem.
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| Deno | `>=2.7` (latest stable: 2.7.7) | Runtime for `hash-sections.ts` | First-class TypeScript, built-in test runner, Web Crypto API for SHA-256, `npm:` specifiers eliminate package.json/node_modules. Single-file scripts just work. |
+## What Carries Over Unchanged
 
-**Confidence:** HIGH (verified via [Deno releases](https://github.com/denoland/deno/releases), March 2026)
+These are validated in v1.0 and require no changes for universality. Listed for completeness; no re-research performed.
 
-**Why not Node/Bun:** The hash tool is a single CLI script. Deno requires zero config for TypeScript execution, has a built-in test framework, and its `npm:` specifiers mean no `package.json`, no `node_modules`, no build step. Node would require `tsconfig.json` + `tsx`/`ts-node` + `package.json`. Bun has similar DX but Deno's security sandbox (`--allow-read` only) is a better fit for a tool that should never write or network.
+| Layer | Technology | v2.0 Status |
+|-------|-----------|-------------|
+| Runtime | Deno >= 2.7 | Unchanged. hash-sections.ts is project-type-agnostic (operates on markdown structure, not content semantics). |
+| Markdown AST | unified 11.0.5 + remark-parse 11.0.0 + remark-stringify 11.0.0 | Unchanged. |
+| Crypto | Web Crypto API (Deno built-in) | Unchanged. |
+| Plugin format | SKILL.md + Agent .md (YAML frontmatter + Markdown) | Unchanged format. Content rewrites needed. |
+| Testing | Deno test (built-in) | Unchanged for hash tool. New fixture patterns for universal model (see below). |
 
-### Markdown AST: unified + remark-parse
+## What Changes
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `npm:unified` | `11.0.5` | Pipeline processor | Composes parser + compiler plugins. Stable, no changes in 1+ year. |
-| `npm:remark-parse` | `11.0.0` | Markdown-to-AST parser | CommonMark-compliant. Handles fenced code blocks, setext headers, ATX trailing hashes automatically. Eliminates ~40 lines of fragile regex. |
-| `npm:remark-stringify` | `11.0.0` | AST-to-Markdown serializer | Needed for deterministic section serialization before hashing. Normalizes AST back to text. |
+### 1. Consolidation Unit: "Component" Replaces "Service"
 
-**Confidence:** HIGH (versions verified via [npm registry](https://www.npmjs.com/package/unified?activeTab=versions) and [Cloudsmith](https://cloudsmith.com/navigator/npm/unified))
+**Problem:** The v1.0 model assumes `specs/{service}/` -- every consolidation target is a "service" in a service-oriented architecture. This fails for CLI tools, libraries, documentation projects, system software.
 
-**Why these specific versions:** The IMPL-SPEC pins `unified@11.0.5` and `remark-parse@11.0.0`. These are the current latest on npm (unified 11.0.5 published ~1 year ago; remark-parse 11.0.0 published ~2 years ago). The unified ecosystem releases infrequently -- major versions are stable for years. Pin exact versions in import specifiers to guarantee hash determinism across environments.
+**Recommendation:** Use "component" as the universal consolidation unit.
 
-**Why not manual regex:** The IMPL-SPEC explicitly rejected manual parsing. Fenced code block state tracking, setext header detection, and tilde fence handling are error-prone. The AST approach handles all CommonMark edge cases in ~10 lines of traversal code vs ~40+ lines of regex with remaining edge cases.
+| Project Type | Component Maps To | Example |
+|-------------|-------------------|---------|
+| Microservices | Service | `auth`, `gateway`, `user` |
+| Monolith | Module/Package | `billing`, `notifications`, `admin` |
+| CLI tool | Subcommand group | `init`, `build`, `deploy` |
+| Library | Public API surface | `parser`, `formatter`, `config` |
+| Documentation | Section/Chapter | `getting-started`, `api-reference` |
+| System software | Subsystem | `scheduler`, `memory-manager`, `fs` |
+| Desktop/Mobile app | Feature area | `editor`, `sync`, `settings` |
 
-### Crypto: Web Crypto API (built-in)
+**Why "component":**
+- Deliberately abstract -- no architectural assumption
+- Maps naturally to any organizational boundary a project uses
+- The host project's PROJECT.md already declares its topology (whatever the project calls its units)
+- Developers understand "what are the major parts of your system?" regardless of project type
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `crypto.subtle.digest` | (Deno built-in) | SHA-256 computation | Web standard, zero dependencies. Available in Deno without imports. |
+**Output directory stays `specs/{component}/`** -- the path structure does not change, only the vocabulary in prompts and templates.
 
-**Confidence:** HIGH (Web Crypto is a W3C standard built into Deno)
+**Confidence:** HIGH. This is a naming decision, not a technology decision. The underlying mechanics (file-per-unit, section-based hashing, merge rules) are all unit-name-agnostic.
 
-### Claude Code Plugin Layer
+### 2. Template System: Generic Default + Host Overrides
 
-| Technology | Format | Purpose | Why |
-|------------|--------|---------|-----|
-| SKILL.md | YAML frontmatter + Markdown body | Skill definitions (`/case`, `/consolidate`) | Claude Code [Agent Skills standard](https://agentskills.io). Frontmatter configures invocation; body is the system prompt. |
-| Agent .md | YAML frontmatter + Markdown body | Subagent definitions (`case-briefer`, `spec-consolidator`) | Claude Code native subagent format. Frontmatter sets model, tools, description; body is the system prompt. |
+**Problem:** v1.0 defines 3 archetype templates (`domain-service.md`, `gateway-bff.md`, `event-driven.md`) with archetype detection logic. Adding a new project type means editing the plugin. This violates the technology neutrality principle.
 
-**Confidence:** HIGH (verified via [official Claude Code skills docs](https://code.claude.com/docs/en/skills) and [subagents docs](https://code.claude.com/docs/en/sub-agents), March 2026)
+**Recommendation:** Two-layer template system.
 
-## Frontmatter Conventions
+#### Layer 1: Generic Default Template (ships with plugin)
 
-### SKILL.md Frontmatter
+A single `templates/default.md` replacing all 3 archetype templates. Contains the minimum sections that apply to ANY component in ANY project type:
 
-Based on official docs and existing `/case` skill pattern:
+```
+# {Component} Spec
 
-```yaml
----
-name: consolidate                    # lowercase, hyphens only (max 64 chars)
-description: >                       # Multi-line. Claude reads this for auto-invocation.
-  Use when a phase has shipped...    # Front-load key trigger. Truncated at 250 chars in listing.
-argument-hint: "[phase-number]"      # Shown in autocomplete
-allowed-tools:                       # Tools available without per-use approval
-  - Read
-  - Write
-  - Bash
-  - Glob
-  - Grep
-  - Edit
-  - AskUserQuestion
-  - Agent                            # For spawning subagents
-disable-model-invocation: true       # User-only invocation (no auto-trigger)
----
+Last consolidated: Phase {id} (YYYY-MM-DD)
+
+## Purpose
+
+What this component does and why it exists.
+
+## Interface
+
+Operations, endpoints, commands, or public API this component exposes.
+Use `{Component}.{Operation}` format for each operation.
+
+## Rules
+
+Business rules, constraints, invariants governing this component's behavior.
+
+## Dependencies
+
+What this component requires from other components or external systems.
+
+## Configuration
+
+Environment variables, feature flags, tunable parameters.
 ```
 
-**Available fields (full reference):**
+**Why these 5 sections:** They pass the universality test. Every component in every project type has a purpose, exposes some interface, follows rules, may depend on other things, and may have configuration. They are also the minimum the consolidator agent needs to produce useful output, and the minimum the case-briefer needs to consume.
 
-| Field | Required | This Project Uses |
-|-------|----------|-------------------|
-| `name` | No (defaults to dir name) | Yes |
-| `description` | Recommended | Yes |
-| `argument-hint` | No | Yes (`[phase-number]`) |
-| `disable-model-invocation` | No | Yes (both skills) |
-| `user-invocable` | No | No (defaults true) |
-| `allowed-tools` | No | Yes |
-| `model` | No | No (inherits session) |
-| `effort` | No | No |
-| `context` | No | No (skills run inline) |
-| `agent` | No | No |
-| `hooks` | No | No |
-| `paths` | No | No |
-| `shell` | No | No |
+**Conditional sections** (included only when the component warrants them):
 
-**String substitutions available:** `$ARGUMENTS`, `$ARGUMENTS[N]`, `$N`, `${CLAUDE_SESSION_ID}`, `${CLAUDE_SKILL_DIR}`
+```
+## State Management
 
-### Agent .md Frontmatter
+(Include when: component manages stateful entities with lifecycle transitions)
 
-Based on official docs and existing `case-briefer`/`case-validator` patterns:
+## Error Categories
 
-```yaml
----
-name: spec-consolidator              # lowercase, hyphens
-description: >                       # When Claude should delegate to this agent
-  Per-service consolidation with...
-tools:                               # Allowlist (inherits all if omitted)
-  - Read
-  - Write
-  - Glob
-  - Grep
-  - Bash
-model: sonnet                        # sonnet | opus | haiku | inherit | full model ID
----
+(Include when: component defines its own error taxonomy)
+
+## Event Contracts
+
+(Include when: component produces or consumes events/messages)
 ```
 
-**Available fields (full reference):**
+**What about the detailed v1.0 archetype sections?** They become examples in the host override layer (see Layer 2) or in reference documentation. The generic template intentionally under-specifies. The agent fills in what the phase documents warrant.
 
-| Field | Required | This Project Uses |
-|-------|----------|-------------------|
-| `name` | Yes | Yes |
-| `description` | Yes | Yes |
-| `tools` | No | Yes (restricted per agent) |
-| `disallowedTools` | No | No |
-| `model` | No | Yes (`sonnet` or `opus` per IMPL-SPEC) |
-| `permissionMode` | No | No |
-| `maxTurns` | No | Consider for verifier |
-| `skills` | No | No |
-| `mcpServers` | No | No |
-| `hooks` | No | No |
-| `memory` | No | No |
-| `background` | No | No |
-| `effort` | No | Consider for verifier |
-| `isolation` | No | No |
-| `initialPrompt` | No | No |
+#### Layer 2: Host Project Overrides (optional, in host project)
 
-### Agent Model Assignments (from IMPL-SPEC)
+The host project can place custom templates in `.planning/specs/_templates/{name}.md`. The consolidator checks for overrides before falling back to the plugin's default.
 
-| Agent | Model | Rationale |
-|-------|-------|-----------|
-| `spec-consolidator` | `sonnet` | Balanced capability/speed for structured merge operations |
-| `e2e-flows` | `sonnet` | Structured output generation, no deep reasoning needed |
-| `spec-verifier` | `opus` | 28-check verification needs strongest reasoning; downgrade candidate after usage data |
-| `case-briefer` | `sonnet` | Extraction from planning docs, no deep reasoning |
-| `case-validator` | `opus` | Cross-referencing gaps requires strong analytical reasoning |
+**Lookup order (consolidator agent prompt instruction):**
 
-## Testing
+1. `.planning/specs/_templates/{component-name}.md` -- component-specific override
+2. `.planning/specs/_templates/default.md` -- project-wide override
+3. `${CLAUDE_SKILL_DIR}/templates/default.md` -- plugin default (always present)
 
-### Deno Test (built-in)
+**Why `_templates/` with underscore prefix:** Distinguishes the template directory from component spec directories. `specs/auth/` is a component; `specs/_templates/` is configuration. The underscore is a common convention for meta/config directories.
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `deno test` | (built-in) | Test runner for `hash-sections_test.ts` | Zero-config, built-in assertions, `--allow-read` permission scoping. No external test framework needed. |
+**Why not YAML/JSON schema files:** Markdown templates are self-documenting. The agent reads the template as instructions, not as a schema to parse. Section headings ARE the schema. Guide text below each heading tells the agent what to write there. This is consistent with the entire cckit approach -- everything is prompt content, not data.
 
-**Confidence:** HIGH (verified via [Deno testing docs](https://docs.deno.com/runtime/fundamentals/testing/))
+**Why not a `consolidate.yaml` config file:** Adding a new config format means adding config validation logic, documentation for the config format, migration handling when the format evolves, and cognitive overhead for users. The template IS the config. Reading a Markdown file with section headings is something Claude already does well.
 
-**Test invocation:**
-```bash
-deno test --allow-read skills/consolidate/hash-sections_test.ts
-```
+**Confidence:** HIGH for the approach. `${CLAUDE_SKILL_DIR}` is confirmed available in Claude Code skills (verified via official docs, March 2026). The template lookup is prompt-instructed behavior, not code -- the orchestrator tells the consolidator agent "check for overrides in this order."
 
-**Test structure:** Standard Deno test pattern with `Deno.test()` and `assertEquals`/`assertExists` from `@std/assert`:
+### 3. Component Classification: Topology-Driven, Not Detection-Based
 
-```typescript
-import { assertEquals } from "jsr:@std/assert";
+**Problem:** v1.0 uses a 2-step detection algorithm: (1) scan CASES.md for `{Service}.{Op}` headings, (2) match against PROJECT.md service topology table. The "archetype determination" from the topology table is hardcoded to 3 types.
 
-Deno.test("basic H2 extraction", async () => {
-  // Read fixture, invoke hash function, assert output
-});
-```
+**Recommendation:** Drop archetype detection entirely. The consolidator does not need to know the archetype -- it needs to know the template.
 
-**Fixture-based testing:** Test fixtures live alongside the test file. Each fixture is a small `.md` file exercising a specific edge case (fenced code blocks, setext headers, consecutive blank lines, etc.). The IMPL-SPEC defines 10 test cases.
+**New classification algorithm:**
 
-### Skill/Agent Testing
+1. **Operation headings:** Scan CASES.md for `## {Component}.{Op}` headings. Extract unique component names. (Unchanged from v1.0.)
+2. **CONTEXT.md component names:** If step 1 yields zero results, scan CONTEXT.md for component names matching PROJECT.md topology. (Unchanged from v1.0.)
+3. **Template resolution:** For each component, resolve the template using the 3-level lookup order above. No archetype mapping needed.
+4. **On miss:** If both steps yield zero components, ask the developer. (Unchanged from v1.0.)
 
-No automated test framework for prompt-based artifacts. Validation is structural:
+**What disappears:** The `<template_type>` dispatch tag in the consolidator input contract. Replaced by `<template_path>` pointing to the resolved template file. The consolidator reads the template and follows its section structure.
 
-| Approach | What It Validates |
-|----------|-------------------|
-| YAML frontmatter linting | Required fields present, field value constraints |
-| Dry-run with fixture data | Skill produces expected artifacts from known input |
-| `spec-verifier` agent | 28-check read-only verification pass (T1/T2/T3 findings) |
+**What stays:** The `{Component}.{Operation}` naming convention is universal. It works for `Auth.Login`, `CLI.Init`, `Parser.Tokenize`, `GettingStarted.QuickStart` (docs), `Scheduler.DispatchJob` (system software). No change needed.
 
-**Confidence:** MEDIUM (skill/agent testing is still an evolving practice in the Claude Code ecosystem)
+**Confidence:** HIGH. The naming convention was already universal in v1.0 by accident -- it just used service-centric vocabulary to describe it.
 
-## Deno Configuration
+### 4. Merge Rules: What Changes, What Stays
 
-### Minimal `deno.json` (optional)
+| Rule | v1.0 | v2.0 | Change |
+|------|------|------|--------|
+| Operation-level replacement | Per-service | Per-component | Vocabulary only |
+| PR-to-SR promotion | SR = Service Rule | SR = Spec Rule (or keep Service Rule -- see below) | Potentially rename |
+| TR exclusion | Unchanged | Unchanged | None |
+| R-to-OR transformation | Unchanged | Unchanged | None |
+| GR reference-only | GR = Global Rule (from PROJECT.md) | Unchanged | None |
+| Superseded operations | Unchanged | Unchanged | None |
+| Superseded rules | Unchanged | Unchanged | None |
+| Section-level rewrite | Per archetype sections | Per template sections | Template-driven |
+| Provenance tagging | Unchanged | Unchanged | None |
+| Forward Concerns exclusion | Unchanged | Unchanged | None |
+| Phase-contextual exclusion | Unchanged | Unchanged | None |
 
-For this project, a `deno.json` is optional but recommended for import map convenience and test task definition:
+**The SR naming question:** "Service Rule" becomes awkward for a CLI tool or library. Options:
 
-```json
-{
-  "tasks": {
-    "test": "deno test --allow-read",
-    "hash": "deno run --no-lock --allow-read skills/consolidate/hash-sections.ts"
-  },
-  "imports": {
-    "unified": "npm:unified@11.0.5",
-    "remark-parse": "npm:remark-parse@11.0.0",
-    "remark-stringify": "npm:remark-stringify@11.0.0"
-  }
-}
-```
+| Option | Pros | Cons |
+|--------|------|------|
+| Keep SR = Service Rule | No migration, all docs/examples stay valid | Misleading for non-service projects |
+| Rename SR = Spec Rule | Accurate for all project types, S still works | Migration in all docs, existing projects |
+| Rename SR = Scoped Rule | Describes the actual semantics (component-scoped) | "Scoped" is less intuitive than "Spec" |
 
-**Why `--no-lock`:** The IMPL-SPEC specifies `--no-lock` for the hash tool invocation. This is correct: the lockfile is unnecessary for a single-script tool with pinned versions, and avoiding it simplifies first-run behavior for host projects consuming the plugin.
+**Recommendation:** Rename to "Spec Rule" (SR stays SR). The abbreviation does not change, so existing CASES.md files, agent prompts, and verifier checks all continue to work. Only the expanded name changes in documentation and guide text. Zero migration cost.
 
-**Why import maps:** Centralizes version pins. The `.ts` files import bare specifiers (`import { unified } from "unified"`) rather than inline `npm:` URLs, making the code cleaner and version management centralized.
+**Confidence:** HIGH. The abbreviation does not change, and the rename happens only in prose.
 
-**Alternative: inline `npm:` specifiers without `deno.json`:**
-```typescript
-import { unified } from "npm:unified@11.0.5";
-import remarkParse from "npm:remark-parse@11.0.0";
-```
-This also works and requires zero config files. Trade-off: version pins scattered across source files vs. centralized in `deno.json`.
+### 5. Verification Checks: Universality Audit
 
-**Recommendation:** Use `deno.json` with import maps. The project already has multiple files that may share imports, and centralized version management is cleaner.
+The v1.0 IMPL-SPEC defines 28 verification checks. Most are already universal. The archetype-specific ones need changes:
 
-## What NOT to Use
+| Check | v1.0 | v2.0 Change |
+|-------|------|-------------|
+| V-04 | "Archetype-appropriate sections present" | "Template-appropriate sections present" -- compare against resolved template |
+| V-11 | "Gateway routes resolve" | Drop or generalize to "Interface references resolve" -- not all components have routes |
+| V-27 | "specs/ service list matches PROJECT.md service topology" | "specs/ component list matches PROJECT.md topology" -- vocabulary only |
 
-| Technology | Why Not |
-|------------|---------|
-| Node.js | Requires tsconfig.json, build step or tsx, package.json. Deno does this with zero config. |
-| Bun | Similar DX to Deno but lacks Deno's permission sandbox. No benefit over Deno for this use case. |
-| Jest/Vitest/Mocha | External test frameworks. Deno's built-in test runner handles all 10 test cases without dependencies. |
-| `remark` (combined package) | Bundles `unified` + `remark-parse` + `remark-stringify`. We only need parse + stringify separately for the pipeline, and explicit imports make dependencies clear. |
-| `mdast-util-to-string` | Tempting for section serialization, but it strips formatting. We need full markdown serialization (including code blocks, emphasis, etc.) for accurate hashing. `remark-stringify` is correct. |
-| `gray-matter` / YAML parsers | Not needed. Skills and agents are consumed by Claude Code, not by our code. The hash tool operates on markdown sections, not frontmatter. |
-| `esbuild` / bundlers | No build step. Deno runs TypeScript directly. Bundling would add complexity for zero benefit. |
-| `prettier` / formatters | Not applicable to prompt-engineering Markdown. Formatting is semantic in skills/agents (whitespace matters for readability by Claude). |
-| Docker | Overkill. The hash tool is `deno run` with one permission flag. |
+All other checks (V-01 through V-29 excluding V-04, V-11, V-27) are already universal -- they operate on structural patterns (provenance tags, section emptiness, operation naming, rule formatting) that are project-type-agnostic.
 
-## Installation (for hash tool dependencies)
+**V-11 specifically:** This check assumed a gateway with route-to-backend-operation mappings. In the universal model, this becomes: "Interface cross-references resolve -- operations referenced in one component's spec exist in the referenced component's spec." Same semantic check, broader applicability.
 
-No installation step. Deno downloads npm packages on first run:
+**Confidence:** HIGH. The verification framework is structurally sound; only vocabulary and a few check definitions need updating.
 
-```bash
-# First run fetches npm:unified, npm:remark-parse, npm:remark-stringify
-deno run --no-lock --allow-read skills/consolidate/hash-sections.ts test.md
+### 6. E2E Flows: Optional, Not Assumed
 
-# Subsequent runs use Deno's global cache (~/.cache/deno or DENO_DIR)
-```
+**Problem:** v1.0 treats E2E flows as a standard pipeline step (Step 3.5, Step 4). But E2E cross-component flows only make sense when components interact (multi-service systems, multi-module monoliths with inter-module calls). For a CLI tool, a library, or a documentation project, there are no "cross-component flows."
 
-**Network requirement:** First invocation requires network access (npm registry). Subsequent runs are fully offline from cache. Document this in the skill's setup notes.
+**Recommendation:** Make E2E flow generation explicitly conditional.
 
-## Alternatives Considered
+**Trigger condition:** E2E flows are generated ONLY when the project topology in PROJECT.md declares inter-component communication. The orchestrator checks for this before Step 3.5.
 
-| Category | Recommended | Alternative | Why Not |
-|----------|-------------|-------------|---------|
-| Runtime | Deno 2.7+ | Node.js 22+ | Zero-config TypeScript, built-in test runner, permission sandbox, npm: specifiers |
-| Runtime | Deno 2.7+ | Bun 1.2+ | No permission sandbox, less mature ecosystem |
-| Markdown parser | unified + remark-parse | `markdown-it` | Not AST-based (token stream). unified/remark gives mdast tree for structural traversal. |
-| Markdown parser | unified + remark-parse | Manual regex | IMPL-SPEC explicitly rejected. 40+ lines of fragile code vs. 10 lines of AST traversal. |
-| AST serializer | remark-stringify | `mdast-util-to-string` | Strips formatting; hashes would miss code block / emphasis changes (false negatives). |
-| Test runner | Deno test | Vitest | External dependency, requires config. Deno test is built-in and sufficient for 10 test cases. |
-| Agent model | sonnet (default) / opus (verifier) | haiku | Too weak for consolidation reasoning. Haiku 4.5 is fast but consolidation needs sonnet-level structured output. |
+**Detection heuristic (prompt-instructed, not code):** "Does PROJECT.md describe communication between components (API calls, event subscriptions, shared state, message passing)? If yes, E2E flows apply. If the project is a standalone tool, library, or documentation project with no inter-component communication, skip E2E flows entirely."
+
+**Impact on pipeline:** Step 3.5 and Step 4 become conditional. The orchestrator skips them with a log message: "No inter-component flows detected. Skipping E2E generation." This is already the v1.0 behavior for the "no cross-service dependencies" case -- it just needs to be the expected default, not the exception.
+
+**Confidence:** HIGH. This is a prompt-level change in the orchestrator SKILL.md. No tooling changes.
+
+### 7. Agent Model Assignments: Unchanged
+
+| Agent | Model | v2.0 Status |
+|-------|-------|-------------|
+| spec-consolidator | sonnet | Unchanged. Template-following consolidation is well within sonnet capability. |
+| e2e-flows | sonnet | Unchanged (when E2E applies). |
+| spec-verifier | opus | Unchanged. Verification reasoning depth hasn't changed. Still a downgrade candidate after usage data. |
+
+No model changes. The universal model does not increase reasoning difficulty -- it reduces template complexity (fewer sections to match) and removes archetype classification (less branching logic for agents).
+
+## What NOT to Add
+
+These were considered and explicitly rejected for v2.0.
+
+### Do Not Add: Schema Definition Language
+
+**Temptation:** Define a formal schema language (YAML, JSON Schema, custom DSL) for specifying template section structures, required vs optional sections, validation rules, and conditional inclusion logic.
+
+**Why not:** The template Markdown file IS the schema. Adding a separate schema definition language means: (1) maintaining two representations of the same information, (2) building a parser/validator for the schema format, (3) documenting the schema language, (4) debugging schema-vs-template mismatches. The agent reads the template headings and guide text directly. Markdown is the schema language.
+
+### Do Not Add: Project Type Detection
+
+**Temptation:** Build a classifier that reads the host project's files (package.json, Cargo.toml, go.mod, Makefile) and determines the project type, then selects an appropriate template.
+
+**Why not:** This is the archetype detection problem from v1.0 at a larger scale. The host project tells us its topology in PROJECT.md. If PROJECT.md does not declare a topology, the developer provides one. The plugin never needs to guess. Detection logic is fragile, incomplete, and creates a maintenance burden of supporting every project type.
+
+### Do Not Add: Template Inheritance / Composition
+
+**Temptation:** Let templates extend or compose other templates (`extends: default`, `includes: [error-categories, state-management]`).
+
+**Why not:** This adds a template processing engine. The problem is small enough to solve with flat files. A project override template is a complete replacement, not a delta. If a project wants 3 sections from the default and 2 custom ones, they write a 5-section template. Copy-paste is simpler than inheritance for files this small (10-30 lines).
+
+### Do Not Add: YAML Configuration File for Consolidation
+
+**Temptation:** Create a `.planning/consolidate.yaml` or `specs/config.yaml` that configures the consolidation pipeline (component mappings, template assignments, rule tier settings, E2E flow preferences).
+
+**Why not:** Configuration accumulates. Every config key needs documentation, default values, migration when the schema changes, and validation. For v2.0, the template files + PROJECT.md topology provide all configuration needed. If configuration complexity grows in the future, evaluate then -- but do not pre-build infrastructure for imagined future needs.
+
+### Do Not Add: Runtime Schema Validation Tool
+
+**Temptation:** Build a Deno tool (like hash-sections.ts) that validates spec files against their template schema.
+
+**Why not:** The spec-verifier agent already does this (V-04 check: template-appropriate sections present). Adding a Deno validation tool duplicates the verifier's job in a different format. The verifier is better at this because it can reason about "close enough" and "technically missing but covered by another section" -- a structural validator cannot.
+
+### Do Not Add: Multiple Template Formats
+
+**Temptation:** Support YAML templates alongside Markdown templates, or support both inline template definitions (in SKILL.md) and file-based templates.
+
+**Why not:** One format. Markdown. Agents read Markdown. Templates are Markdown. Specs are Markdown. Adding a second format doubles the surface area for bugs and documentation.
+
+## File Inventory Changes (v1.0 to v2.0)
+
+| v1.0 File | v2.0 Replacement | Change Type |
+|-----------|-------------------|-------------|
+| `templates/domain-service.md` | `templates/default.md` | Replace (3 files -> 1) |
+| `templates/gateway-bff.md` | (removed) | Covered by default + host overrides |
+| `templates/event-driven.md` | (removed) | Covered by default + host overrides |
+| `agents/spec-consolidator.md` | `agents/spec-consolidator.md` | Rewrite (remove archetype references) |
+| `agents/e2e-flows.md` | `agents/e2e-flows.md` | Minor rewrite (vocabulary only) |
+| `agents/spec-verifier.md` | `agents/spec-verifier.md` | Minor rewrite (V-04, V-11, V-27 updates) |
+| `skills/consolidate/SKILL.md` | `skills/consolidate/SKILL.md` | Rewrite (remove archetype detection, add template lookup, conditional E2E) |
+| (new) | `templates/examples/` | New directory with example host-override templates for common project types |
+| `hash-sections.ts` | `hash-sections.ts` | Unchanged |
+| `hash-sections_test.ts` | `hash-sections_test.ts` | Unchanged |
+
+## Template Examples Directory
+
+**Not part of the runtime.** A `templates/examples/` directory ships with the plugin containing non-functional example templates that developers can copy into their host project's `specs/_templates/`:
+
+| Example | For Project Types Like | Key Sections |
+|---------|----------------------|--------------|
+| `microservice.md` | Backend services, APIs | Domain Model, Adapter Contracts, Service Interface, Error Categories |
+| `cli-tool.md` | CLI applications | Command Interface, Argument Parsing, Output Formats |
+| `library.md` | Reusable libraries, SDKs | Public API, Type Contracts, Error Handling |
+| `documentation.md` | Doc sites, knowledge bases | Content Structure, Cross-References, Audience |
+
+These are reference material, not active templates. The skill never reads from `examples/`. Their purpose is reducing the "blank page" problem for users creating host overrides.
+
+**Confidence:** MEDIUM. The specific example categories and sections are speculative -- they should be refined based on real usage. The mechanism (reference examples, not functional templates) is HIGH confidence.
+
+## Integration with Existing Hash Tool
+
+The hash tool (`hash-sections.ts`) operates on H2 section headings. It does not know or care what those headings say. A spec with `## Domain Model` and a spec with `## Command Interface` are processed identically.
+
+**No changes needed.** The hash tool is already universal.
+
+The only interaction point: the E2E flows agent uses hashes from the hash tool to detect spec changes. If a component's spec sections change (regardless of what those sections are called), the hash changes, and the E2E flow referencing that spec is flagged for regeneration. This mechanism is heading-name-agnostic.
+
+## Testing Impact
+
+### Hash Tool Tests: No Change
+
+The 10 existing test cases in `hash-sections_test.ts` are structure-based (H2 extraction, code block handling, normalization). They do not reference service-specific content. Already universal.
+
+### Skill/Agent Test Fixtures: New
+
+For v2.0, test fixtures should cover:
+
+| Fixture Category | Purpose |
+|-----------------|---------|
+| Generic component (minimal template) | Validates basic consolidation with default template |
+| Component with host override template | Validates template lookup order |
+| Non-service project (CLI tool) | Validates vocabulary neutrality |
+| Multi-component project without E2E | Validates E2E skip path |
+
+These are prompt-based (fixture input -> expected output assertions). No new tooling needed.
+
+**Confidence:** MEDIUM. Fixture design depends on final template format decisions during implementation.
+
+## Recommended Stack Summary
+
+| Layer | Technology | Change from v1.0 |
+|-------|-----------|------------------|
+| Runtime | Deno >= 2.7 | None |
+| Markdown AST | unified + remark-parse + remark-stringify | None |
+| Crypto | Web Crypto API | None |
+| Plugin format | SKILL.md + Agent .md | None (format unchanged, content rewritten) |
+| Templates | Single `default.md` + host override lookup | Replace 3 archetypes with 1 default + override mechanism |
+| Agent models | sonnet (consolidator, e2e) + opus (verifier) | None |
+| Schema format | Markdown (template headings = schema) | Explicit decision: no YAML/JSON schema |
+| Config | PROJECT.md topology + template files | Explicit decision: no separate config file |
+| Testing | Deno test + prompt-based fixtures | New fixtures for universal scenarios |
 
 ## Sources
 
-- [Deno Releases (GitHub)](https://github.com/denoland/deno/releases) -- Deno 2.7.7, March 2026
-- [Deno Configuration Docs](https://docs.deno.com/runtime/fundamentals/configuration/) -- deno.json, import maps, npm: specifiers
-- [Deno Testing Docs](https://docs.deno.com/runtime/fundamentals/testing/) -- built-in test runner, assertions
-- [Claude Code Skills Docs](https://code.claude.com/docs/en/skills) -- SKILL.md frontmatter reference, full field list
-- [Claude Code Subagents Docs](https://code.claude.com/docs/en/sub-agents) -- Agent .md frontmatter reference, model options
-- [unified (npm)](https://www.npmjs.com/package/unified?activeTab=versions) -- v11.0.5 latest
-- [remark-parse (npm)](https://www.npmjs.com/package/remark-parse) -- v11.0.0 latest
-- [remark-stringify (npm)](https://www.npmjs.com/package/remark-stringify) -- v11.0.0 latest
-- [Agent Skills Standard](https://agentskills.io) -- Open standard Claude Code follows
+- [Claude Code Skills Docs](https://code.claude.com/docs/en/skills) -- `${CLAUDE_SKILL_DIR}` reference, supporting files pattern, template conventions (verified March 2026)
+- [Claude Code Subagents Docs](https://code.claude.com/docs/en/sub-agents) -- Agent .md frontmatter, model options (verified March 2026)
+- [Skill Authoring Best Practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices) -- Keeping SKILL.md focused, reference file patterns
+- [Agent Skills Standard](https://agentskills.io) -- Open standard for skill format
+- v1.0 research: `.planning/research/STACK.md` (2026-03-30) -- Deno, unified, remark-parse validation
+- v1.0 IMPL-SPEC: `docs/IMPL-SPEC.md` -- Current design being replaced

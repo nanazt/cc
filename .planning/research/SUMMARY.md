@@ -1,193 +1,217 @@
 # Project Research Summary
 
 **Project:** cckit (Claude Code Toolkit)
-**Domain:** Claude Code multi-agent plugin toolkit (skill orchestration, spec consolidation, case discovery)
-**Researched:** 2026-03-30
-**Confidence:** HIGH
+**Domain:** v2.0 Universal Consolidation -- redesigning the consolidation pipeline from service-archetype-specific to project-type-agnostic
+**Researched:** 2026-03-31
+**Confidence:** HIGH (all research based on direct codebase analysis and official documentation)
 
 ## Executive Summary
 
-cckit is a Claude Code plugin project implementing a spec-driven consolidation pipeline via the Orchestrator-Agent pattern. The dominant insight across all four research areas is that this is not a traditional software application — it is a collection of LLM behavioral artifacts (SKILL.md orchestrators, agent .md subagents, Deno tooling) that follow Claude Code's established conventions. The recommended approach is to replicate and extend the already-working `/case` architecture: a SKILL.md state machine dispatches specialized agents via XML dispatch tags, agents return structured completion protocols, and all side-channel state (hashes, classifications, developer input) flows through the orchestrator. The one non-LLM component (hash-sections.ts) should be built first because it is the only piece testable without LLM execution and its correctness gates all E2E flow work.
+The v1 consolidation pipeline is structurally sound but architecturally constrained. Its merge rules, hash tool, verification framework, and orchestrator-agent dispatch pattern are all proven and project-type-agnostic at their core. What is NOT agnostic is the vocabulary ("service", "archetype"), the template system (3 fixed archetype templates), the classification mechanism (archetype detection from PROJECT.md topology), and the E2E flow assumption (always-on). The v2 redesign is therefore a vocabulary/schema/template problem, not a technology or architecture problem. Zero new runtime dependencies are needed. The entire change happens in the prompt-engineering layer: skills, agents, and templates.
 
-The critical risk is implementation complexity collapsing under the weight of 11 merge rules, 28 verification checks, and parallel agent dispatch — the same failure mode that killed v1. The mitigation is disciplined phase decomposition: build hash tool independently, validate templates structurally, test spec-consolidator with fixture phase documents before wiring up the full orchestrator, and never combine untested pieces. A secondary risk is the AST serialization roundtrip problem in hash-sections.ts — the correct implementation must hash original source bytes using AST node position offsets, not serialized AST output, to ensure cross-version hash stability.
+The recommended approach replaces fixed archetype templates with a user-authored schema that declares consolidation units and their section structures. The user defines what their project's components are and what sections their specs should contain. A sensible default covers 80% of projects without customization. This inverts the v1 model: instead of the plugin telling the project "you have domain services, gateways, and event processors," the project tells the plugin "I have these units with these sections." The `{Unit}.{Operation}` naming convention, the 11 merge rules, the hash-based change detection, and the parallel agent dispatch all carry forward unchanged.
 
-The project's feature set is completely specified in IMPL-SPEC.md. There are no design gaps requiring invention — the research validates the spec's decisions and identifies one implementation trap (hash roundtrip) and one architectural gap (maxTurns exhaustion handling) that must be addressed during build. The recommended build order is: hash tool, templates, spec-consolidator agent, orchestrator steps 1–3, e2e-flows agent, spec-verifier agent, orchestrator steps 4–7.
+The primary risk is navigating between over-abstraction (removing all structure, leaving agents with no guidance) and under-abstraction (renaming "service" to "component" without changing the underlying data model). Research identified one critical design decision that must be resolved before implementation: whether structure is defined via a schema file or via template files. All other decisions have strong consensus across researchers. Secondary risks include the load-bearing nature of the `{Service}.{Op}` naming convention (six consumption points across the codebase) and the verifier's service-specific checks (6 of 28 checks need updating).
 
 ## Key Findings
 
 ### Recommended Stack
 
-This project has no server, no framework, and no build step. The stack has two layers: (1) prompt-engineering artifacts as Markdown with YAML frontmatter, consumed by Claude Code's runtime; and (2) a single Deno TypeScript tool for deterministic section hashing. Deno is the right choice for the hash tool because it runs TypeScript with zero config, has a built-in test runner, and its `--allow-read` permission sandbox is appropriate for a tool that should never write or call the network. The unified/remark-parse ecosystem provides AST-based markdown parsing that eliminates ~40 lines of fragile regex with ~10 lines of tree traversal.
+No technology changes from v1. The entire v2 change is in the prompt-engineering layer.
 
-**Core technologies:**
-- **Deno >= 2.7**: runtime for hash-sections.ts — zero-config TypeScript, built-in test runner, permission sandbox, npm: specifiers
-- **unified@11.0.5 + remark-parse@11.0.0**: AST parsing pipeline — CommonMark-compliant, eliminates regex edge cases, provides node position offsets needed for source-byte hashing
-- **remark-stringify@11.0.0**: AST serialization — required for the pipeline but NOT for hashing (see Pitfall 1)
-- **Web Crypto API (built-in)**: SHA-256 computation — zero dependencies, W3C standard
-- **SKILL.md + Agent .md format**: Claude Code plugin layer — YAML frontmatter configures invocation; Markdown body is the system prompt
+**Core technologies (unchanged):**
+- **Deno >= 2.7**: Runtime for hash-sections.ts -- already project-type-agnostic
+- **unified 11.0.5 + remark-parse/stringify 11.0.0**: Markdown AST processing -- operates on structure, not content semantics
+- **Web Crypto API**: SHA-256 hashing via crypto.subtle.digest -- zero dependencies
+- **SKILL.md + Agent .md**: Claude Code plugin format -- content rewrites needed, format unchanged
+- **sonnet (consolidator, e2e) + opus (verifier)**: Agent model assignments unchanged
+
+**What changes:**
+- 3 archetype template files -> 1 default + user override mechanism (or user-authored schema file -- see Critical Decision below)
+- Template examples directory added (reference material, not consumed by pipeline)
+- Test fixtures added for universal scenarios (generic component, CLI tool, library)
+
+**What NOT to add:** No schema definition language, no project type detection, no template inheritance, no YAML/JSON config files, no runtime schema validation tool. Markdown is the schema language.
 
 ### Expected Features
 
-The IMPL-SPEC defines the complete feature surface. There are no gaps in the must-have tier. The spec-consolidator's 11 merge rules are individually sound; the risk is their interactions during LLM execution, not their design.
-
 **Must have (table stakes):**
-- 7-step orchestrator pipeline (SKILL.md) — without this, nothing dispatches
-- spec-consolidator agent with 11 merge rules — core value proposition; latest-wins semantics, PR-to-SR promotion, TR/Forward Concerns exclusion, provenance tagging
-- /case PR/TR distinction — consolidator cannot classify rule permanence; /case must do it first
-- /case Superseded Operations and Superseded Rules sections — mechanical instructions for removing stale content
-- hash-sections.ts with 10 test cases — gates E2E flow change detection
-- Templates (domain-service, gateway-bff) — define section schema per archetype; consolidator cannot produce consistent output without them
-- Confirmation summary + commit/rollback — developer must approve before changes commit; no silent writes
-- INDEX.md generation — consumer navigation; full rewrite per run
-- case-briefer specs/ priority lookup — post-consolidation, specs/ is authoritative; briefer must read it first
-- case-validator TR/OR recognition — prevents false negatives on new rule tier prefixes
+- User-declared consolidation units (replaces fixed archetype classification)
+- Default section structure that works for any project type without customization
+- User-overridable section structures per unit (escape hatch for specific needs)
+- All 11 merge rules (already universal -- operation replacement, PR-to-SR promotion, TR exclusion, etc.)
+- `{Unit}.{Operation}` naming convention (universal; works for Auth.Login, CLI.ParseArgs, Parser.Tokenize)
+- Component discovery from operation headings (unchanged algorithm, new terminology)
+- `specs/{unit}/context.md + cases.md` output structure
+- INDEX.md with "Component" + optional "Type" column
 
 **Should have (differentiators):**
-- spec-verifier agent (28 checks, opus) — T1/T2/T3 tiered findings; read-only safety net before commit
-- e2e-flows agent — cross-service Mermaid diagrams with hash-based change detection
-- Fail-fast + selective retry — retry only the failed agent, not all; better DX than "start over"
-- Out-of-order consolidation warning — prevents accidental data loss when consolidating phases out of sequence
-- Orphan directory cleanup (Step 3.7) — hygiene; developer confirmation required
+- Opt-in cross-unit flow documentation (replaces mandatory E2E flows)
+- Universal verifier with schema-aware checks (parameterized against active schema, not hardcoded archetypes)
+- Template/schema examples for common project types (microservice, CLI, library)
+- Template validation check (V-04 generalized: schema-declared sections present)
+- /case audit for service-biased language (low effort, mostly find-and-replace)
 
-**Defer (v2+):**
-- Event-driven archetype template — no real event-driven service exists to validate against; ship as experimental or defer
-- Installation/distribution mechanism — symlink approach works now; solve after core tool validates
-- Spec-vs-code drift detection — different problem domain; future gsd:verify expansion
-- Rule tier rename migration (SR->GR, SvcR->SR) — orthogonal 6+ file atomic change; separate task
+**Defer:**
+- Template inheritance/composition -- wait for evidence that flat files are insufficient
+- Template marketplace/sharing -- format must stabilize first
+- Behavioral test DSL for conditional sections -- natural language conditions sufficient
+- Auto-generating PROJECT.md topology -- out of scope for consolidation tool
 
 ### Architecture Approach
 
-The consolidate v2 pipeline follows the Orchestrator-Agent pattern proven by /case. The SKILL.md owns all pipeline state: phase resolution, service classification, parallel agent dispatch, hash computation (via Bash+Deno), INDEX.md writes, developer checkpoints (AskUserQuestion), and commit/rollback. Agents are isolated workers that receive complete XML dispatch contracts and return structured completion protocols. No inter-agent communication; all data flows through the orchestrator. The key difference from /case is that consolidate agents write spec files directly (avoiding orchestrator passthrough cost), compensated by the verifier's 28-check post-write validation.
+The architecture preserves the proven orchestrator-agent pipeline (SKILL.md state machine dispatching parallel spec-consolidator agents) while replacing the archetype-driven classification with schema-driven unit resolution. The orchestrator reads a structural declaration (schema or template files), extracts unit names from CASES.md headings, resolves section structure per unit, and dispatches agents with explicit section lists instead of template type tags. E2E flows become conditional (only when cross-unit communication exists). The hash tool requires zero changes.
 
-**Major components:**
-1. **SKILL.md orchestrator** — 7+2 step state machine; owns all side-channel state and developer interaction
-2. **spec-consolidator agent (sonnet)** — per-service merge with 11 rules; writes specs/{service}/ directly
-3. **hash-sections.ts (Deno)** — deterministic SHA-256/8 section hashing via AST position offsets
-4. **e2e-flows agent (sonnet)** — cross-service flow docs with Mermaid; compares hashes but never computes them
-5. **spec-verifier agent (opus)** — 28-check read-only verification; ephemeral findings, never persisted
-6. **Templates (domain-service, gateway-bff)** — section schema per archetype; static files read by consolidator
-7. **Updated /case skill** — PR/TR classification, Superseded sections, OR-N prefix output
+**Major components (with v2 change level):**
+1. **SKILL.md orchestrator** -- REWRITE: schema/template reading replaces archetype determination; unit terminology; E2E opt-in gate; bootstrapping flow
+2. **spec-consolidator agent** -- MODIFY: receives `<sections>` instead of `<template_type>`; SR -> UR/SR rename; reads section list from dispatch, not template file
+3. **spec-verifier agent** -- MODIFY: V-04, V-11, V-27 updated; checks parameterized against schema
+4. **e2e-flows agent** -- MODIFY: unit terminology; opt-in gating by orchestrator
+5. **case-briefer agent** -- MINOR: "service topology" -> "component topology" in a few lines
+6. **hash-sections.ts** -- NO CHANGE: already universal
+7. **/case skill** -- NO CHANGE: already largely universal
+8. **templates/** -- REPLACE: 3 archetype files deleted, replaced by default + examples
 
 ### Critical Pitfalls
 
-1. **AST serialization roundtrip breaks hash stability** — remark-stringify output differs from source syntax even for unchanged content; hash original source bytes using AST node `position.start.offset` / `position.end.offset`, not serialized output. Must resolve before hash tool ships.
+1. **"Service" is baked into the data model, not just the language** -- Renaming vocabulary without changing the underlying classification algorithm, dispatch granularity, and directory layout produces a cosmetically neutral tool that still only works for services. Prevention: define the universal unit abstractly first, test the design against CLI tool + library + documentation project on paper before writing any code.
 
-2. **Subagent context isolation causes silent information loss** — subagents start with empty context; everything the orchestrator learned in Step 1 must be serialized into dispatch XML tags. Add `<orchestrator_notes>` for edge-case context (warnings, out-of-order detection, developer overrides). Never let subagents re-derive what the orchestrator already classified.
+2. **Over-abstraction removes the structure that makes consolidation useful** -- The v1 archetypes are valuable because they tell the agent exactly what sections to produce. Remove them without replacement and the output becomes a formless dump. Prevention: user-defined section schemas with a sensible default that covers 80% of projects. The default must be opinionated (7-8 sections), not a blank page.
 
-3. **Parallel write conflicts on shared files** — spec-consolidator agents write to isolated per-service paths, but LLM non-determinism may cause "helpful" writes to INDEX.md. Agent prompt must include an explicit exclusion list: "Write ONLY to specs/{service}/context.md and specs/{service}/cases.md."
+3. **`{Service}.{Op}` naming convention is load-bearing infrastructure** -- Six consumption points across the codebase parse this pattern programmatically. Changing it without updating all six simultaneously creates silent breakage in LLM-consumed prompts (degraded output quality, not error messages). Prevention: map all consumption points, update atomically, make the convention configurable via schema.
 
-4. **maxTurns exhaustion returns neither COMPLETE nor FAILED** — orchestrator must handle a third UNKNOWN state (no completion header found) and treat it as retry, not success. Set generous defaults (20+ turns for consolidators).
+4. **Verifier's 28 checks assume service architecture** -- 6 of 28 checks are service-specific (V-04, V-10, V-11, V-15, V-27, V-29). Universalizing consolidation without updating the verifier generates false positives that erode trust. Prevention: re-derive checks from universal model, parameterize against active schema, make E2E checks conditional.
 
-5. **Rollback destroys unrelated manual edits** — `git checkout -- .planning/specs/` reverts all changes, not just the current consolidation's writes. Before rollback, diff against the orchestrator's known-written files and warn if unrelated edits exist.
+5. **Template extensibility anti-patterns** -- Inheritance, configuration explosion, and modification-based extension all fail in LLM-agent pipelines where behavior is non-deterministic. Prevention: composition over inheritance, schema is data not code, custom schemas completely replace defaults (no merging).
+
+## Critical Design Decision: Schema File vs Template Files
+
+**This is the single most important decision for requirements definition.** The four research streams produced two distinct approaches:
+
+### Option A: Template Files (STACK.md, FEATURES.md)
+
+A single `templates/default.md` ships with the plugin. Host projects override by placing files in `.planning/specs/_templates/{type}.md`. Three-level lookup: component-specific override -> project-wide override -> plugin default. Templates ARE the schema -- section headings define the structure, guide text below each heading instructs the agent.
+
+**Pros:** Markdown templates are self-documenting. No new concepts (agents already read Markdown). No parser needed. Consistent with the "everything is prompt content" philosophy.
+
+**Cons:** No explicit unit registry. Template resolution is prompt-instructed behavior (fuzzy). No place to configure operation-prefix format or rule-prefix naming.
+
+### Option B: Schema File (ARCHITECTURE.md)
+
+A single `.planning/consolidation.schema.md` authored by the host project. Contains a Units table (explicit registry), Meta section (operation-prefix, rule-prefix, e2e-flows toggle), default Sections block, and per-unit section overrides. No template files ship with the plugin -- only starter examples in `docs/examples/`.
+
+**Pros:** Explicit unit registry (no guessing). Configurable naming conventions. E2E opt-in flag. Single source of truth. Orchestrator reads one file instead of probing filesystem.
+
+**Cons:** New artifact for users to author. Bootstrapping needed for first run. More upfront friction.
+
+### Recommendation
+
+**Option B (schema file) is stronger.** The explicit unit registry eliminates the ambiguity in template-based discovery. The meta section provides a clean place for configuration that otherwise has no home. The bootstrapping UX ("No schema found -- create from starter?") is already a pattern the v1 IMPL-SPEC uses for error recovery. The schema file is still Markdown, still self-documenting, still readable by agents without a parser.
+
+The template approach (Option A) works for the "what sections should specs have?" question but does not answer "what units exist?" or "what naming convention does this project use?" -- those answers must come from somewhere, and a schema file consolidates them.
+
+**This decision should be validated during requirements definition** -- both approaches are implementable, but the choice affects every downstream phase.
 
 ## Implications for Roadmap
 
-Based on research, the dependency graph is clear and non-negotiable: the hash tool must exist before E2E work begins; templates must exist before the consolidator can be tested; the consolidator must produce output before the orchestrator, E2E agent, or verifier can do anything useful. The suggested phase structure mirrors this chain.
+Based on research, the v2 work decomposes into 5 phases (down from 8 in v1, because the hash tool is complete and several v1 phases collapse).
 
-### Phase 1: Hash Tool
-**Rationale:** Only non-LLM component; fully testable with `deno test` before any agent work. If the AST approach has problems, discover them here before 3 agents depend on the output. Pitfall 1 (roundtrip) must be resolved here.
-**Delivers:** `skills/consolidate/hash-sections.ts` + `hash-sections_test.ts` with all 10 test cases passing; `deno.json` with import maps
-**Addresses:** Infrastructure prerequisite for e2e-flows and spec-verifier (V-29)
-**Avoids:** Pitfall 1 (hash by source bytes, not serialized AST), Pitfall 7 (document `deno cache` pre-warm)
+### Phase 1: Universal Model Design
+**Rationale:** Everything downstream depends on the unit/schema/naming decisions. This phase produces the conceptual foundation: what is a unit, how are units declared, what sections do specs contain, what is the naming convention.
+**Delivers:** Consolidation schema format specification, default section list, naming convention definition, verification check redesign sketch
+**Addresses:** T1 (user-declared topology), T2 (schema-free templates), the "component" vs "unit" terminology decision, SR vs UR vs CR prefix decision
+**Avoids:** Pitfall 1 (service data model), Pitfall 2 (over-abstraction), Pitfall 3 (naming convention)
 
-### Phase 2: Templates
-**Rationale:** Static files with zero runtime behavior; quick to produce; define the section schema that spec-consolidator depends on. Can be reviewed and adjusted before any agent code is written.
-**Delivers:** `skills/consolidate/templates/domain-service.md`, `gateway-bff.md` (event-driven deferred)
-**Avoids:** Inconsistent spec structure across services
+### Phase 2: Schema System + Consolidator Agent
+**Rationale:** The consolidator is the core agent. It needs the schema system to know what to produce. These are tightly coupled and should ship together so the consolidation pipeline is end-to-end testable.
+**Delivers:** Schema format (or template system), spec-consolidator agent rewrite, default section structure, example schemas for 3 project types
+**Addresses:** T2 (templates), T3 (merge rules -- carry-over), T4 (output structure)
+**Avoids:** Pitfall 5 (no replacement discovery mechanism), Pitfall 6 (extensibility anti-patterns)
 
-### Phase 3: spec-consolidator Agent
-**Rationale:** Core write path. All downstream components (INDEX.md, E2E, verifier, orchestrator) depend on consolidated specs existing. Test with manual dispatch against fixture phase documents before wiring into orchestrator.
-**Delivers:** `agents/spec-consolidator.md` with all 11 merge rules; fixture-based validation
-**Addresses:** 7 table-stakes merge rule features
-**Avoids:** Pitfall 2 (complete dispatch contract), Pitfall 3 (explicit exclusion list), Pitfall 6 (prescribe rule application order: supersessions first, then exclusions, then transformations)
+### Phase 3: Orchestrator Rewrite
+**Rationale:** The orchestrator (SKILL.md) wires everything together. It depends on the schema system (Phase 2) and drives the consolidator agent. Schema reading, unit resolution, conditional E2E gating, and bootstrapping flow all live here.
+**Delivers:** Rewritten /consolidate SKILL.md, schema bootstrapping UX, conditional E2E dispatch, INDEX.md updates
+**Addresses:** T1 (component discovery), T4 (output structure), conditional E2E
+**Avoids:** Pitfall 1 (service classification in Step 1), Pitfall 8 (E2E assumes multi-service)
 
-### Phase 4: /case Updates
-**Rationale:** The orchestrator's Step 1 depends on PR/TR classification happening before consolidation. Updating /case before building the full orchestrator means the classification system is ready when the orchestrator wires Step 1.
-**Delivers:** PR/TR distinction in discuss/finalize, Superseded Operations/Rules sections, OR-N prefix output; case-validator TR/OR recognition
-**Addresses:** `/case PR/TR distinction`, consumer update features
+### Phase 4: Verifier + /case Updates
+**Rationale:** The verifier and /case updates are independent of each other but both depend on the universal model being stable. Group them because both are modification work (not greenfield) and both are lower risk.
+**Delivers:** Universal spec-verifier with schema-aware checks, /case language audit, case-briefer terminology fixes
+**Addresses:** Verification (differentiator), T5 (/case audit)
+**Avoids:** Pitfall 7 (verifier assumes services), Pitfall 10 (/case service language)
 
-### Phase 5: Orchestrator SKILL.md (Steps 1–3.7)
-**Rationale:** With templates, consolidator, and /case updates in place, the orchestrator can run a complete consolidation cycle (classify -> dispatch -> collect -> index). Steps 4–7 can be stubs that return early.
-**Delivers:** Working end-to-end consolidation without E2E flows or verification; confirmation summary; commit/rollback
-**Addresses:** 7-step pipeline table stakes; service classification; INDEX.md generation
-**Avoids:** Pitfall 4 (one-agent-per-service invariant), Pitfall 10 (diff-aware rollback warning)
-
-### Phase 6: e2e-flows Agent
-**Rationale:** Depends on consolidated specs (Phase 3 output) and hash tool (Phase 1). The orchestrator skeleton from Phase 5 provides dispatch infrastructure; wire Step 4 to point at this agent.
-**Delivers:** `agents/e2e-flows.md`; hash-based change detection; Mermaid flow docs in specs/e2e/
-**Addresses:** e2e-flows differentiator feature
-**Avoids:** Pitfall 13 (use changed_services manifest as primary trigger, not only hash comparison)
-
-### Phase 7: spec-verifier Agent + Full Orchestrator Integration
-**Rationale:** Read-only agent; safe to develop last because it cannot corrupt output. Wiring Steps 4–7 into the orchestrator completes the full pipeline. Integration test with all components.
-**Delivers:** `agents/spec-verifier.md` (28 checks); complete SKILL.md; full pipeline end-to-end
-**Addresses:** spec-verifier differentiator; confirmation summary with T1/T2/T3 findings
-**Avoids:** Pitfall 8 (UNKNOWN return state in orchestrator), Pitfall 9 (synthetic fixture project before first real run)
-
-### Phase 8: Consumer Updates + Polish
-**Rationale:** case-briefer and case-validator updates are low-complexity and independent of the consolidation pipeline. Ship after Phase 7 validates the pipeline works.
-**Delivers:** case-briefer specs/ priority lookup; CLAUDE.md snippet template; backfill strategy documentation
-**Addresses:** Consumer update features; adoption enablement
+### Phase 5: Cross-Unit Flows + Polish
+**Rationale:** E2E flows are opt-in and may not be needed by any immediate test project. Defer until the core pipeline is proven. Polish includes migration guide, template library, backfill docs.
+**Delivers:** Opt-in cross-unit flow generation, migration guide for v1 users, template example library, consumer updates (case-briefer reads specs/ first)
+**Addresses:** E2E differentiator, migration, documentation
+**Avoids:** Pitfall 8 (E2E for non-service projects)
 
 ### Phase Ordering Rationale
 
-- Phases 1–3 are driven by the dependency chain: hash tool unblocks E2E, templates unblock consolidator, consolidator unblocks everything else.
-- Phase 4 (/case updates) is placed before the orchestrator because classification must work before orchestration is wired end-to-end. It could slip to after Phase 5 without blocking Phase 5 development, but is better done earlier to avoid drift.
-- Phase 5 deliberately builds the orchestrator in two passes (Steps 1–3.7 now, Steps 4–7 in Phase 7). This lets the core consolidation pipeline be used and validated before E2E and verification layers are added.
-- Phases 6–7 are the "quality gate" layer — important but not required to get value from consolidation. The pipeline works without them (manual verification substitutes until they ship).
-- Phase 8 is polish that improves adoption but does not affect correctness.
+- **Phase 1 before everything**: The model design decisions (unit definition, schema format, naming convention) are load-bearing. Getting them wrong means rewriting Phases 2-5.
+- **Phase 2 before Phase 3**: The orchestrator dispatches the consolidator. The consolidator must exist and be testable before the orchestrator can wire it up.
+- **Phase 3 before Phase 4**: The verifier checks the orchestrator's output. The /case updates reference the universal model vocabulary established in earlier phases.
+- **Phase 5 last**: E2E flows are opt-in and the lowest priority feature. Migration/polish only matter after the core pipeline works.
+- **Phase 4 items can partially parallel Phase 3**: /case language audit is independent of the orchestrator rewrite.
 
 ### Research Flags
 
-Phases likely needing deeper research during planning:
-- **Phase 3 (spec-consolidator):** The 11 merge rules interact. The agent prompt ordering (supersessions before transformations) needs to be validated against real CASES.md structure. First fixture run may surface rule precedence issues.
-- **Phase 5 (orchestrator):** maxTurns calibration is deferred to first usage (IMPL-SPEC Open Question #1). Monitor aggressively on first real consolidation; may require prompt iteration.
-- **Phase 7 (verifier):** 28 checks are comprehensive but V-28 (SR keyword overlap / NLP-light detection) is flagged as ambitious. May need to downgrade to exact-match duplicate detection at implementation time.
+Phases likely needing `/gsd:research-phase` during planning:
+- **Phase 1:** Critical. The schema format decision (template files vs schema file) needs concrete examples worked out for 3 project types before implementation.
+- **Phase 2:** Moderate. Default section list needs validation -- the 7-8 section proposals from STACK.md and FEATURES.md differ slightly and must be reconciled.
 
-Phases with standard patterns (skip research-phase):
-- **Phase 1 (hash tool):** Algorithm is fully specified in IMPL-SPEC. Deno + unified/remark-parse stack is verified. Ten test cases are defined. Straightforward implementation.
-- **Phase 2 (templates):** Static markdown. Section schemas are defined in IMPL-SPEC. Review-only validation.
-- **Phase 4 (/case updates):** Incremental additions to an existing working skill. Pattern is established; no unknowns.
-- **Phase 8 (consumer updates):** Low-complexity changes to existing agents; lookup order change and pattern recognition update.
+Phases with standard patterns (skip research):
+- **Phase 3:** The orchestrator is a state machine rewrite with well-understood steps. The v1 IMPL-SPEC provides the exact structure to modify.
+- **Phase 4:** Verifier check updates and /case language fixes are mechanical. PITFALLS.md provides the exact line numbers and replacements.
+- **Phase 5:** E2E flow modification is straightforward once the universal model is established.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Deno 2.7.7 verified via GitHub releases; unified@11.0.5, remark-parse@11.0.0 verified via npm registry; Claude Code skill/agent frontmatter verified via official docs (March 2026) |
-| Features | HIGH | All features derived directly from IMPL-SPEC.md (authoritative design document); no external inference required |
-| Architecture | HIGH | Architecture derived from working /case implementation (direct evidence) + IMPL-SPEC resolved design decisions; no unknowns |
-| Pitfalls | HIGH | Critical pitfalls verified against official sources: mdast-util-to-markdown roundtrip limitation (documented), Claude Code context isolation (documented), v1 monolithic failure (direct project history) |
+| Stack | HIGH | Zero technology changes. All research confirmed v1 stack is already universal at the runtime layer. |
+| Features | HIGH | Clear table stakes / differentiator / anti-feature separation. All 11 merge rules confirmed universal. Strong consensus across researchers. |
+| Architecture | HIGH | Derived from complete codebase analysis. Pipeline pattern proven in v1. Changes are well-scoped (vocabulary, schema, template). |
+| Pitfalls | HIGH | All pitfalls derived from direct code analysis with specific line numbers. Concrete prevention strategies provided. |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **maxTurns calibration (Pitfall 8):** IMPL-SPEC correctly defers this to first real usage. Set generous defaults (20+ for consolidators, 15 for verifier) and monitor turn counts on first run. Adjust before shipping Phase 7 if turn counts approach limits.
-- **V-28 SR keyword overlap (FEATURES.md):** NLP-light keyword extraction for detecting semantically contradicting SRs may be too ambitious for reliable LLM execution. Plan to implement as exact-match duplicate detection first; escalate to semantic detection only if the simpler check is insufficient.
-- **Backfill multi-phase same-service scenario (Pitfall 4):** IMPL-SPEC handles this implicitly (one agent per service), but the invariant needs an explicit test fixture: two phases both affecting the same service, consolidated in a single invocation. Verify SR numbering is sequential and phase-ordered.
-- **Idempotency:** IMPL-SPEC does not explicitly validate what happens when `/consolidate {phase}` is run twice. Latest-wins semantics should make it safe, but add a fixture test confirming idempotent behavior before first real run.
+- **Schema format vs template files**: The critical design decision. Both approaches are well-articulated but the choice must be made before Phase 1 planning. Recommend resolving during requirements definition by working through a concrete CLI-tool example with each approach.
+
+- **Default section list**: STACK.md proposes 5 mandatory + 3 conditional sections (Purpose, Interface, Rules, Dependencies, Configuration + State Management, Error Categories, Event Contracts). FEATURES.md proposes 7 mandatory + 1 conditional (Overview, Public Interface, Domain Model, Behavior Rules, Error Handling, Dependencies, Configuration + State Lifecycle). These need reconciliation -- the right answer is probably 5-6 mandatory sections that pass the "does this make sense for a CLI tool?" test.
+
+- **Terminology: "component" vs "unit"**: STACK.md and FEATURES.md use "component". ARCHITECTURE.md uses "unit" (and proposes UR prefix). Both work. "Unit" is more abstract and shorter in schemas; "component" is more intuitive for developers. Recommendation: use "component" in user-facing text, allow either in documentation. The rule prefix question (SR "Spec Rule" vs UR "Unit Rule" vs CR "Component Rule") needs a decision.
+
+- **Conditional section evaluation**: FEATURES.md flags this as an open question. Can the consolidation agent reliably evaluate natural language conditions ("Does this component manage stateful entities?")? Recommendation from FEATURES.md: start with user-declared conditions (in schema or template), defer agent inference.
+
+- **Operation prefix configurability**: ARCHITECTURE.md proposes making `{unit}.{operation}` configurable via schema (some projects use `module::function` or flat names). This interacts with the six consumption points identified in Pitfall 3. Needs design attention in Phase 1.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- `/Users/syr/Developments/cckit/docs/IMPL-SPEC.md` — authoritative design spec; all features, merge rules, verification checks
-- `/Users/syr/Developments/cckit/skills/case/SKILL.md` — working reference implementation for orchestrator pattern
-- [Deno Releases (GitHub)](https://github.com/denoland/deno/releases) — Deno 2.7.7, March 2026
-- [Claude Code Skills Docs](https://code.claude.com/docs/en/skills) — SKILL.md frontmatter full reference
-- [Claude Code Subagents Docs](https://code.claude.com/docs/en/sub-agents) — agent frontmatter, context isolation behavior
-- [unified (npm)](https://www.npmjs.com/package/unified?activeTab=versions) — v11.0.5 latest confirmed
-- [remark-parse (npm)](https://www.npmjs.com/package/remark-parse) — v11.0.0 latest confirmed
-- [mdast-util-to-markdown](https://github.com/syntax-tree/mdast-util-to-markdown) — roundtrip impossibility documented explicitly
+- `docs/IMPL-SPEC.md` -- v1 design document, 891 lines, full analysis
+- `skills/consolidate/SKILL.md` -- v1 consolidate skill, 203 lines
+- `skills/case/SKILL.md` -- /case orchestrator, 231 lines
+- `skills/case/step-*.md` -- all /case step files, full analysis
+- `agents/case-briefer.md` -- 299 lines, service-bias audit
+- `agents/case-validator.md` -- 257 lines, confirmed universal
+- `tools/hash-sections.ts` -- confirmed universal, no changes needed
+- `.planning/PROJECT.md` -- project context and neutrality constraints
+- [Claude Code Skills Docs](https://code.claude.com/docs/en/skills) -- SKILL.md format, `${CLAUDE_SKILL_DIR}` reference (March 2026)
+- [Claude Code Subagents Docs](https://code.claude.com/docs/en/sub-agents) -- Agent .md format (March 2026)
 
 ### Secondary (MEDIUM confidence)
-- [Multi-agent coordination patterns (Tacnode)](https://tacnode.io/post/multi-agent-coordination) — parallel file write race conditions
-- [MAST failure taxonomy (arXiv 2503.13657)](https://arxiv.org/abs/2503.13657) — specification failures are 41.8% of multi-agent failures
-- [Claude Code sub-agent best practices](https://claudefa.st/blog/guide/agents/sub-agent-best-practices) — dispatch contract completeness
+- [Agent Skills Standard](https://agentskills.io) -- open standard for skill format
+- [W3C/FAST Component Spec Template](https://eisenbergeffect.medium.com/writing-component-specs-111f154d6f46) -- overview + dependencies + API + behavior pattern
+- [Red Hat Software Catalog Templates](https://developers.redhat.com/articles/2026/01/19/depth-look-software-catalog-and-templates) -- type field flexibility pattern
+- Template example section lists (microservice, CLI, library) -- speculative, need validation
 
 ### Tertiary (LOW confidence)
-- [Agent Skills Standard (agentskills.io)](https://agentskills.io) — open standard Claude Code follows; less authoritative than official Claude Code docs
+- Default section list specifics -- both proposals are informed guesses that need validation against real projects
+- Conditional section evaluation reliability -- untested with current agent models
 
 ---
-*Research completed: 2026-03-30*
+*Research completed: 2026-03-31*
 *Ready for roadmap: yes*
