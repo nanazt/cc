@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-03-30T12:57:18.165Z"
-last_activity: 2026-03-30 -- Roadmap created (8 phases, 66 requirements mapped)
+status: executing
+stopped_at: Completed 01-hash-tool-01-PLAN.md
+last_updated: "2026-03-30T13:56:54.176Z"
+last_activity: 2026-03-30
 progress:
   total_phases: 8
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-30)
 
 **Core value:** Consolidate phase-scoped planning decisions into persistent, per-service spec files as authoritative source of truth.
-**Current focus:** Phase 1: Hash Tool
+**Current focus:** Phase 01 — hash-tool
 
 ## Current Position
 
-Phase: 1 of 8 (Hash Tool)
-Plan: 0 of 0 in current phase
-Status: Ready to plan
-Last activity: 2026-03-30 -- Roadmap created (8 phases, 66 requirements mapped)
+Phase: 01 (hash-tool) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-03-30
 
 Progress: [..........] 0%
 
@@ -52,6 +52,7 @@ Progress: [..........] 0%
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 01-hash-tool P01 | 3 | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -63,6 +64,9 @@ Recent decisions affecting current work:
 - [Roadmap]: Hash tool first -- only non-LLM component, fully testable with deno test, gates E2E flow work
 - [Roadmap]: CSMR-03/04/05 grouped with Phase 4 (/case updates) -- validator must recognize new sections that /case produces
 - [Roadmap]: ORCH-06 in Phase 6, ORCH-07 in Phase 7 -- orchestrator steps wired alongside the agents they dispatch
+- [Phase 01-hash-tool]: D-01: Position-offset slicing of original source bytes - hashes immune to remark-parse version changes
+- [Phase 01-hash-tool]: D-10: Separate fixture files in tools/tests/fixtures/ for byte-level hash stability in determinism tests
+- [Phase 01-hash-tool]: D-11: import.meta.main guard enables dual library/CLI mode - functions exported for direct test imports
 
 ### Pending Todos
 
@@ -76,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-30T12:57:18.162Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-hash-tool/01-CONTEXT.md
+Last session: 2026-03-30T13:56:54.174Z
+Stopped at: Completed 01-hash-tool-01-PLAN.md
+Resume file: None

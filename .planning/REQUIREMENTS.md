@@ -9,12 +9,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Hash Tool
 
-- [ ] **HASH-01**: hash-sections.ts produces deterministic SHA-256/8 hashes for H2 sections in markdown files
-- [ ] **HASH-02**: AST-based parsing (unified + remark-parse) handles all CommonMark edge cases (fenced code blocks, setext headers, ATX trailing hashes)
-- [ ] **HASH-03**: Normalization: trailing whitespace stripped, consecutive blank lines collapsed, LF line endings
-- [ ] **HASH-04**: Pre-first-H2 content excluded from hashing
-- [ ] **HASH-05**: JSON output format matches IMPL-SPEC schema (files array with path, sections array with heading + hash)
-- [ ] **HASH-06**: Multiple file paths accepted as CLI arguments
+- [x] **HASH-01**: hash-sections.ts produces deterministic SHA-256/8 hashes for H2 sections in markdown files
+- [x] **HASH-02**: AST-based parsing (unified + remark-parse) handles all CommonMark edge cases (fenced code blocks, setext headers, ATX trailing hashes)
+- [x] **HASH-03**: Normalization: trailing whitespace stripped, consecutive blank lines collapsed, LF line endings
+- [x] **HASH-04**: Pre-first-H2 content excluded from hashing
+- [x] **HASH-05**: JSON output format matches IMPL-SPEC schema (files array with path, sections array with heading + hash)
+- [x] **HASH-06**: Multiple file paths accepted as CLI arguments
 - [ ] **HASH-07**: 10 test cases pass (basic extraction, code block safety, tilde fence, normalization x2, determinism, JSON format, header-in-hash, empty section, multi-file)
 
 ### Templates
@@ -132,12 +132,12 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HASH-01 | Phase 1 | Pending |
-| HASH-02 | Phase 1 | Pending |
-| HASH-03 | Phase 1 | Pending |
-| HASH-04 | Phase 1 | Pending |
-| HASH-05 | Phase 1 | Pending |
-| HASH-06 | Phase 1 | Pending |
+| HASH-01 | Phase 1 | Complete |
+| HASH-02 | Phase 1 | Complete |
+| HASH-03 | Phase 1 | Complete |
+| HASH-04 | Phase 1 | Complete |
+| HASH-05 | Phase 1 | Complete |
+| HASH-06 | Phase 1 | Complete |
 | HASH-07 | Phase 1 | Pending |
 | TMPL-01 | Phase 2 | Pending |
 | TMPL-02 | Phase 2 | Pending |

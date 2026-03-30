@@ -36,7 +36,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Fixtures + hash-sections.ts implementation (HASH-01 through HASH-06)
+- [x] 01-01-PLAN.md -- Fixtures + hash-sections.ts implementation (HASH-01 through HASH-06)
 - [ ] 01-02-PLAN.md -- 10 test cases in hash-sections_test.ts (HASH-07, TEST-04)
 
 ### Phase 2: Templates
@@ -145,7 +145,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Hash Tool | 0/2 | Planned | - |
+| 1. Hash Tool | 1/2 | In Progress|  |
 | 2. Templates | 0/0 | Not started | - |
 | 3. Spec Consolidator Agent | 0/0 | Not started | - |
 | 4. /case Updates | 0/0 | Not started | - |
