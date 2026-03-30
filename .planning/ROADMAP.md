@@ -1,8 +1,9 @@
 # Roadmap: cckit
 
-## Overview
+## Milestones
 
-Build the consolidate v2 pipeline bottom-up along the dependency chain: deterministic hash tool first (only testable non-LLM piece), then templates (section schema), then spec-consolidator agent (core write path), then /case updates (classification prerequisite), then orchestrator core (wiring Steps 1-3.7), then e2e-flows agent (cross-service docs), then spec-verifier with full orchestrator integration (Steps 4-7), and finally consumer updates (case-briefer/case-validator adaptation). Each phase delivers a verifiable capability that unblocks the next.
+- [x] **v1.0 Hash Tool** - Phase 1 (shipped)
+- [ ] **v2.0 Universal Consolidation** - Phases 9-14 (in progress)
 
 ## Phases
 
@@ -12,144 +13,105 @@ Build the consolidate v2 pipeline bottom-up along the dependency chain: determin
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Hash Tool** - Deno SHA-256 section hashing with AST-based parsing and 10 test cases
-- [ ] **Phase 2: Templates** - Service archetype templates defining section schemas for consolidator
-- [ ] **Phase 3: Spec Consolidator Agent** - Per-service merge agent with 11 rules, tested against fixture phase documents
-- [ ] **Phase 4: /case Updates** - PR/TR classification, superseded sections, OR-N prefix, and validator recognition
-- [ ] **Phase 5: Orchestrator Core** - SKILL.md Steps 1-3.7 wiring classification, dispatch, collection, and INDEX.md
-- [ ] **Phase 6: E2E Flows Agent** - Cross-service flow documentation with hash-based change detection
-- [ ] **Phase 7: Spec Verifier + Full Integration** - 28-check read-only verifier and orchestrator Steps 4-7
-- [ ] **Phase 8: Consumer Updates** - case-briefer specs/ priority lookup and Forward Concerns sourcing
+<details>
+<summary>v1.0 Hash Tool (Phase 1) - SHIPPED</summary>
+
+- [x] **Phase 1: Hash Tool** - Deno SHA-256 section hashing with AST-based parsing and 10 test cases
+
+Phases 2-8 from v1.0 are **superseded** by v2.0 requirements. They assumed fixed service archetypes which violates the technology neutrality principle.
+
+</details>
+
+### v2.0 Universal Consolidation
+
+- [ ] **Phase 9: Universal Model Design** - Define project-type-agnostic consolidation units, default sections, and naming conventions
+- [ ] **Phase 10: Schema System** - User-authored schema file with bootstrap, overrides, and conditional sections
+- [ ] **Phase 11: Consolidation Pipeline** - Orchestrator + consolidator agent rewrite with schema-driven dispatch and IMPL-SPEC
+- [ ] **Phase 12: /case Updates** - Remove service bias, add PR/TR classification, supersession sections, OR-N prefix, specs/ lookup
+- [ ] **Phase 13: Verification** - Universal verifier with schema-parameterized checks and no false positives on non-service projects
+- [ ] **Phase 14: Cross-Unit Flows** - Opt-in E2E flow generation with universal unit terminology and hash-based change detection
 
 ## Phase Details
 
-### Phase 1: Hash Tool
-**Goal**: Developers can compute deterministic section hashes for any markdown file via CLI
-**Depends on**: Nothing (first phase)
-**Requirements**: HASH-01, HASH-02, HASH-03, HASH-04, HASH-05, HASH-06, HASH-07, TEST-04
+### Phase 9: Universal Model Design
+**Goal**: The consolidation model is defined in a way that works for any project type -- web service, CLI tool, library, documentation project
+**Depends on**: Nothing (v1 hash tool carries over unchanged)
+**Requirements**: MODEL-01, MODEL-02, MODEL-03, MODEL-04, MODEL-05
 **Success Criteria** (what must be TRUE):
-  1. Running `deno run hash-sections.ts <file>` produces JSON with SHA-256/8 hashes for each H2 section
-  2. Hashing the same file twice produces identical output (deterministic)
-  3. CommonMark edge cases (fenced code blocks, setext headers, ATX trailing hashes) parse correctly without false section splits
-  4. All 10 test cases pass via `deno test`
-  5. Pre-first-H2 content is excluded from hash output
-**Plans**: 2 plans
-
-Plans:
-- [x] 01-01-PLAN.md -- Fixtures + hash-sections.ts implementation (HASH-01 through HASH-06)
-- [x] 01-02-PLAN.md -- 10 test cases in hash-sections_test.ts (HASH-07, TEST-04)
-
-### Phase 2: Templates
-**Goal**: Consolidator has authoritative section schemas for each service archetype
-**Depends on**: Nothing (independent of Phase 1, but ordered for review before consolidator work)
-**Requirements**: TMPL-01, TMPL-02, TMPL-03, TMPL-04, TMPL-05, TMPL-06
-**Success Criteria** (what must be TRUE):
-  1. Domain service template contains all 8 context.md sections and cases.md format per IMPL-SPEC
-  2. Gateway/BFF template contains all 7 context.md sections with conditional cases.md documented
-  3. Event-driven template contains all 7 context.md sections
-  4. All v1-to-v2 section renames are applied (Ports to Adapter Contracts, gRPC Interface to Service Interface, etc.)
+  1. A consolidation unit can be declared without selecting from predefined archetypes -- the user names it and the system accepts it
+  2. Custom section structures can be defined per unit type, and these definitions are the authoritative source for what the consolidator produces
+  3. A default section list exists that passes the neutrality test: each section name is meaningful whether the project is a web service, CLI tool, library, or documentation project
+  4. Meta configuration (operation-prefix format, rule-prefix naming, e2e-flows toggle) has a defined home in the model
+  5. The model specification is documented with concrete examples for at least 3 project types (microservice, CLI tool, library)
 **Plans**: TBD
 
-Plans:
-- [ ] 02-01: TBD
-
-### Phase 3: Spec Consolidator Agent
-**Goal**: A dispatched agent can merge phase planning documents into per-service spec files following all 11 rules
-**Depends on**: Phase 2 (templates define section schema)
-**Requirements**: CONS-01, CONS-02, CONS-03, CONS-04, CONS-05, CONS-06, CONS-07, CONS-08, CONS-09, CONS-10, CONS-11, CONS-12, CONS-13, CONS-14, CONS-15, TEST-01, TEST-02, TEST-03
+### Phase 10: Schema System
+**Goal**: Users have a concrete schema file they can author, and new projects get a working starter schema automatically
+**Depends on**: Phase 9 (model defines what the schema must express)
+**Requirements**: SCHEMA-01, SCHEMA-02, SCHEMA-03, SCHEMA-04
 **Success Criteria** (what must be TRUE):
-  1. Agent dispatched with XML tags produces specs/{service}/context.md and cases.md with correct section structure
-  2. PR rules are mechanically promoted to SR with sequential numbering; TR entries are excluded from output
-  3. Superseded operations are removed and superseded rules are skipped during promotion
-  4. Context.md sections follow latest-wins semantics (unchanged sections preserved, changed sections replaced)
-  5. Every rule and decision entry carries provenance tags citing source phase
+  1. Running `/consolidate` on a project with no schema file bootstraps a starter schema (with confirmation) that works immediately without edits
+  2. User can override section structure for a specific unit type within the schema, and the override completely replaces the default for that type
+  3. Conditional sections use behavioral conditions ("Does this component manage persistent state?") not type checks ("Is this a domain service?")
+  4. Reference schema examples for at least 3 common project types ship as documentation
 **Plans**: TBD
 
-Plans:
-- [ ] 03-01: TBD
-
-### Phase 4: /case Updates
-**Goal**: /case produces PR/TR-classified rules and supersession metadata that consolidator can consume mechanically
-**Depends on**: Nothing (independent skill update, but must complete before orchestrator wires Step 1)
-**Requirements**: CASE-01, CASE-02, CASE-03, CASE-04, CSMR-03, CSMR-04, CSMR-05
+### Phase 11: Consolidation Pipeline
+**Goal**: The full consolidation cycle runs end-to-end using schema-driven dispatch instead of archetype classification
+**Depends on**: Phase 10 (orchestrator reads schema; consolidator receives section list from schema)
+**Requirements**: PIPE-01, PIPE-02, PIPE-03, PIPE-04, PIPE-05, PIPE-06
 **Success Criteria** (what must be TRUE):
-  1. Discuss step prompts "permanent (PR) or temporary (TR)?" for each rule; finalize step presents full PR/TR list for review
-  2. CASES.md output includes Superseded Operations table (Old Operation, Replacement, Reason) when applicable
-  3. CASES.md output includes Superseded Rules table (Phase, Rule ID, Reason) when applicable
-  4. Rules use OR-N prefix natively in output (not R-N)
-  5. case-validator accepts TR-N, OR-N as valid rule tiers and recognizes Superseded Operations/Rules as valid sections
+  1. Orchestrator reads the schema file to resolve unit names and their section structures -- no archetype classification step exists
+  2. Consolidator agent receives an explicit section list via dispatch XML and produces output matching that structure exactly
+  3. All 11 merge rules produce correct results with universal model (operation replacement, PR promotion, TR exclusion, latest-wins, provenance tagging)
+  4. INDEX.md uses "Component" heading with optional "Type" column; `specs/{unit}/context.md` and `cases.md` are produced for each unit
+  5. IMPL-SPEC.md is fully rewritten to reflect the universal design (no archetype references, schema-driven pipeline documented)
 **Plans**: TBD
 
-Plans:
-- [ ] 04-01: TBD
-
-### Phase 5: Orchestrator Core
-**Goal**: Running `/consolidate {phase}` performs a complete consolidation cycle: classify services, dispatch consolidators, collect results, generate INDEX.md
-**Depends on**: Phase 2 (templates), Phase 3 (consolidator agent), Phase 4 (/case PR/TR ready)
-**Requirements**: ORCH-01, ORCH-02, ORCH-03, ORCH-04, ORCH-05, ORCH-08, ORCH-09, ORCH-10, ORCH-11, ORCH-12
+### Phase 12: /case Updates
+**Goal**: /case skill and its agents produce output using universal vocabulary with PR/TR classification and supersession metadata
+**Depends on**: Phase 9 (universal vocabulary must be stable before rewriting /case language)
+**Requirements**: CASE-01, CASE-02, CASE-03, CASE-04, CASE-05, CASE-06, CASE-07, CASE-08
 **Success Criteria** (what must be TRUE):
-  1. Orchestrator resolves phase directory, classifies services via 2-step algorithm, and determines archetype per service
-  2. Consolidator agents are dispatched in parallel (one per service) and results are collected into changed_services manifest
-  3. INDEX.md is generated in v2 format after consolidation completes
-  4. Developer sees confirmation summary and can approve (commit) or reject (rollback via git checkout)
-  5. Failed agent triggers selective retry; abort triggers full rollback with diff-aware warning
+  1. /case skill text contains no service-biased language -- reading the skill prompts reveals no assumption that the target is a backend service
+  2. case-briefer uses "component topology" instead of "service topology" and reads `specs/{unit}/cases.md` first, falling back to phase directories only when no spec exists
+  3. /case discuss step prompts for PR (permanent) vs TR (temporary) classification on each rule; finalize step presents the full PR/TR list for review
+  4. CASES.md output includes Superseded Operations and Superseded Rules tables when applicable; rules use OR-N prefix natively
+  5. case-validator accepts TR-N, OR-N as valid rule formats and recognizes Superseded Operations/Rules as valid sections
 **Plans**: TBD
 
-Plans:
-- [ ] 05-01: TBD
-
-### Phase 6: E2E Flows Agent
-**Goal**: Cross-service user flows are documented with Mermaid diagrams and hash-based staleness detection
-**Depends on**: Phase 1 (hash tool), Phase 3 (consolidated specs to reference), Phase 5 (orchestrator dispatch infra)
-**Requirements**: E2E-01, E2E-02, E2E-03, E2E-04, E2E-05, E2E-06, E2E-07, ORCH-06
+### Phase 13: Verification
+**Goal**: Verifier produces accurate findings on any project type without false positives from service-specific assumptions
+**Depends on**: Phase 11 (verifier checks pipeline output; checks parameterized against active schema)
+**Requirements**: VRFY-01, VRFY-02, VRFY-03
 **Success Criteria** (what must be TRUE):
-  1. E2E agent produces per-flow files at specs/e2e/{flow-name}.md with Step Table, Mermaid diagram, Error Paths, and Spec References
-  2. Hash comparison detects changed specs; unchanged flows (all hashes match) are skipped
-  3. New flows are only created after developer confirmation via `<new_flows>` tag
-  4. Orchestrator Step 4 wires Deno prerequisite check, hash computation, and E2E agent dispatch
+  1. Verifier checks are parameterized against the active schema -- section presence checks use schema-declared sections, not hardcoded lists
+  2. The 6 service-specific checks (V-04, V-10, V-11, V-15, V-27, V-29) are either universalized or made conditional on schema configuration
+  3. Running the verifier against a non-service project (CLI tool or library) produces zero false positives
 **Plans**: TBD
 
-Plans:
-- [ ] 06-01: TBD
-
-### Phase 7: Spec Verifier + Full Integration
-**Goal**: Consolidated specs pass 28 automated verification checks before commit, and the full 7-step pipeline runs end-to-end
-**Depends on**: Phase 5 (orchestrator skeleton), Phase 6 (E2E agent for V-29 check)
-**Requirements**: VRFY-01, VRFY-02, VRFY-03, VRFY-04, VRFY-05, VRFY-06, ORCH-07
+### Phase 14: Cross-Unit Flows
+**Goal**: Projects with cross-unit communication can opt into flow documentation; projects without it are unaffected
+**Depends on**: Phase 11 (orchestrator dispatch infrastructure; hash tool from v1 for change detection)
+**Requirements**: FLOW-01, FLOW-02, FLOW-03, FLOW-04
 **Success Criteria** (what must be TRUE):
-  1. Spec-verifier executes 28 checks across T1/T2/T3 tiers without modifying any spec file
-  2. Each finding references specific file path and section; T1 findings block confirmation with warning
-  3. Orchestrator Steps 4-7 are fully wired: hash computation, E2E dispatch, verifier dispatch, confirmation with tiered findings
-  4. UNKNOWN agent return state (maxTurns exhaustion) is handled as retry, not success
+  1. E2E flow generation is controlled by a schema flag and defaults to off -- projects that do not set it never see flow-related prompts or output
+  2. When E2E is disabled, the orchestrator skips all flow-related steps entirely (no hash computation, no agent dispatch, no flow output)
+  3. When E2E is enabled, the flow agent uses universal unit terminology and hash-based change detection works with the universal unit directory structure
 **Plans**: TBD
-
-Plans:
-- [ ] 07-01: TBD
-
-### Phase 8: Consumer Updates
-**Goal**: case-briefer and case-validator work correctly against the new specs/ directory structure
-**Depends on**: Phase 7 (pipeline validated end-to-end)
-**Requirements**: CSMR-01, CSMR-02
-**Success Criteria** (what must be TRUE):
-  1. case-briefer reads specs/{service}/cases.md first, falling back to phase directories only when spec does not exist
-  2. case-briefer always reads Forward Concerns from phase CASES.md (never from specs/)
-**Plans**: TBD
-
-Plans:
-- [ ] 08-01: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
+Phases execute in numeric order: 9 -> 10 -> 11 -> 12 -> 13 -> 14
+Note: Phase 12 depends only on Phase 9 and can run after Phase 9 completes, potentially parallel with Phases 10-11.
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Hash Tool | 1/2 | In Progress|  |
-| 2. Templates | 0/0 | Not started | - |
-| 3. Spec Consolidator Agent | 0/0 | Not started | - |
-| 4. /case Updates | 0/0 | Not started | - |
-| 5. Orchestrator Core | 0/0 | Not started | - |
-| 6. E2E Flows Agent | 0/0 | Not started | - |
-| 7. Spec Verifier + Full Integration | 0/0 | Not started | - |
-| 8. Consumer Updates | 0/0 | Not started | - |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Hash Tool | v1.0 | 2/2 | Complete | 2026-03-30 |
+| 9. Universal Model Design | v2.0 | 0/0 | Not started | - |
+| 10. Schema System | v2.0 | 0/0 | Not started | - |
+| 11. Consolidation Pipeline | v2.0 | 0/0 | Not started | - |
+| 12. /case Updates | v2.0 | 0/0 | Not started | - |
+| 13. Verification | v2.0 | 0/0 | Not started | - |
+| 14. Cross-Unit Flows | v2.0 | 0/0 | Not started | - |

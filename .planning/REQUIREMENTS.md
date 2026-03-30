@@ -1,13 +1,11 @@
 # Requirements: cckit
 
-**Defined:** 2026-03-30
-**Core Value:** Consolidate phase-scoped planning decisions into persistent, per-service spec files as authoritative source of truth.
+**Defined:** 2026-03-30 (v1), 2026-03-31 (v2.0)
+**Core Value:** Consolidate phase-scoped planning decisions into persistent spec files as authoritative source of truth. Project-type agnostic.
 
-## v1 Requirements
+## v1.0 Requirements (Completed / Superseded)
 
-Requirements for initial release. Each maps to roadmap phases.
-
-### Hash Tool
+### Hash Tool (Complete)
 
 - [x] **HASH-01**: hash-sections.ts produces deterministic SHA-256/8 hashes for H2 sections in markdown files
 - [x] **HASH-02**: AST-based parsing (unified + remark-parse) handles all CommonMark edge cases (fenced code blocks, setext headers, ATX trailing hashes)
@@ -16,111 +14,82 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **HASH-05**: JSON output format matches IMPL-SPEC schema (files array with path, sections array with heading + hash)
 - [x] **HASH-06**: Multiple file paths accepted as CLI arguments
 - [x] **HASH-07**: 10 test cases pass (basic extraction, code block safety, tilde fence, normalization x2, determinism, JSON format, header-in-hash, empty section, multi-file)
+- [x] **TEST-04**: hash-sections_test.ts -- 10 test cases per IMPL-SPEC
 
-### Templates
+### v1 Templates / Consolidator / Orchestrator / Verifier / E2E (Superseded by v2.0)
 
-- [ ] **TMPL-01**: Domain service template defines 8 context.md sections (Domain Model, Adapter Contracts, Business Rules, Error Categories, Service Interface, Configuration, Cross-Service Dependencies, State Management)
-- [ ] **TMPL-02**: Domain service template defines cases.md format (per-operation sections with SR, OR, Side Effects, Cases table)
-- [ ] **TMPL-03**: Gateway/BFF template defines 7 context.md sections (Route/Endpoint Table, Middleware Stack, Composition Patterns, Error Translation, External API Conventions, Configuration, Identity Propagation)
-- [ ] **TMPL-04**: Gateway cases.md is conditional — only when gateway has behavioral operations passing "judgment seat" test
-- [ ] **TMPL-05**: Event-driven template defines 7 context.md sections (Event Subscriptions, Event Publications, Processing Logic, Idempotency, Error Categories, Configuration, State Management)
-- [ ] **TMPL-06**: v1-to-v2 section renames applied (Ports->Adapter Contracts, gRPC Interface->Service Interface, Orchestration Patterns->Composition Patterns, Error Handling->Error Translation, REST Conventions->External API Conventions)
+v1 requirements TMPL-01 through TMPL-06, CONS-01 through CONS-15, ORCH-01 through ORCH-12, E2E-01 through E2E-07, VRFY-01 through VRFY-06, CASE-01 through CASE-04, CSMR-01 through CSMR-05, TEST-01 through TEST-03 are **superseded** by v2.0 requirements below. They assumed fixed service archetypes which violates the technology neutrality principle.
 
-### Spec Consolidator Agent
+## v2.0 Requirements
 
-- [ ] **CONS-01**: Agent reads phase CONTEXT.md, CASES.md, and PROJECT.md via XML dispatch tags
-- [ ] **CONS-02**: Operation-level replacement — later phase replaces entire operation section
-- [ ] **CONS-03**: PR-to-SR mechanical promotion with sequential renumbering (no collisions)
-- [ ] **CONS-04**: TR entries excluded from output
-- [ ] **CONS-05**: R-to-OR transformation in output
-- [ ] **CONS-06**: GR referenced only (`See GR-XX`), never content-duplicated
-- [ ] **CONS-07**: Superseded operations removed from existing spec
-- [ ] **CONS-08**: Superseded rules skipped during SR promotion
-- [ ] **CONS-09**: Section-level rewrite for context.md (latest wins per section, unchanged sections preserved)
-- [ ] **CONS-10**: Provenance tags on every rule and decision entry — `(Source: Phase {id})`
-- [ ] **CONS-11**: Forward Concerns excluded from output
-- [ ] **CONS-12**: Template sections match assigned archetype
-- [ ] **CONS-13**: `Last consolidated: Phase {id} (YYYY-MM-DD)` header updated
-- [ ] **CONS-14**: Return protocol: `## CONSOLIDATION COMPLETE` or `## CONSOLIDATION FAILED` with structured data
-- [ ] **CONS-15**: Quality gate checklist (13 items) self-verified before return
+### Universal Model (MODEL)
 
-### E2E Flows Agent
+- [ ] **MODEL-01**: User can declare consolidation units in a schema file without being constrained to predefined archetypes
+- [ ] **MODEL-02**: User can define custom section structures per unit type via the schema
+- [ ] **MODEL-03**: Components without a custom type use a sensible default section structure that works for any project type
+- [ ] **MODEL-04**: Schema includes meta configuration (operation-prefix format, rule-prefix naming, e2e-flows toggle)
+- [ ] **MODEL-05**: Default section list passes the neutrality test (meaningful for web service, CLI tool, library, documentation project)
 
-- [ ] **E2E-01**: Generates per-user-action flow files at `specs/e2e/{flow-name}.md`
-- [ ] **E2E-02**: Flow format: Step Table (6 columns), Mermaid sequence diagram, Error Paths, Spec References
-- [ ] **E2E-03**: Hash-based change detection — compare spec_hashes against existing flow's Spec References
-- [ ] **E2E-04**: Unchanged flows skipped (all hashes match, no participants affected)
-- [ ] **E2E-05**: New flows only created when confirmed by developer (via `<new_flows>` tag)
-- [ ] **E2E-06**: Level B granularity — cross-service hops plus key internal logic with side effects
-- [ ] **E2E-07**: Return protocol: `## E2E FLOWS COMPLETE` or `## E2E FLOWS FAILED`
+### Schema System (SCHEMA)
 
-### Spec Verifier Agent
+- [ ] **SCHEMA-01**: Plugin bootstraps a starter schema when no schema file exists on first `/consolidate` run
+- [ ] **SCHEMA-02**: User can override sections for specific unit types within the schema
+- [ ] **SCHEMA-03**: Conditional sections use behavioral conditions (not type checks)
+- [ ] **SCHEMA-04**: Schema examples ship as reference material for common project types
 
-- [ ] **VRFY-01**: 28 verification checks executed across 4 tiers (T1 blocks, T2 developer-decides, T3 info, Human-only)
-- [ ] **VRFY-02**: Read-only — never modifies spec files
-- [ ] **VRFY-03**: Each finding references specific file path and section
-- [ ] **VRFY-04**: T1 findings: V-01 provenance, V-02 empty sections, V-07/V-08 INDEX.md validity, V-09 no fabricated cases, V-16 latest-wins, V-17 Forward Concerns leak, V-25/V-26 GR reference validity, V-29 E2E spec references
-- [ ] **VRFY-05**: T2 findings: V-05 SR format, V-10 cross-service refs, V-11 gateway routes, V-14 PR-to-SR count, V-15 error consistency, V-18 backfill provenance, V-27 service topology match, V-28 SR keyword overlap
-- [ ] **VRFY-06**: Return protocol: `## VERIFICATION COMPLETE` or `## VERIFICATION FAILED` with tiered findings
+### Consolidation Pipeline (PIPE)
 
-### Orchestrator (SKILL.md)
+- [ ] **PIPE-01**: Orchestrator reads schema to resolve unit names and section structures (replaces archetype classification)
+- [ ] **PIPE-02**: Consolidator agent receives explicit section list via dispatch (not template type)
+- [ ] **PIPE-03**: All 11 merge rules function correctly with universal model
+- [ ] **PIPE-04**: INDEX.md uses "Component" heading with optional "Type" column
+- [ ] **PIPE-05**: `specs/{unit}/context.md` and `cases.md` output structure works for any unit type
+- [ ] **PIPE-06**: IMPL-SPEC is fully rewritten to reflect universal design
 
-- [ ] **ORCH-01**: Step 1 — resolve phase directory, read documents, classify services (2-step algorithm), determine archetype, read existing specs
-- [ ] **ORCH-02**: Step 2 — parallel dispatch of spec-consolidator agents per service
-- [ ] **ORCH-03**: Step 3 — collect results, build changed_services manifest, update INDEX.md v2 format
-- [ ] **ORCH-04**: Step 3.5 — identify E2E flows (existing + new candidates), developer confirmation for new flows
-- [ ] **ORCH-05**: Step 3.7 — orphan directory detection and cleanup with developer confirmation
-- [ ] **ORCH-06**: Step 4 — Deno prerequisite check, hash computation, E2E agent dispatch
-- [ ] **ORCH-07**: Step 5 — spec-verifier dispatch with all required input tags
-- [ ] **ORCH-08**: Step 6 — confirmation summary (services, E2E, verification findings, exclusions)
-- [ ] **ORCH-09**: Step 7 — commit on confirmation, rollback (`git checkout -- .planning/specs/`) on rejection
-- [ ] **ORCH-10**: Fail-fast + selective retry — retry failed agent only, abort triggers full rollback
-- [ ] **ORCH-11**: Out-of-order consolidation warning (existing spec newer than source phase)
-- [ ] **ORCH-12**: T1 findings block confirmation with warning
+### Verification (VRFY)
 
-### /case Updates
+- [ ] **VRFY-01**: Verifier checks are parameterized against active schema (not hardcoded archetypes)
+- [ ] **VRFY-02**: Service-specific checks (V-04, V-10, V-11, V-15, V-27, V-29) are universalized or made conditional
+- [ ] **VRFY-03**: Verifier produces no false positives on non-service projects
 
-- [ ] **CASE-01**: PR/TR distinction — discuss step asks "permanent (PR) or temporary (TR)?", finalize step reviews full PR/TR list
-- [ ] **CASE-02**: Superseded Operations section — table with Old Operation, Replacement, Reason columns
-- [ ] **CASE-03**: Superseded Rules section — table with Phase, Rule ID, Reason columns
-- [ ] **CASE-04**: OR-N prefix produced natively (replacing R-N) for future phases
+### /case Updates (CASE)
 
-### Consumer Updates
+- [ ] **CASE-01**: /case skill contains no service-biased language or assumptions
+- [ ] **CASE-02**: case-briefer uses "component topology" instead of "service topology"
+- [ ] **CASE-03**: /case produces PR/TR-classified rules (permanent vs temporary)
+- [ ] **CASE-04**: CASES.md includes Superseded Operations table when applicable
+- [ ] **CASE-05**: CASES.md includes Superseded Rules table when applicable
+- [ ] **CASE-06**: Rules use OR-N prefix natively
+- [ ] **CASE-07**: case-validator accepts TR-N, OR-N and recognizes supersession sections
+- [ ] **CASE-08**: case-briefer reads `specs/{unit}/cases.md` first, falling back to phase directories only when spec does not exist
 
-- [ ] **CSMR-01**: case-briefer reads specs/{service}/cases.md first, falls back to phase directories if not found
-- [ ] **CSMR-02**: case-briefer always reads Forward Concerns from phase CASES.md (never from specs/)
-- [ ] **CSMR-03**: case-validator recognizes TR-N as valid rule tier
-- [ ] **CSMR-04**: case-validator recognizes OR-N as valid rule tier
-- [ ] **CSMR-05**: case-validator recognizes Superseded Operations and Superseded Rules as valid sections
+### Cross-Unit Flows (FLOW)
 
-### Testing
+- [ ] **FLOW-01**: E2E flow generation is opt-in via schema flag (not default)
+- [ ] **FLOW-02**: Orchestrator skips flow steps when E2E is disabled
+- [ ] **FLOW-03**: When enabled, flow agent uses universal unit terminology
+- [ ] **FLOW-04**: Hash-based change detection works with universal unit structure
 
-- [ ] **TEST-01**: Fixture set: synthetic phase directory with CONTEXT.md, CASES.md, PROJECT.md
-- [ ] **TEST-02**: Fixture set: existing specs/ directory for merge testing
-- [ ] **TEST-03**: Fixture set: multi-phase scenario (Phase 1 infra + Phase 2 behavioral)
-- [x] **TEST-04**: hash-sections_test.ts — 10 test cases per IMPL-SPEC
-
-## v2 Requirements
-
-Deferred to future release. Tracked but not in current roadmap.
+## Future Requirements
 
 ### Installation
-
 - **INST-01**: Global install option (available to all projects)
 - **INST-02**: Per-project install option (scoped to single project)
 - **INST-03**: Install command or script that handles both modes
 
 ### Advanced
-
 - **ADV-01**: Spec-vs-code drift detection (Layer 3 verification)
-- **ADV-02**: Proto/Common service handling (template_type: none)
-- **ADV-03**: Rule tier rename migration tool (SR->GR, SvcR->SR atomic rename)
+- **ADV-02**: Template inheritance/composition -- wait for evidence flat files are insufficient
+- **ADV-03**: Template marketplace/sharing -- format must stabilize first
+- **ADV-04**: Rule tier rename migration tool (atomic rename in existing projects)
+- **ADV-05**: Auto-generating PROJECT.md topology
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
 | /gsd:next integration | Manual invocation preserves developer control over consolidation timing |
+| Fixed archetype templates | Violates technology neutrality -- replaced by user-defined schema |
 | Keyword-based service classification | Masks structural problems in phase documents |
 | Case-level merge (within operations) | /case produces complete per-operation specs; case-level merge creates conflicts |
 | Automatic PR/TR classification | Consolidator is mechanical; cannot make judgment calls |
@@ -132,78 +101,43 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HASH-01 | Phase 1 | Complete |
-| HASH-02 | Phase 1 | Complete |
-| HASH-03 | Phase 1 | Complete |
-| HASH-04 | Phase 1 | Complete |
-| HASH-05 | Phase 1 | Complete |
-| HASH-06 | Phase 1 | Complete |
-| HASH-07 | Phase 1 | Complete |
-| TMPL-01 | Phase 2 | Pending |
-| TMPL-02 | Phase 2 | Pending |
-| TMPL-03 | Phase 2 | Pending |
-| TMPL-04 | Phase 2 | Pending |
-| TMPL-05 | Phase 2 | Pending |
-| TMPL-06 | Phase 2 | Pending |
-| CONS-01 | Phase 3 | Pending |
-| CONS-02 | Phase 3 | Pending |
-| CONS-03 | Phase 3 | Pending |
-| CONS-04 | Phase 3 | Pending |
-| CONS-05 | Phase 3 | Pending |
-| CONS-06 | Phase 3 | Pending |
-| CONS-07 | Phase 3 | Pending |
-| CONS-08 | Phase 3 | Pending |
-| CONS-09 | Phase 3 | Pending |
-| CONS-10 | Phase 3 | Pending |
-| CONS-11 | Phase 3 | Pending |
-| CONS-12 | Phase 3 | Pending |
-| CONS-13 | Phase 3 | Pending |
-| CONS-14 | Phase 3 | Pending |
-| CONS-15 | Phase 3 | Pending |
-| TEST-01 | Phase 3 | Pending |
-| TEST-02 | Phase 3 | Pending |
-| TEST-03 | Phase 3 | Pending |
-| CASE-01 | Phase 4 | Pending |
-| CASE-02 | Phase 4 | Pending |
-| CASE-03 | Phase 4 | Pending |
-| CASE-04 | Phase 4 | Pending |
-| CSMR-03 | Phase 4 | Pending |
-| CSMR-04 | Phase 4 | Pending |
-| CSMR-05 | Phase 4 | Pending |
-| ORCH-01 | Phase 5 | Pending |
-| ORCH-02 | Phase 5 | Pending |
-| ORCH-03 | Phase 5 | Pending |
-| ORCH-04 | Phase 5 | Pending |
-| ORCH-05 | Phase 5 | Pending |
-| ORCH-08 | Phase 5 | Pending |
-| ORCH-09 | Phase 5 | Pending |
-| ORCH-10 | Phase 5 | Pending |
-| ORCH-11 | Phase 5 | Pending |
-| ORCH-12 | Phase 5 | Pending |
-| E2E-01 | Phase 6 | Pending |
-| E2E-02 | Phase 6 | Pending |
-| E2E-03 | Phase 6 | Pending |
-| E2E-04 | Phase 6 | Pending |
-| E2E-05 | Phase 6 | Pending |
-| E2E-06 | Phase 6 | Pending |
-| E2E-07 | Phase 6 | Pending |
-| ORCH-06 | Phase 6 | Pending |
-| VRFY-01 | Phase 7 | Pending |
-| VRFY-02 | Phase 7 | Pending |
-| VRFY-03 | Phase 7 | Pending |
-| VRFY-04 | Phase 7 | Pending |
-| VRFY-05 | Phase 7 | Pending |
-| VRFY-06 | Phase 7 | Pending |
-| ORCH-07 | Phase 7 | Pending |
-| CSMR-01 | Phase 8 | Pending |
-| CSMR-02 | Phase 8 | Pending |
-| TEST-04 | Phase 1 | Complete |
+| HASH-01~07, TEST-04 | v1.0 Phase 1 | Complete |
+| MODEL-01 | Phase 9 | Pending |
+| MODEL-02 | Phase 9 | Pending |
+| MODEL-03 | Phase 9 | Pending |
+| MODEL-04 | Phase 9 | Pending |
+| MODEL-05 | Phase 9 | Pending |
+| SCHEMA-01 | Phase 10 | Pending |
+| SCHEMA-02 | Phase 10 | Pending |
+| SCHEMA-03 | Phase 10 | Pending |
+| SCHEMA-04 | Phase 10 | Pending |
+| PIPE-01 | Phase 11 | Pending |
+| PIPE-02 | Phase 11 | Pending |
+| PIPE-03 | Phase 11 | Pending |
+| PIPE-04 | Phase 11 | Pending |
+| PIPE-05 | Phase 11 | Pending |
+| PIPE-06 | Phase 11 | Pending |
+| CASE-01 | Phase 12 | Pending |
+| CASE-02 | Phase 12 | Pending |
+| CASE-03 | Phase 12 | Pending |
+| CASE-04 | Phase 12 | Pending |
+| CASE-05 | Phase 12 | Pending |
+| CASE-06 | Phase 12 | Pending |
+| CASE-07 | Phase 12 | Pending |
+| CASE-08 | Phase 12 | Pending |
+| VRFY-01 | Phase 13 | Pending |
+| VRFY-02 | Phase 13 | Pending |
+| VRFY-03 | Phase 13 | Pending |
+| FLOW-01 | Phase 14 | Pending |
+| FLOW-02 | Phase 14 | Pending |
+| FLOW-03 | Phase 14 | Pending |
+| FLOW-04 | Phase 14 | Pending |
 
 **Coverage:**
-- v1 requirements: 66 total
-- Mapped to phases: 66
+- v2.0 requirements: 30 total
+- Mapped to phases: 30/30
 - Unmapped: 0
 
 ---
-*Requirements defined: 2026-03-30*
-*Last updated: 2026-03-30 after roadmap creation*
+*Requirements defined: 2026-03-30 (v1), 2026-03-31 (v2.0)*
+*Last updated: 2026-03-31 -- v2.0 roadmap mapped*

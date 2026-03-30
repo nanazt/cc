@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: verifying
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-30T15:02:25.045Z"
-last_activity: 2026-03-30
+milestone: v2.0
+milestone_name: Universal Consolidation
+status: roadmapped
+stopped_at: Roadmap created
+last_updated: "2026-03-31"
+last_activity: 2026-03-31
 progress:
-  total_phases: 8
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_phases: 6
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
   percent: 0
 ---
 
@@ -18,17 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-30)
+See: .planning/PROJECT.md (updated 2026-03-31)
 
-**Core value:** Consolidate phase-scoped planning decisions into persistent, per-service spec files as authoritative source of truth.
-**Current focus:** Phase 01 — hash-tool
+**Core value:** Consolidate phase-scoped planning decisions into persistent spec files as authoritative source of truth. Project-type agnostic.
+**Current focus:** Milestone v2.0 Phase 9 -- Universal Model Design
 
 ## Current Position
 
-Phase: 2
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-03-30
+Phase: 9 (Universal Model Design) -- first of 6 v2.0 phases
+Plan: --
+Status: Ready to plan
+Last activity: 2026-03-31 -- v2.0 roadmap created (Phases 9-14)
 
 Progress: [..........] 0%
 
@@ -36,24 +36,22 @@ Progress: [..........] 0%
 
 **Velocity:**
 
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: 0 hours
+- Total plans completed: 2 (v1.0)
+- Average duration: --
+- Total execution time: --
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01-hash-tool | 2 | -- | -- |
 
 **Recent Trend:**
 
-- Last 5 plans: -
-- Trend: -
+- Last 5 plans: --
+- Trend: --
 
 *Updated after each plan completion*
-| Phase 01-hash-tool P01 | 3 | 2 tasks | 12 files |
-| Phase 01-hash-tool P02 | 1 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -62,13 +60,12 @@ Progress: [..........] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [Roadmap]: Hash tool first -- only non-LLM component, fully testable with deno test, gates E2E flow work
-- [Roadmap]: CSMR-03/04/05 grouped with Phase 4 (/case updates) -- validator must recognize new sections that /case produces
-- [Roadmap]: ORCH-06 in Phase 6, ORCH-07 in Phase 7 -- orchestrator steps wired alongside the agents they dispatch
-- [Phase 01-hash-tool]: D-01: Position-offset slicing of original source bytes - hashes immune to remark-parse version changes
-- [Phase 01-hash-tool]: D-10: Separate fixture files in tools/tests/fixtures/ for byte-level hash stability in determinism tests
-- [Phase 01-hash-tool]: D-11: import.meta.main guard enables dual library/CLI mode - functions exported for direct test imports
-- [Phase 01-hash-tool]: D-11 validated: direct function imports work without subprocess via import.meta.main guard
+- [Research]: Schema file (Option B) recommended over template files -- explicit unit registry, configurable naming, single source of truth
+- [Research]: Default section list needs reconciliation between STACK.md (5+3) and FEATURES.md (7+1) proposals
+- [Research]: "component" for user-facing text, "unit" acceptable in schema internals
+- [Research]: All 11 merge rules carry over unchanged -- already universal
+- [Roadmap]: Phase 9 is critical path -- model design decisions are load-bearing for all downstream phases
+- [Roadmap]: Phase 12 (/case) depends only on Phase 9, can parallel Phases 10-11
 
 ### Pending Todos
 
@@ -76,12 +73,12 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Research]: AST serialization roundtrip breaks hash stability -- must hash original source bytes using position offsets, not serialized AST
-- [Research]: maxTurns exhaustion returns neither COMPLETE nor FAILED -- orchestrator must handle UNKNOWN state
-- [Research]: V-28 SR keyword overlap may be too ambitious -- plan exact-match first, escalate to semantic if needed
+- [Research]: Default section list needs validation against 3+ project types before implementation
+- [Research]: Conditional section evaluation reliability untested with current agent models
+- [Research]: `{Unit}.{Op}` naming convention has 6 load-bearing consumption points -- must update atomically
 
 ## Session Continuity
 
-Last session: 2026-03-30T15:02:25.043Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-templates/02-CONTEXT.md
+Last session: 2026-03-31
+Stopped at: v2.0 roadmap created
+Resume file: None

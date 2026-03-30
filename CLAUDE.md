@@ -76,27 +76,29 @@ Rules:
 
 **cckit — Claude Code Toolkit**
 
-A personal Claude Code plugin project providing reusable skills, agents, and directives for use across projects. The two primary tools — `/case` (behavioral case discovery) and `/consolidate` (per-service spec consolidation) — extend the GSD workflow pipeline: `discuss -> /case -> plan -> execute -> verify -> ship -> /consolidate`.
+A personal Claude Code plugin project providing reusable skills, agents, and directives for use across projects. The two primary tools — `/case` (behavioral case discovery) and `/consolidate` (spec consolidation after phase ship) — extend the GSD workflow pipeline: `discuss -> /case -> plan -> execute -> verify -> ship -> /consolidate`.
 
-**Core Value:** Consolidate phase-scoped planning decisions into persistent, per-service spec files that downstream agents (case-briefer, planner, executor) can consume as authoritative source of truth.
+**Core Value:** Consolidate phase-scoped planning decisions into persistent spec files that downstream agents (case-briefer, planner, executor) can consume as authoritative source of truth. The consolidation model must be project-type agnostic — not limited to services, backends, or any specific architecture style.
 
 ### Constraints
 
 - **Runtime**: Deno required for hash-sections.ts (npm:unified, npm:remark-parse)
-- **Agent models**: spec-consolidator and e2e-flows use sonnet; spec-verifier uses opus (downgrade candidate after usage data)
+- **Agent models**: consolidation agents use sonnet; verifier uses opus (downgrade candidate after usage data)
 - **No hardcoded project references**: Skills and agents must be technology-neutral and project-neutral
 - **GSD conventions**: Depends on CONTEXT.md, CASES.md, ROADMAP.md, PROJECT.md phase directory structure
 - **Content language**: All code, docs, commit messages in English (per CLAUDE.md)
 
 ### Technology Neutrality
 
-cckit is a **plugin installed into arbitrary host projects**. Every artifact it produces — skills, agents, templates, directives — must work regardless of the host project's language, framework, or infrastructure.
+cckit is a **plugin installed into arbitrary host projects**. Every artifact it produces — skills, agents, templates, directives — must work regardless of the host project's type, language, framework, or infrastructure.
 
-**Default stance: technology-neutral and generic.**
+**"Arbitrary" means truly arbitrary:** web services, CLI tools, mobile/desktop clients, system software, OS components, libraries, and even non-code projects (documentation, design systems, research). No artifact should assume the host project is a backend service or follows any specific architecture style.
 
-- Template section descriptions use role-based language ("operations this service exposes"), never protocol-specific language ("gRPC methods", "REST endpoints").
-- Guide text, placeholder content, and examples use abstract terms (`{Service}.{Operation}`, `{Entity}`, `{Event}`) — no real service names, no framework-specific patterns.
-- Judgment criteria (e.g., when to include conditional sections, when to generate cases.md) are expressed as behavioral tests ("does this code examine state, apply rules, and branch?"), not technology checks ("is this a gRPC service?").
+**Default stance: technology-neutral and project-type-agnostic.**
+
+- Templates and section schemas must not assume a specific project type (service, CLI, client, etc.). Prefer user-defined/extensible structures over hardcoded categories.
+- Guide text, placeholder content, and examples use abstract terms — no real project names, no framework-specific patterns, no architecture-specific assumptions.
+- Judgment criteria are expressed as behavioral tests ("does this code examine state, apply rules, and branch?"), not technology or architecture checks ("is this a gRPC service?", "is this a microservice?").
 
 **Exceptions exist** — some artifacts are inherently technology-specific:
 
@@ -104,7 +106,7 @@ cckit is a **plugin installed into arbitrary host projects**. Every artifact it 
 - Agent model assignments (sonnet/opus) are vendor-specific by nature.
 - When a skill or directive explicitly targets a named technology (e.g., a future Rust-specific directive), mark it clearly in its description and frontmatter.
 
-**The test:** Could a team using Python/Django, Rust/Axum, Go/gRPC, or Node/Express install this and use it without editing the plugin? If not, the artifact is too specific.
+**The test:** Could any project — regardless of type, language, or domain — install this and use it without editing the plugin? If the artifact assumes a specific project type or architecture style, it is too specific.
 <!-- GSD:project-end -->
 
 <!-- GSD:stack-start source:research/STACK.md -->
