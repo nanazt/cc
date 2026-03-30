@@ -15,7 +15,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **HASH-04**: Pre-first-H2 content excluded from hashing
 - [x] **HASH-05**: JSON output format matches IMPL-SPEC schema (files array with path, sections array with heading + hash)
 - [x] **HASH-06**: Multiple file paths accepted as CLI arguments
-- [ ] **HASH-07**: 10 test cases pass (basic extraction, code block safety, tilde fence, normalization x2, determinism, JSON format, header-in-hash, empty section, multi-file)
+- [x] **HASH-07**: 10 test cases pass (basic extraction, code block safety, tilde fence, normalization x2, determinism, JSON format, header-in-hash, empty section, multi-file)
 
 ### Templates
 
@@ -98,7 +98,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **TEST-01**: Fixture set: synthetic phase directory with CONTEXT.md, CASES.md, PROJECT.md
 - [ ] **TEST-02**: Fixture set: existing specs/ directory for merge testing
 - [ ] **TEST-03**: Fixture set: multi-phase scenario (Phase 1 infra + Phase 2 behavioral)
-- [ ] **TEST-04**: hash-sections_test.ts — 10 test cases per IMPL-SPEC
+- [x] **TEST-04**: hash-sections_test.ts — 10 test cases per IMPL-SPEC
 
 ## v2 Requirements
 
@@ -138,7 +138,7 @@ Deferred to future release. Tracked but not in current roadmap.
 | HASH-04 | Phase 1 | Complete |
 | HASH-05 | Phase 1 | Complete |
 | HASH-06 | Phase 1 | Complete |
-| HASH-07 | Phase 1 | Pending |
+| HASH-07 | Phase 1 | Complete |
 | TMPL-01 | Phase 2 | Pending |
 | TMPL-02 | Phase 2 | Pending |
 | TMPL-03 | Phase 2 | Pending |
@@ -197,7 +197,7 @@ Deferred to future release. Tracked but not in current roadmap.
 | ORCH-07 | Phase 7 | Pending |
 | CSMR-01 | Phase 8 | Pending |
 | CSMR-02 | Phase 8 | Pending |
-| TEST-04 | Phase 1 | Pending |
+| TEST-04 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 66 total

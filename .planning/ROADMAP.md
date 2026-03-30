@@ -37,7 +37,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 01-01-PLAN.md -- Fixtures + hash-sections.ts implementation (HASH-01 through HASH-06)
-- [ ] 01-02-PLAN.md -- 10 test cases in hash-sections_test.ts (HASH-07, TEST-04)
+- [x] 01-02-PLAN.md -- 10 test cases in hash-sections_test.ts (HASH-07, TEST-04)
 
 ### Phase 2: Templates
 **Goal**: Consolidator has authoritative section schemas for each service archetype
