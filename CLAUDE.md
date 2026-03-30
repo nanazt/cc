@@ -87,6 +87,24 @@ A personal Claude Code plugin project providing reusable skills, agents, and dir
 - **No hardcoded project references**: Skills and agents must be technology-neutral and project-neutral
 - **GSD conventions**: Depends on CONTEXT.md, CASES.md, ROADMAP.md, PROJECT.md phase directory structure
 - **Content language**: All code, docs, commit messages in English (per CLAUDE.md)
+
+### Technology Neutrality
+
+cckit is a **plugin installed into arbitrary host projects**. Every artifact it produces — skills, agents, templates, directives — must work regardless of the host project's language, framework, or infrastructure.
+
+**Default stance: technology-neutral and generic.**
+
+- Template section descriptions use role-based language ("operations this service exposes"), never protocol-specific language ("gRPC methods", "REST endpoints").
+- Guide text, placeholder content, and examples use abstract terms (`{Service}.{Operation}`, `{Entity}`, `{Event}`) — no real service names, no framework-specific patterns.
+- Judgment criteria (e.g., when to include conditional sections, when to generate cases.md) are expressed as behavioral tests ("does this code examine state, apply rules, and branch?"), not technology checks ("is this a gRPC service?").
+
+**Exceptions exist** — some artifacts are inherently technology-specific:
+
+- `hash-sections.ts` depends on Deno + unified/remark-parse. This is acceptable because it is a build tool, not a host-facing artifact.
+- Agent model assignments (sonnet/opus) are vendor-specific by nature.
+- When a skill or directive explicitly targets a named technology (e.g., a future Rust-specific directive), mark it clearly in its description and frontmatter.
+
+**The test:** Could a team using Python/Django, Rust/Axum, Go/gRPC, or Node/Express install this and use it without editing the plugin? If not, the artifact is too specific.
 <!-- GSD:project-end -->
 
 <!-- GSD:stack-start source:research/STACK.md -->
