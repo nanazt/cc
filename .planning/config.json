@@ -3,7 +3,8 @@
   "granularity": "fine",
   "model_profile": "quality",
   "model_overrides": {
-    "gsd-executor": "sonnet"
+    "gsd-executor": "sonnet",
+    "gsd-verifier": "opus"
   },
   "commit_docs": false,
   "parallelization": true,

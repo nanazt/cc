@@ -15,6 +15,8 @@ Consolidate phase-scoped planning decisions into persistent, per-service spec fi
 - `/case` skill working (migrated from madome) — S/F/E table discovery, CASE-SCRATCH.md and CASES.md production
 - `case-briefer` agent working — extracts operations from phase planning documents
 - `case-validator` agent working — validates CASES.md structure and completeness
+- hash-sections.ts — Validated in Phase 1: Hash Tool (10/10 tests pass, all 8 requirements verified)
+- hash-sections_test.ts — Validated in Phase 1: Hash Tool (HASH-07, TEST-04)
 
 ### Active
 
@@ -22,8 +24,6 @@ Consolidate phase-scoped planning decisions into persistent, per-service spec fi
 - [ ] spec-consolidator agent — per-service consolidation with merge rules, PR-to-SR promotion, supersession handling
 - [ ] e2e-flows agent — cross-service E2E flow documentation with Mermaid diagrams and spec reference hashes
 - [ ] spec-verifier agent — 28-check verification (T1/T2/T3 tiered findings), read-only
-- [ ] hash-sections.ts — Deno SHA-256 section hashing tool (unified + remark-parse AST)
-- [ ] hash-sections_test.ts — 10 test cases for hash tool
 - [ ] Template: domain-service archetype (context.md + cases.md sections)
 - [ ] Template: gateway-bff archetype (context.md sections, conditional cases.md)
 - [ ] Template: event-driven archetype (context.md + cases.md sections)
@@ -66,11 +66,11 @@ Consolidate phase-scoped planning decisions into persistent, per-service spec fi
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| AST-based hashing over manual regex | remark-parse handles all CommonMark edge cases (fenced blocks, setext headers) automatically | -- Pending |
+| AST-based hashing over manual regex | remark-parse handles all CommonMark edge cases (fenced blocks, setext headers) automatically | Validated Phase 1 |
 | Orchestrator computes hashes, E2E agent compares only | Single source of truth; avoids agent-side non-deterministic normalization | -- Pending |
 | 2-step service classification (no keyword fallback) | Keyword guessing masks structural problems in phase documents | -- Pending |
 | PR mechanically promoted to SR (no filtering) | Consolidator cannot make judgment calls; /case finalizes PR/TR before consolidation | -- Pending |
-| Separate test fixtures (not madome dry-run) | Isolated, reproducible tests independent of any host project state | -- Pending |
+| Separate test fixtures (not madome dry-run) | Isolated, reproducible tests independent of any host project state | Validated Phase 1 |
 | Installation method deferred | Need research on global vs project install options before committing | -- Pending |
 
 ## Evolution
@@ -91,4 +91,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-30 after initialization*
+*Last updated: 2026-03-30 after Phase 1 completion*
