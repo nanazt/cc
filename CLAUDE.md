@@ -52,16 +52,24 @@ Host project CLAUDE.md should include an Extended Workflow section documenting t
 
 ## Commit Conventions
 
-Conventional Commits with descriptive scope:
+Conventional Commits 1.0.0. Scope is a codebase noun, not a phase number.
+
+Types: feat, fix, docs, refactor, test, chore
+
+Scope examples:
 
 ```
 feat(case): add PR/TR classification to discuss step
-fix(consolidate): correct hash computation for empty sections
+fix(hash-tool): correct empty section handling
 docs: update IMPL-SPEC with review findings
 refactor(briefer): extract operation discovery into helper
 ```
 
-Types: feat, fix, docs, refactor, test, chore
+Rules:
+- Scope must name a tool, module, or component (e.g., hash-tool, case, consolidate)
+- Never use phase numbers, requirement IDs, or internal planning references
+- Body should explain why, not dump planning context
+- Keep the subject line understandable to someone with no .planning/ access
 
 <!-- GSD:project-start source:PROJECT.md -->
 ## Project
