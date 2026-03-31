@@ -33,8 +33,8 @@ v1 requirements TMPL-01 through TMPL-06, CONS-01 through CONS-15, ORCH-01 throug
 ### Schema System (SCHEMA)
 
 - [x] **SCHEMA-01**: Plugin bootstraps a starter schema when no schema file exists on first `/consolidate` run
-- [ ] **SCHEMA-02**: User can override sections for specific unit types within the schema
-- [ ] **SCHEMA-03**: Conditional sections use behavioral conditions (not type checks)
+- [x] **SCHEMA-02**: User can override sections for specific unit types within the schema
+- [x] **SCHEMA-03**: Conditional sections use behavioral conditions (not type checks)
 - [x] **SCHEMA-04**: Schema examples ship as reference material for common project types
 
 ### Consolidation Pipeline (PIPE)
@@ -108,8 +108,8 @@ v1 requirements TMPL-01 through TMPL-06, CONS-01 through CONS-15, ORCH-01 throug
 | MODEL-04 | Phase 9 | Complete |
 | MODEL-05 | Phase 9 | Complete |
 | SCHEMA-01 | Phase 10 | Complete |
-| SCHEMA-02 | Phase 10 | Pending |
-| SCHEMA-03 | Phase 10 | Pending |
+| SCHEMA-02 | Phase 10 | Complete |
+| SCHEMA-03 | Phase 10 | Complete |
 | SCHEMA-04 | Phase 10 | Complete |
 | PIPE-01 | Phase 11 | Pending |
 | PIPE-02 | Phase 11 | Pending |
