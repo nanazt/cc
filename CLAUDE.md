@@ -71,7 +71,33 @@ Rules:
 - Never use "state" as a scope — STATE.md changes are bundled into the related commit (e.g., context capture, plan creation) rather than committed separately
 - Body should explain why, not dump planning context
 - Keep the subject line understandable to someone with no .planning/ access
-- GSD executor agents must also follow these rules — no "complete 09-01 plan" or similar GSD-internal references in any commit
+
+**CRITICAL — applies to ALL agents (including GSD executor subagents):**
+
+GSD-internal references must NEVER appear in commit messages — not in subject, not in body. This includes:
+- Phase numbers: `phase 11`, `phase 9`
+- Plan IDs: `11-01`, `plan 02`, `09-01`
+- Requirement IDs: `PIPE-01`, `MODEL-03`, `CASE-05`
+- Decision IDs: `D-03`, `D-15`
+- Progress fractions: `plan 1/3`, `progress 71%`
+
+Bad examples (all violate this rule):
+```
+docs(consolidate): complete 11-01 orchestrator plan execution     ← plan ID
+docs(consolidator): complete plan 02 — spec-consolidator agents   ← plan number
+docs(consolidate): evolve PROJECT.md after phase 11 completion    ← phase number
+docs(consolidate): mark PIPE-06 done, progress 100%              ← requirement ID
+```
+
+Good examples (describe what was done, not which plan):
+```
+docs(consolidate): complete orchestrator plan execution
+docs(consolidator): complete spec-consolidator and e2e-flows agents
+docs(consolidate): evolve PROJECT.md after pipeline completion
+docs(consolidate): complete verification and state updates
+```
+
+If a GSD workflow template suggests a commit message containing these references, rewrite it to follow this rule before committing.
 
 ## GSD Reference Boundary
 
