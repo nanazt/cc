@@ -42,7 +42,7 @@ The word "component" is used everywhere: schema declarations, dispatch tags, use
 
 ## Default Section Structure
 
-All components use the same section structure. Per-component section overrides are deferred; implement the 7+2 default first.
+All components use the same section structure unless a type-specific override is declared in the schema. See [Section Overrides](#section-overrides) for the override mechanism.
 
 ### Context Sections
 
@@ -68,6 +68,62 @@ These sections are included or excluded by the consolidation agent based on natu
 ### Neutrality Validation
 
 All 7 mandatory sections produce meaningful content for web service, CLI tool, and library project types. Conditional sections appropriately skip for stateless or eventless components. See `docs/examples/` for concrete proof across 3 project types.
+
+---
+
+## Section Overrides
+
+Type-based section overrides allow groups of components to share a custom section structure. Overrides are declared in the schema file using named section blocks.
+
+### Override Syntax
+
+The schema file supports multiple section blocks:
+
+- `## Sections: default` -- applies to components with no Type or an empty Type column
+- `## Sections: {type-name}` -- applies to components whose Type column matches `{type-name}`
+
+Each section block contains `### Context Sections` (numbered list) and optionally `### Conditional Sections` (bullet list). An override completely replaces the default -- both mandatory and conditional sections. If an override block omits `### Conditional Sections`, components of that type have no conditional sections.
+
+### Type Names
+
+Type names must be kebab-case: lowercase ASCII letters, digits, and hyphens. Examples: `api-service`, `worker`, `data-store`. Validated by the schema parser.
+
+Regex: `^[a-z][a-z0-9]*(-[a-z0-9]+)*$`
+
+### Components Table Type Column
+
+The `## Components` table includes a `Type` column that maps each component to its section block:
+
+| Component | Description | Type |
+|-----------|-------------|------|
+| auth | Authentication and session management | api-service |
+| worker | Background job processor | worker |
+| config | Configuration management | |
+
+- Components with an empty Type column use `## Sections: default`.
+- Every Type value in the Components table must have a corresponding `## Sections: {type}` block in the schema.
+
+### Override Example
+
+```markdown
+## Sections: default
+
+### Context Sections
+1. **Overview** -- What this component does and why it exists
+2. **Public Interface** -- Operations, commands, endpoints, or API surface
+...
+
+## Sections: worker
+
+### Context Sections
+1. **Overview** -- What this worker does and why it exists
+2. **Job Interface** -- Job types, payloads, and scheduling triggers
+3. **Processing Rules** -- Retry policies, timeout handling, and idempotency guarantees
+4. **Error Handling** -- Dead letter handling, failure escalation, and alerting
+5. **Dependencies** -- Queues, databases, and external services this worker requires
+```
+
+In this example, `worker`-typed components get 5 custom sections with no conditional sections. All other components use the 7+2 default.
 
 ---
 
@@ -182,10 +238,10 @@ A component is the smallest independently specifiable unit in your project.
 
 ## Components
 
-| Component | Description |
-|-----------|-------------|
-| auth | Authentication and session management |
-| user | User profile and account operations |
+| Component | Description | Type |
+|-----------|-------------|------|
+| auth | Authentication and session management | |
+| user | User profile and account operations | |
 
 ## Sections: default
 
@@ -230,6 +286,12 @@ Implementers use these rules to parse the schema file:
 6. **Empty `## Components` table:** Valid schema state. Consolidation prompts for component discovery when the Components table has no rows.
 
 7. **Section heading matching:** Compare headings case-insensitively. `## Meta`, `## meta`, and `## META` are equivalent. Section names in the Components table are stored as declared (case is preserved).
+
+8. **Section override blocks:** Headings matching `## Sections: {name}` (where `{name}` is not "default") define type-specific section overrides. The content structure is identical to `## Sections: default`. The `{name}` must match a Type value in the Components table.
+
+9. **Type column in Components table:** When present, the third column maps components to section blocks. Empty values mean "use default". Every non-empty Type value must have a corresponding `## Sections: {type}` block.
+
+10. **Type name validation:** Type names must match the kebab-case pattern `^[a-z][a-z0-9]*(-[a-z0-9]+)*$`. The parser rejects non-conforming type names with an error.
 
 ---
 
