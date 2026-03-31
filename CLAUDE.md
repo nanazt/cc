@@ -68,6 +68,7 @@ refactor(briefer): extract operation discovery into helper
 Rules:
 - Scope must name a tool, module, or component (e.g., hash-tool, case, consolidate)
 - Never use phase numbers, requirement IDs, or internal planning references
+- Never use "state" as a scope — STATE.md changes are bundled into the related commit (e.g., context capture, plan creation) rather than committed separately
 - Body should explain why, not dump planning context
 - Keep the subject line understandable to someone with no .planning/ access
 - GSD executor agents must also follow these rules — no "complete 09-01 plan" or similar GSD-internal references in any commit
