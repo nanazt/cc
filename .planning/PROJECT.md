@@ -31,9 +31,9 @@ Consolidate phase-scoped planning decisions into persistent spec files that down
 
 ### Active (v2.0)
 
-- [ ] Consolidation model redesign — project-type-agnostic unit and structure (replaces fixed archetypes)
-- [ ] Consolidate v2 SKILL.md — orchestrator pipeline with universal model
-- [ ] Consolidation agent — merge rules, promotion, supersession handling (universal)
+- [x] Consolidation model redesign — project-type-agnostic unit and structure (replaces fixed archetypes) — Validated in Phase 9: Universal Model Design
+- [x] Consolidate v2 SKILL.md — orchestrator pipeline with schema-driven dispatch — Validated in Phase 11: Consolidation Pipeline
+- [x] Consolidation agent — merge rules, promotion, supersession handling (universal) — Validated in Phase 11: Consolidation Pipeline
 - [ ] Verification agent — read-only spec verification (universal)
 - [x] Template/schema system — extensible, user-defined (replaces 3 fixed archetype templates) — Validated in Phase 10: Schema System
 - [ ] /case review — remove service-biased language and assumptions
@@ -42,7 +42,7 @@ Consolidate phase-scoped planning decisions into persistent spec files that down
 - [ ] /case update: OR-N prefix natively (replacing R-N)
 - [ ] case-briefer update: specs/ priority lookup with phase directory fallback
 - [ ] case-validator update: TR/OR recognition, supersession sections
-- [ ] IMPL-SPEC rewrite reflecting universal design
+- [x] IMPL-SPEC rewrite reflecting universal design — Validated in Phase 11: Consolidation Pipeline
 - [ ] Test fixtures for skill/agent validation
 
 ### Out of Scope
@@ -76,9 +76,9 @@ Consolidate phase-scoped planning decisions into persistent spec files that down
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | AST-based hashing over manual regex | remark-parse handles all CommonMark edge cases (fenced blocks, setext headers) automatically | Validated Phase 1 |
-| Orchestrator computes hashes, E2E agent compares only | Single source of truth; avoids agent-side non-deterministic normalization | -- Pending |
-| 2-step service classification (no keyword fallback) | Keyword guessing masks structural problems in phase documents | -- Pending |
-| PR mechanically promoted to SR (no filtering) | Consolidator cannot make judgment calls; /case finalizes PR/TR before consolidation | -- Pending |
+| Orchestrator computes hashes, E2E agent compares only | Single source of truth; avoids agent-side non-deterministic normalization | Validated Phase 11 |
+| 2-step component discovery (no keyword fallback) | Keyword guessing masks structural problems in phase documents | Validated Phase 11 |
+| PR mechanically promoted to CR (no filtering) | Consolidator cannot make judgment calls; /case finalizes PR/TR before consolidation | Validated Phase 11 |
 | Separate test fixtures (not madome dry-run) | Isolated, reproducible tests independent of any host project state | Validated Phase 1 |
 | Installation method deferred | Need research on global vs project install options before committing | -- Pending |
 
@@ -100,4 +100,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-31 — Phase 10 complete (schema system: MODEL.md override spec, 3 examples, bootstrap tool, AST-based parser)*
+*Last updated: 2026-04-01 — Phase 11 complete (consolidation pipeline: v2 orchestrator SKILL.md, spec-consolidator agent, e2e-flows agent, IMPL-SPEC rewrite)*
