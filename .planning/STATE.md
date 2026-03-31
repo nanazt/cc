@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Universal Consolidation
-status: verifying
-stopped_at: Phase 11 context gathered
-last_updated: "2026-03-31T14:33:11.085Z"
+status: executing
+stopped_at: Completed 11-01-PLAN.md
+last_updated: "2026-03-31T15:25:18.939Z"
 last_activity: 2026-03-31
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 7
+  completed_plans: 5
   percent: 0
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-31)
 
 **Core value:** Consolidate phase-scoped planning decisions into persistent spec files as authoritative source of truth. Project-type agnostic.
-**Current focus:** Phase 10 — schema-system
+**Current focus:** Phase 11 — consolidation-pipeline
 
 ## Current Position
 
-Phase: 11
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 11 (consolidation-pipeline) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
 Last activity: 2026-03-31
 
 Progress: [..........] 0%
@@ -56,6 +56,7 @@ Progress: [..........] 0%
 | Phase 09-universal-model-design P02 | 67 | 1 tasks | 3 files |
 | Phase 10-schema-system P01 | 148 | 3 tasks | 6 files |
 | Phase 10-schema-system P02 | 156 | 2 tasks | 2 files |
+| Phase 11-consolidation-pipeline P01 | 15 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,10 @@ Recent decisions affecting current work:
 - [Phase 10-schema-system]: schema-bootstrap.ts uses Deno.writeTextFile createNew:true for atomic no-overwrite; no npm dependencies
 - [Phase 10-schema-system]: Mutually exclusive outputs in parseSchema: data present only when errors is empty
 - [Phase 10-schema-system]: Section name extracted from strong AST node, not by splitting on ' -- ' separator
+- [Phase 11-consolidation-pipeline]: consolidate skill name (from consolidate-specs) aligns with IMPL-SPEC and removes v1 artifact
+- [Phase 11-consolidation-pipeline]: meta.e2eFlows checked immediately after schema parse; Steps 3.5 and 4 skip entirely when false
+- [Phase 11-consolidation-pipeline]: spec-verifier.md existence checked via Glob; absent = UNVERIFIED marking without blocking
+- [Phase 11-consolidation-pipeline]: INDEX.md fully rewritten each run; Type column always present even when empty
 
 ### Pending Todos
 
@@ -92,6 +97,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T14:33:11.082Z
-Stopped at: Phase 11 context gathered
-Resume file: .planning/phases/11-consolidation-pipeline/11-CONTEXT.md
+Last session: 2026-03-31T15:25:18.937Z
+Stopped at: Completed 11-01-PLAN.md
+Resume file: None
