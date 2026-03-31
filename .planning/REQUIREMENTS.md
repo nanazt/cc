@@ -24,11 +24,11 @@ v1 requirements TMPL-01 through TMPL-06, CONS-01 through CONS-15, ORCH-01 throug
 
 ### Universal Model (MODEL)
 
-- [ ] **MODEL-01**: User can declare consolidation units in a schema file without being constrained to predefined archetypes
-- [ ] **MODEL-02**: User can define custom section structures per unit type via the schema
-- [ ] **MODEL-03**: Components without a custom type use a sensible default section structure that works for any project type
-- [ ] **MODEL-04**: Schema includes meta configuration (operation-prefix format, rule-prefix naming, e2e-flows toggle)
-- [ ] **MODEL-05**: Default section list passes the neutrality test (meaningful for web service, CLI tool, library, documentation project)
+- [x] **MODEL-01**: User can declare consolidation units in a schema file without being constrained to predefined archetypes
+- [x] **MODEL-02**: User can define custom section structures per unit type via the schema
+- [x] **MODEL-03**: Components without a custom type use a sensible default section structure that works for any project type
+- [x] **MODEL-04**: Schema includes meta configuration (operation-prefix format, rule-prefix naming, e2e-flows toggle)
+- [x] **MODEL-05**: Default section list passes the neutrality test (meaningful for web service, CLI tool, library, documentation project)
 
 ### Schema System (SCHEMA)
 
@@ -102,11 +102,11 @@ v1 requirements TMPL-01 through TMPL-06, CONS-01 through CONS-15, ORCH-01 throug
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | HASH-01~07, TEST-04 | v1.0 Phase 1 | Complete |
-| MODEL-01 | Phase 9 | Pending |
-| MODEL-02 | Phase 9 | Pending |
-| MODEL-03 | Phase 9 | Pending |
-| MODEL-04 | Phase 9 | Pending |
-| MODEL-05 | Phase 9 | Pending |
+| MODEL-01 | Phase 9 | Complete |
+| MODEL-02 | Phase 9 | Complete |
+| MODEL-03 | Phase 9 | Complete |
+| MODEL-04 | Phase 9 | Complete |
+| MODEL-05 | Phase 9 | Complete |
 | SCHEMA-01 | Phase 10 | Pending |
 | SCHEMA-02 | Phase 10 | Pending |
 | SCHEMA-03 | Phase 10 | Pending |
