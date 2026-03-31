@@ -35,7 +35,7 @@ Consolidate phase-scoped planning decisions into persistent spec files that down
 - [ ] Consolidate v2 SKILL.md — orchestrator pipeline with universal model
 - [ ] Consolidation agent — merge rules, promotion, supersession handling (universal)
 - [ ] Verification agent — read-only spec verification (universal)
-- [ ] Template/schema system — extensible, user-defined (replaces 3 fixed archetype templates)
+- [x] Template/schema system — extensible, user-defined (replaces 3 fixed archetype templates) — Validated in Phase 10: Schema System
 - [ ] /case review — remove service-biased language and assumptions
 - [ ] /case update: PR/TR rule distinction (discuss + finalize classification)
 - [ ] /case update: Superseded Operations and Rules sections
@@ -100,4 +100,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-31 — Milestone v2.0 started (universal consolidation redesign)*
+*Last updated: 2026-03-31 — Phase 10 complete (schema system: MODEL.md override spec, 3 examples, bootstrap tool, AST-based parser)*
