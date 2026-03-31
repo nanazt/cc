@@ -23,7 +23,7 @@ Rewrite the consolidation orchestrator (SKILL.md), create the spec-consolidator 
 ### IMPL-SPEC handling
 - **D-01:** IMPL-SPEC.md is gradually deprecated. Each phase's deliverables replace the corresponding IMPL-SPEC sections. GSD artifacts (CONTEXT.md, PLAN.md) serve as the design document during implementation; completed deliverables become the source of truth after.
 - **D-02:** IMPL-SPEC.md is deleted after Phase 14 completion, when all content has been transferred to deliverables.
-- **D-03:** During implementation, IMPL-SPEC.md remains in `docs/` as a reference. It is not modified in Phase 11.
+- **D-03:** During implementation, IMPL-SPEC.md remains in `docs/` as a reference. It may be rewritten to reflect v2 design (per PIPE-06), but is not deleted until after Phase 14.
 
 ### Orchestrator pipeline
 - **D-04:** 7+2 pipeline structure preserved from v1. Step contents updated for schema-driven dispatch; step sequence unchanged.

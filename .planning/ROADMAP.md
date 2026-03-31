@@ -72,7 +72,11 @@ Plans:
   3. All 11 merge rules produce correct results with universal model (operation replacement, PR promotion, TR exclusion, latest-wins, provenance tagging)
   4. INDEX.md uses "Component" heading with optional "Type" column; `specs/{unit}/context.md` and `cases.md` are produced for each unit
   5. IMPL-SPEC.md is fully rewritten to reflect the universal design (no archetype references, schema-driven pipeline documented)
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 11-01-PLAN.md -- Rewrite orchestrator SKILL.md with schema-driven 7+2 step pipeline
+- [ ] 11-02-PLAN.md -- Create spec-consolidator and e2e-flows agents
+- [ ] 11-03-PLAN.md -- Rewrite IMPL-SPEC.md for universal v2 design
 
 ### Phase 12: /case Updates
 **Goal**: /case skill and its agents produce output using universal vocabulary with PR/TR classification and supersession metadata
@@ -117,7 +121,7 @@ Note: Phase 12 depends only on Phase 9 and can run after Phase 9 completes, pote
 | 1. Hash Tool | v1.0 | 2/2 | Complete | 2026-03-30 |
 | 9. Universal Model Design | v2.0 | 2/2 | Complete   | 2026-03-31 |
 | 10. Schema System | v2.0 | 2/2 | Complete    | 2026-03-31 |
-| 11. Consolidation Pipeline | v2.0 | 0/0 | Not started | - |
+| 11. Consolidation Pipeline | v2.0 | 0/3 | Planning complete | - |
 | 12. /case Updates | v2.0 | 0/0 | Not started | - |
 | 13. Verification | v2.0 | 0/0 | Not started | - |
 | 14. Cross-Unit Flows | v2.0 | 0/0 | Not started | - |
