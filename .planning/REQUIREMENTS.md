@@ -44,7 +44,7 @@ v1 requirements TMPL-01 through TMPL-06, CONS-01 through CONS-15, ORCH-01 throug
 - [x] **PIPE-03**: All 11 merge rules function correctly with universal model
 - [x] **PIPE-04**: INDEX.md uses "Component" heading with optional "Type" column
 - [x] **PIPE-05**: `specs/{unit}/context.md` and `cases.md` output structure works for any unit type
-- [ ] **PIPE-06**: IMPL-SPEC is fully rewritten to reflect universal design
+- [x] **PIPE-06**: IMPL-SPEC is fully rewritten to reflect universal design
 
 ### Verification (VRFY)
 
@@ -116,7 +116,7 @@ v1 requirements TMPL-01 through TMPL-06, CONS-01 through CONS-15, ORCH-01 throug
 | PIPE-03 | Phase 11 | Complete |
 | PIPE-04 | Phase 11 | Complete |
 | PIPE-05 | Phase 11 | Complete |
-| PIPE-06 | Phase 11 | Pending |
+| PIPE-06 | Phase 11 | Complete |
 | CASE-01 | Phase 12 | Pending |
 | CASE-02 | Phase 12 | Pending |
 | CASE-03 | Phase 12 | Pending |

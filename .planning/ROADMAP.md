@@ -26,7 +26,7 @@ Phases 2-8 from v1.0 are **superseded** by v2.0 requirements. They assumed fixed
 
 - [x] **Phase 9: Universal Model Design** - Define project-type-agnostic consolidation units, default sections, and naming conventions (completed 2026-03-31)
 - [x] **Phase 10: Schema System** - User-authored schema file with bootstrap, overrides, and conditional sections (completed 2026-03-31)
-- [ ] **Phase 11: Consolidation Pipeline** - Orchestrator + consolidator agent rewrite with schema-driven dispatch and IMPL-SPEC
+- [x] **Phase 11: Consolidation Pipeline** - Orchestrator + consolidator agent rewrite with schema-driven dispatch and IMPL-SPEC (completed 2026-03-31)
 - [ ] **Phase 12: /case Updates** - Remove service bias, add PR/TR classification, supersession sections, OR-N prefix, specs/ lookup
 - [ ] **Phase 13: Verification** - Universal verifier with schema-parameterized checks and no false positives on non-service projects
 - [ ] **Phase 14: Cross-Unit Flows** - Opt-in E2E flow generation with universal unit terminology and hash-based change detection
@@ -72,11 +72,11 @@ Plans:
   3. All 11 merge rules produce correct results with universal model (operation replacement, PR promotion, TR exclusion, latest-wins, provenance tagging)
   4. INDEX.md uses "Component" heading with optional "Type" column; `specs/{unit}/context.md` and `cases.md` are produced for each unit
   5. IMPL-SPEC.md is fully rewritten to reflect the universal design (no archetype references, schema-driven pipeline documented)
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [x] 11-01-PLAN.md -- Rewrite orchestrator SKILL.md with schema-driven 7+2 step pipeline
 - [x] 11-02-PLAN.md -- Create spec-consolidator and e2e-flows agents
-- [ ] 11-03-PLAN.md -- Rewrite IMPL-SPEC.md for universal v2 design
+- [x] 11-03-PLAN.md -- Rewrite IMPL-SPEC.md for universal v2 design
 
 ### Phase 12: /case Updates
 **Goal**: /case skill and its agents produce output using universal vocabulary with PR/TR classification and supersession metadata
@@ -121,7 +121,7 @@ Note: Phase 12 depends only on Phase 9 and can run after Phase 9 completes, pote
 | 1. Hash Tool | v1.0 | 2/2 | Complete | 2026-03-30 |
 | 9. Universal Model Design | v2.0 | 2/2 | Complete   | 2026-03-31 |
 | 10. Schema System | v2.0 | 2/2 | Complete    | 2026-03-31 |
-| 11. Consolidation Pipeline | v2.0 | 2/3 | In Progress|  |
+| 11. Consolidation Pipeline | v2.0 | 3/3 | Complete   | 2026-03-31 |
 | 12. /case Updates | v2.0 | 0/0 | Not started | - |
 | 13. Verification | v2.0 | 0/0 | Not started | - |
 | 14. Cross-Unit Flows | v2.0 | 0/0 | Not started | - |
