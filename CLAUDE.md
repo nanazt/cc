@@ -72,7 +72,6 @@ Rules:
 - Body should explain why, not dump planning context
 - Keep the subject line understandable to someone with no .planning/ access
 - GSD executor agents must also follow these rules — no "complete 09-01 plan" or similar GSD-internal references in any commit
-- GSD workflow files contain commit message templates (e.g., `docs(${padded_phase})`). These templates are **overridden** by the rules above — always rewrite them to match project conventions before committing
 
 ## GSD Reference Boundary
 
