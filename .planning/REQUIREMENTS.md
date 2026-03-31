@@ -40,8 +40,8 @@ v1 requirements TMPL-01 through TMPL-06, CONS-01 through CONS-15, ORCH-01 throug
 ### Consolidation Pipeline (PIPE)
 
 - [x] **PIPE-01**: Orchestrator reads schema to resolve unit names and section structures (replaces archetype classification)
-- [ ] **PIPE-02**: Consolidator agent receives explicit section list via dispatch (not template type)
-- [ ] **PIPE-03**: All 11 merge rules function correctly with universal model
+- [x] **PIPE-02**: Consolidator agent receives explicit section list via dispatch (not template type)
+- [x] **PIPE-03**: All 11 merge rules function correctly with universal model
 - [x] **PIPE-04**: INDEX.md uses "Component" heading with optional "Type" column
 - [x] **PIPE-05**: `specs/{unit}/context.md` and `cases.md` output structure works for any unit type
 - [ ] **PIPE-06**: IMPL-SPEC is fully rewritten to reflect universal design
@@ -112,8 +112,8 @@ v1 requirements TMPL-01 through TMPL-06, CONS-01 through CONS-15, ORCH-01 throug
 | SCHEMA-03 | Phase 10 | Complete |
 | SCHEMA-04 | Phase 10 | Complete |
 | PIPE-01 | Phase 11 | Complete |
-| PIPE-02 | Phase 11 | Pending |
-| PIPE-03 | Phase 11 | Pending |
+| PIPE-02 | Phase 11 | Complete |
+| PIPE-03 | Phase 11 | Complete |
 | PIPE-04 | Phase 11 | Complete |
 | PIPE-05 | Phase 11 | Complete |
 | PIPE-06 | Phase 11 | Pending |

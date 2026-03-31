@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Universal Consolidation
 status: executing
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-03-31T15:25:18.939Z"
+stopped_at: Completed 11-02-PLAN.md
+last_updated: "2026-03-31T15:31:26.100Z"
 last_activity: 2026-03-31
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 7
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-31)
 ## Current Position
 
 Phase: 11 (consolidation-pipeline) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-03-31
 
@@ -57,6 +57,7 @@ Progress: [..........] 0%
 | Phase 10-schema-system P01 | 148 | 3 tasks | 6 files |
 | Phase 10-schema-system P02 | 156 | 2 tasks | 2 files |
 | Phase 11-consolidation-pipeline P01 | 15 | 1 tasks | 1 files |
+| Phase 11-consolidation-pipeline P02 | 3 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,8 @@ Recent decisions affecting current work:
 - [Phase 11-consolidation-pipeline]: meta.e2eFlows checked immediately after schema parse; Steps 3.5 and 4 skip entirely when false
 - [Phase 11-consolidation-pipeline]: spec-verifier.md existence checked via Glob; absent = UNVERIFIED marking without blocking
 - [Phase 11-consolidation-pipeline]: INDEX.md fully rewritten each run; Type column always present even when empty
+- [Phase 11-consolidation-pipeline]: spec-consolidator uses <sections> dispatch tag (not template type) so it adapts to any schema-defined section structure
+- [Phase 11-consolidation-pipeline]: e2e-flows agent compares hashes only — orchestrator provides spec_hashes from hash-sections.ts, never computed by agent
 
 ### Pending Todos
 
@@ -97,6 +100,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T15:25:18.937Z
-Stopped at: Completed 11-01-PLAN.md
+Last session: 2026-03-31T15:31:26.097Z
+Stopped at: Completed 11-02-PLAN.md
 Resume file: None
