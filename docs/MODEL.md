@@ -42,7 +42,7 @@ The word "component" is used everywhere: schema declarations, dispatch tags, use
 
 ## Default Section Structure
 
-All components use the same section structure. Per-component section overrides are deferred (D-16); implement the 7+2 default first.
+All components use the same section structure. Per-component section overrides are deferred; implement the 7+2 default first.
 
 ### Context Sections
 
@@ -56,7 +56,7 @@ Every `specs/{component}/context.md` file contains these 7 mandatory sections. T
 6. **Dependencies** -- What this component requires from other components or external systems
 7. **Configuration** -- Environment variables, feature flags, and tunable parameters
 
-Guide text style is **descriptive** (enumerates examples: "Operations, commands, endpoints, or API surface..."). Descriptive guide text helps LLM agents scope section content accurately (D-05).
+Guide text style is **descriptive** (enumerates examples: "Operations, commands, endpoints, or API surface..."). Descriptive guide text helps LLM agents scope section content accurately.
 
 ### Conditional Sections
 
@@ -67,7 +67,7 @@ These sections are included or excluded by the consolidation agent based on natu
 
 ### Neutrality Validation
 
-D-04 confirms that all 7 mandatory sections produce meaningful content for web service, CLI tool, and library project types. Conditional sections appropriately skip for stateless or eventless components. See `docs/examples/` for concrete proof across 3 project types.
+All 7 mandatory sections produce meaningful content for web service, CLI tool, and library project types. Conditional sections appropriately skip for stateless or eventless components. See `docs/examples/` for concrete proof across 3 project types.
 
 ---
 
@@ -110,13 +110,13 @@ Operations are named using the fixed format: `{Component}.{Operation}`
 | Library | Parser.Tokenize, Serializer.Encode, API.Query |
 | Documentation | GettingStarted.QuickStart, Reference.Lookup |
 
-This format is **not configurable via schema** (D-18). It is a fixed convention that works universally across all project types.
+This format is **not configurable via schema**. It is a fixed convention that works universally across all project types.
 
 ---
 
 ## Cases Format
 
-The `specs/{component}/cases.md` file format is unchanged from v1 (D-06).
+The `specs/{component}/cases.md` file format is unchanged from v1.
 
 ### Structure
 
@@ -211,7 +211,7 @@ A component is the smallest independently specifiable unit in your project.
 | rule-prefix | string | CR | Prefix for component-level rules. Default "CR" (Component Rule). |
 | e2e-flows | boolean | false | When true, enables cross-component E2E flow generation. Projects without cross-component communication should leave this false. |
 
-No `specs-dir` or `operation-prefix` meta fields exist. The `specs/` directory location and `{Component}.{Operation}` naming format are fixed conventions, not configurable (D-18).
+No `specs-dir` or `operation-prefix` meta fields exist. The `specs/` directory location and `{Component}.{Operation}` naming format are fixed conventions, not configurable.
 
 ### Parsing Rules
 
@@ -247,7 +247,7 @@ When `/consolidate` runs, it identifies which components are affected by the cur
 
 ### Schema Authority
 
-The schema is the authoritative component registry (D-22).
+The schema is the authoritative component registry.
 
 - Components discovered during consolidation that are not in the schema trigger an "Add to schema?" prompt: `Component '{name}' not in schema. Add it?`
 - On confirmation, the new component is added to the schema's `## Components` table.
@@ -286,7 +286,7 @@ The spec-consolidator agent evaluates natural language conditions from the schem
 
 ### Decision Logging
 
-Inclusion and exclusion decisions are logged as HTML comments in the spec file (D-25). This serves two purposes: traceability and chain-of-thought accuracy improvement for the agent.
+Inclusion and exclusion decisions are logged as HTML comments in the spec file. This serves two purposes: traceability and chain-of-thought accuracy improvement for the agent.
 
 **Format for inclusion** (comment placed immediately before the section heading):
 
@@ -301,7 +301,7 @@ Inclusion and exclusion decisions are logged as HTML comments in the spec file (
 <!-- Event Contracts: Excluded -- No event production or consumption patterns found in phase documents -->
 ```
 
-Future conditional sections are added by updating cckit's default schema definition. Host project users can also add or remove conditional sections in their own `.planning/consolidation.schema.md` file (D-26).
+Future conditional sections are added by updating cckit's default schema definition. Host project users can also add or remove conditional sections in their own `.planning/consolidation.schema.md` file.
 
 ---
 

@@ -70,6 +70,19 @@ Rules:
 - Never use phase numbers, requirement IDs, or internal planning references
 - Body should explain why, not dump planning context
 - Keep the subject line understandable to someone with no .planning/ access
+- GSD executor agents must also follow these rules — no "complete 09-01 plan" or similar GSD-internal references in any commit
+
+## GSD Reference Boundary
+
+GSD-internal references (D-nn decisions, phase numbers, requirement IDs like MODEL-01, plan IDs like 09-01) exist only inside `.planning/`. They must never appear in any file outside `.planning/`:
+
+- Code and comments (`src/`, `tools/`, etc.)
+- Documentation (`docs/`)
+- Skills and agents (`skills/`, `agents/`, `directives/`)
+- Consolidated specs (`specs/`)
+- Commit messages
+
+If a GSD decision needs to be expressed in a deliverable, state the decision itself — not its ID.
 
 <!-- GSD:project-start source:PROJECT.md -->
 ## Project
