@@ -43,7 +43,10 @@ Phases 2-8 from v1.0 are **superseded** by v2.0 requirements. They assumed fixed
   3. A default section list exists that passes the neutrality test: each section name is meaningful whether the project is a web service, CLI tool, library, or documentation project
   4. Meta configuration (operation-prefix format, rule-prefix naming, e2e-flows toggle) has a defined home in the model
   5. The model specification is documented with concrete examples for at least 3 project types (microservice, CLI tool, library)
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 09-01-PLAN.md -- Write complete model specification (docs/MODEL.md)
+- [ ] 09-02-PLAN.md -- Create 3 starter schema examples and verify deliverables
 
 ### Phase 10: Schema System
 **Goal**: Users have a concrete schema file they can author, and new projects get a working starter schema automatically
@@ -109,7 +112,7 @@ Note: Phase 12 depends only on Phase 9 and can run after Phase 9 completes, pote
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. Hash Tool | v1.0 | 2/2 | Complete | 2026-03-30 |
-| 9. Universal Model Design | v2.0 | 0/0 | Not started | - |
+| 9. Universal Model Design | v2.0 | 0/2 | Planning | - |
 | 10. Schema System | v2.0 | 0/0 | Not started | - |
 | 11. Consolidation Pipeline | v2.0 | 0/0 | Not started | - |
 | 12. /case Updates | v2.0 | 0/0 | Not started | - |
