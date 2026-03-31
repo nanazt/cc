@@ -13,12 +13,12 @@ A component is the smallest independently specifiable unit in your project.
 
 ## Components
 
-| Component | Description |
-|-----------|-------------|
-| parser | Input parsing and AST construction |
-| transformer | AST transformation and optimization passes |
-| emitter | Output code generation and serialization |
-| plugin | Plugin discovery, loading, and lifecycle management |
+| Component | Description | Type |
+|-----------|-------------|------|
+| parser | Input parsing and AST construction | |
+| transformer | AST transformation and optimization passes | |
+| emitter | Output code generation and serialization | |
+| plugin | Plugin discovery, loading, and lifecycle management | |
 
 ## Sections: default
 

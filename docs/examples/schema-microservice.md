@@ -13,12 +13,12 @@ A component is the smallest independently specifiable unit in your project.
 
 ## Components
 
-| Component | Description |
-|-----------|-------------|
-| auth | Authentication, session management, and token lifecycle |
-| user | User profiles, account settings, and preferences |
-| notification | Message delivery across email, push, and in-app channels |
-| billing | Subscription management, payment processing, and invoicing |
+| Component | Description | Type |
+|-----------|-------------|------|
+| auth | Authentication, session management, and token lifecycle | api-gateway |
+| user | User profiles, account settings, and preferences | |
+| notification | Message delivery across email, push, and in-app channels | |
+| billing | Subscription management, payment processing, and invoicing | |
 
 ## Sections: default
 
@@ -34,3 +34,14 @@ A component is the smallest independently specifiable unit in your project.
 ### Conditional Sections
 - **State Lifecycle** -- Include when: component manages stateful entities with lifecycle transitions
 - **Event Contracts** -- Include when: component produces or consumes events/messages
+
+## Sections: api-gateway
+
+### Context Sections
+1. **Overview** -- What this gateway component does and why it exists
+2. **Public Interface** -- Routes, middleware chains, and API surface exposed to external consumers
+3. **Authentication** -- Token validation, session management, and identity resolution
+4. **Rate Limiting** -- Throttling rules, quota management, and abuse prevention
+5. **Error Handling** -- Error response formats, status code mapping, and client-facing error contracts
+6. **Dependencies** -- Upstream services, identity providers, and external integrations
+7. **Configuration** -- Environment variables, feature flags, and tunable parameters

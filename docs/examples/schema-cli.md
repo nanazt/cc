@@ -13,12 +13,12 @@ A component is the smallest independently specifiable unit in your project.
 
 ## Components
 
-| Component | Description |
-|-----------|-------------|
-| init | Project scaffolding and configuration initialization |
-| run | Core command execution and pipeline orchestration |
-| config | User configuration management and persistence |
-| output | Output formatting, colors, and display rendering |
+| Component | Description | Type |
+|-----------|-------------|------|
+| init | Project scaffolding and configuration initialization | |
+| run | Core command execution and pipeline orchestration | |
+| config | User configuration management and persistence | |
+| output | Output formatting, colors, and display rendering | |
 
 ## Sections: default
 
