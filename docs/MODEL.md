@@ -81,7 +81,7 @@ All 7 mandatory sections produce meaningful content for web service, CLI tool, a
 | CR-N | Component Rule | Single component | Promoted from PR at consolidation; permanent in specs | CR-1: Passwords require minimum 12 characters |
 | OR-N | Operation Rule | Single operation | Defined per operation in cases.md | OR-1: Input email must be normalized to lowercase |
 | PR-N | Phase Rule | Phase-scoped | Temporary; promotes to CR-N at consolidation | PR1: Rate limiting applies to all auth endpoints |
-| TR-N | Temp Rule | Phase-scoped | Temporary; excluded from specs, never consolidated | TR1: Use mock SMTP during Phase 3 |
+| TR-N | Temp Rule | Phase-scoped | Temporary; excluded from specs, never consolidated | TR1: Use mock SMTP during development |
 
 ### Rule Prefix Changes from v1
 
@@ -161,7 +161,7 @@ When applicable, include these tables at the bottom of `cases.md`:
 
 ## Schema Format
 
-Each host project has one schema file at `.planning/consolidation.schema.md`. This file is human-readable Markdown with tables and is machine-parseable by the Phase 10 schema system.
+Each host project has one schema file at `.planning/consolidation.schema.md`. This file is human-readable Markdown with tables and is machine-parseable by the schema system.
 
 ### Schema Structure
 
@@ -215,7 +215,7 @@ No `specs-dir` or `operation-prefix` meta fields exist. The `specs/` directory l
 
 ### Parsing Rules
 
-Phase 10 implementers use these rules to parse the schema file:
+Implementers use these rules to parse the schema file:
 
 1. **Meta section:** The `## Meta` heading identifies the meta section. The table below it contains key-value pairs (Key column, Value column). Parse each row as `key = value`.
 
@@ -251,7 +251,7 @@ The schema is the authoritative component registry.
 
 - Components discovered during consolidation that are not in the schema trigger an "Add to schema?" prompt: `Component '{name}' not in schema. Add it?`
 - On confirmation, the new component is added to the schema's `## Components` table.
-- Schema grows automatically during consolidation. Deletion and rename detection are deferred to Phase 11 (orchestrator implementation).
+- Schema grows automatically during consolidation. Deletion and rename detection are deferred to the orchestrator implementation.
 - All schema changes proposed during a consolidation run are reviewed at the confirmation step before any files are written.
 
 ---
@@ -395,4 +395,4 @@ Starter schema examples demonstrating this model for different project types are
 - `docs/examples/schema-cli.md` -- CLI application with command groups, no E2E flows
 - `docs/examples/schema-library.md` -- Reusable library, stateless components, no E2E flows
 
-These examples serve as the neutrality validation artifacts for MODEL-05. Each mandatory section appears with project-type-specific content, demonstrating that the 7+2 default works without modification for any project type.
+These examples serve as neutrality validation artifacts. Each mandatory section appears with project-type-specific content, demonstrating that the 7+2 default works without modification for any project type.
