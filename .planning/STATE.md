@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-03-31)
 Phase: 13
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-04-01
+Last activity: 2026-04-01 - Completed quick task 260401-tgz: Update CLAUDE.md manual sections to match actual project state
 
 Progress: [..........] 0%
 
@@ -121,6 +121,12 @@ None yet.
 - [Research]: Default section list needs validation against 3+ project types before implementation
 - [Research]: Conditional section evaluation reliability untested with current agent models
 - [Research]: `{Unit}.{Op}` naming convention has 6 load-bearing consumption points -- must update atomically
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260401-tgz | Update CLAUDE.md manual sections to match actual project state | 2026-04-01 | 0f08d44 | [260401-tgz-update-claude-md-manual-sections-to-matc](./quick/260401-tgz-update-claude-md-manual-sections-to-matc/) |
 
 ## Session Continuity
 
