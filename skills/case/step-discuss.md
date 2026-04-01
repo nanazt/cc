@@ -24,6 +24,15 @@ The developer can:
 - Promote an R to PR ("that applies to all ops")
 - Add new PRs the briefer missed
 
+After presenting Phase Rules for confirmation, review each rule's content for temporary signals. If a rule describes behavior that is explicitly temporary, migration-only, or development-only (e.g., "use mock SMTP during development", "maintain v1 compatibility until migration completes"), propose TR classification:
+
+```
+This rule sounds temporary: PR-3 "[rule text]"
+Reclassify as TR-3? TR rules are excluded from consolidated specs.
+```
+
+Developer can confirm (reclassifies to TR-3) or reject (stays as PR-3). All rules default to PR (permanent) — TR is the exception. The developer can also initiate TR classification directly ("this is temporary").
+
 After confirmation, save Phase Rules to CASE-SCRATCH.md's `## Phase Rules` section (replacing the placeholder from step-init).
 
 If the briefing has no Cross-Cutting Constraints section (older briefing format), scan CONTEXT.md directly for cross-cutting architectural constraints and propose them.
@@ -55,6 +64,12 @@ Track confirmed inherited concerns and raise them at the relevant operation duri
 That sounds like a phase-wide rule. I'll add it as PR-[N]: [description].
 It will apply to the remaining operations too. Confirm?
 ```
+
+**Mid-discussion TR classification:** When a new rule is discovered during per-operation probing and appears temporary, propose TR classification:
+```
+This sounds temporary -- classify as TR-N instead of OR-N? TR rules are excluded from consolidated specs.
+```
+Developer confirms (becomes TR-N) or rejects (stays OR-N). Same interaction pattern as PR promotion above.
 
 **GR-candidate discovery:** When the developer uses "project policy" or "same everywhere" language, flag as GR-candidate:
 ```
@@ -233,6 +248,19 @@ Standard infrastructure probes:
 
 These are usually the same across operations. Confirm or adjust.
 ```
+
+**3c-ix: Supersession detection**
+
+During per-operation discussion, watch for restructuring signals: an operation being renamed, split into multiple operations, merged from multiple operations, moved to a different component, or removed entirely. Also watch for rules being replaced by new rules.
+
+When detected, capture internally (do not surface mid-discussion — same as CB inline detection in 3c-vii). These are consolidated during finalize (Step 4f) as a Supersession Review.
+
+Restructuring signals to watch for:
+- "This replaces [old operation]" or "We renamed X to Y"
+- "We split X into Y and Z" or "We merged X and Y into Z"
+- "This moved from [component A] to [component B]"
+- "X is no longer needed" or "We removed X"
+- "PR-2 replaces the old PR-1" or "This rule supersedes [old rule]"
 
 **Classification criterion:** Does this case need its own code path?
 - **Failure (F):** a distinct error condition requiring its own handling code (detection, error response, compensation). External dependency unavailability always falls here.

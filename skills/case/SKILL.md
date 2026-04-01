@@ -227,6 +227,8 @@ Each step file ends with a `## Transition` section. Follow it exactly:
 - Open questions captured (not glossed over or guessed)
 - Cross-operation consistency checked (including side effect consistency)
 - Configuration behaviors (CB) captured for any config-driven behavior variants
+- TR-classified rules (if any) confirmed by developer during discussion and finalize review
+- Supersession metadata captured for any restructured operations or replaced rules
 - XX-CASES.md written and confirmed by developer
 - Next step (plan-phase or resolve questions) communicated
 </success_criteria>
