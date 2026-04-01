@@ -11,17 +11,9 @@ All content (code, docs, commit messages) in English.
 ```
 skills/        -- Claude Code skills (installed to .claude/skills/)
 agents/        -- Agent definitions (installed to .claude/agents/)
-directives/    -- Detailed behavioral guidelines (referenced from host CLAUDE.md)
-docs/          -- Implementation specs, research
-```
-
-## Installation
-
-Copy or symlink into a host project's `.claude/` directory:
-
-```bash
-ln -s /path/to/cckit/skills/case .claude/skills/case
-ln -s /path/to/cckit/agents/case-briefer.md .claude/agents/case-briefer.md
+directives/    -- Detailed behavioral guidelines (currently empty; guidelines are inline in CLAUDE.md)
+tools/         -- Runtime tools (Deno): hash-sections, schema-bootstrap, schema-parser
+docs/          -- Implementation specs, research, stack documentation
 ```
 
 ## Current Tools
@@ -31,7 +23,7 @@ ln -s /path/to/cckit/agents/case-briefer.md .claude/agents/case-briefer.md
 | Skill | Purpose | Status |
 |-------|---------|--------|
 | `/case` | Behavioral case discovery (S/F/E tables) for GSD phases | Working (migrated from madome) |
-| `/consolidate` | Per-component spec consolidation after phase ship | v1 exists, v2 in development (see docs/IMPL-SPEC.md) |
+| `/consolidate` | Per-component spec consolidation after phase ship | Working (v2 validated) |
 
 ### Agents
 
@@ -39,6 +31,8 @@ ln -s /path/to/cckit/agents/case-briefer.md .claude/agents/case-briefer.md
 |-------|---------|-------|
 | case-briefer | /case | sonnet |
 | case-validator | /case | opus |
+| spec-consolidator | /consolidate | sonnet |
+| e2e-flows | /consolidate | sonnet |
 
 ## GSD Workflow Integration
 
