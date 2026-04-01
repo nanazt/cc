@@ -31,10 +31,10 @@ Parse `<phase_context>` for phase orientation (number, name, description, key de
 
 **PROJECT.md deep extraction:** Beyond general architecture reference, extract and retain these specific elements for use in later steps:
 - **Component topology** -- which components exist, their roles, communication patterns (REST, gRPC, CLI, event-driven, etc.)
-- **Authentication policy** -- e.g., "all endpoints require authentication" applies to any phase with user-facing operations
+- **Authentication policy** -- e.g., "[system-wide access policy]" applies to any phase with user-facing operations
 - **Global Rules** (`## Global Rules` section) -- these are authoritative constraints that apply across all phases
 - **Cross-component interaction patterns** -- orchestration patterns, component-to-component contracts, composition flows
-- **API conventions** -- URL structure, naming patterns, error handling conventions
+- **Interface conventions** -- [project-specific patterns, naming conventions, error handling approach]
 
 Summarize these as an `## Architectural Context` section in the output briefing so the Protester has project-wide context when discussing cases.
 
@@ -84,7 +84,7 @@ From decisions, extract business rules, validation rules, and constraints. Attac
 After extracting per-operation constraints, scan ALL decisions for constraints that span multiple operations or the entire phase. Classify each as GR-candidate, PR-candidate, or operation-specific:
 
 - **GR-candidate:** Uses "all components/phases" language, or matches an existing Global Rule in PROJECT.md's `## Global Rules` section. Note in the "Existing GR?" column if already in PROJECT.md.
-- **PR-candidate:** Applies to 2+ operations in this phase but is not universal across all phases. Typically: security invariants, shared error policies, session/ceremony constraints.
+- **PR-candidate:** Applies to 2+ operations in this phase but is not universal across all phases. Typically: security invariants, shared error policies, [cross-operation interaction constraints].
 - **Operation-specific (OR):** Default. Unique to one operation's flow. No change needed — these stay in per-operation "Decided constraints."
 
 **TR exclusion:** This agent does NOT classify rules as TR (temporary). TR judgment is the Protester's (orchestrator's) responsibility during discussion. Classify constraints as GR-candidate, PR-candidate, or operation-specific (OR) only.
@@ -93,7 +93,7 @@ Check PROJECT.md for an existing `## Global Rules` section. For each existing GR
 
 ### Step 4.6: Cross-reference operations from other phases
 
-Scan CONTEXT.md for references to operations defined in other phases. These appear as `{Component}.{OperationName}` patterns (e.g., "User.CreateUser", "Auth.ValidateSession") or plain-text mentions of operations from other components.
+Scan CONTEXT.md for references to operations defined in other phases. These appear as `{Component}.{OperationName}` patterns (e.g., "[Component.OperationName]") or plain-text mentions of operations from other components.
 
 1. **Extract references:** Find all mentions of external operations in CONTEXT.md decisions and descriptions.
 
@@ -114,7 +114,7 @@ After classifying cross-cutting constraints, scan dependency phases for forwarde
 
 1. **Resolve dependencies:** Read ROADMAP.md and extract the `Depends on` field for this phase. Parse phase references (e.g., "Phase 1, Phase 2" -> [1, 2]). Use direct dependencies only -- do not resolve transitive chains.
 
-   **Auto-detect implicit dependencies:** If PROJECT.md states a system-wide policy that applies to this phase (e.g., "all endpoints require authentication"), and a completed phase implements that policy, include it as an implicit dependency even if not listed in `Depends on`. To identify policy-implementing phases, check ROADMAP.md phase descriptions and names for keyword matches (e.g., "authentication" policy → phase with "authentication" in its name or description). This ensures policy-implementing phases are always consulted.
+   **Auto-detect implicit dependencies:** If PROJECT.md states a system-wide policy that applies to this phase (e.g., "[system-wide access policy]"), and a completed phase implements that policy, include it as an implicit dependency even if not listed in `Depends on`. To identify policy-implementing phases, check ROADMAP.md phase descriptions and names for keyword matches (e.g., "authentication" policy → phase with "authentication" in its name or description). This ensures policy-implementing phases are always consulted.
 
 2. **Find dependency CASES.md:** For each dependency phase, look for `{dep_phase_dir}/*-CASES.md`. Skip phases with no CASES.md (not yet completed or skipped /case).
 
@@ -126,8 +126,8 @@ After classifying cross-cutting constraints, scan dependency phases for forwarde
    - **Heuristic scan (fallback for legacy CASES.md):** If no `Forward` column or `Forward Concerns` section exists, scan Open Questions and Rules text for references to this phase's number, name, or known operations (e.g., "3B", "deferred to Phase 3B", operation names from ROADMAP).
 
 4. **Classify each concern:**
-   - **Behavioral** (needs a case or Open Question in the receiving phase) -- e.g., "verify JWT claims freshness when user info changes"
-   - **Constraint** (needs a Rule in the receiving phase) -- e.g., "ceremony logic should be reusable"
+   - **Behavioral** (needs a case or Open Question in the receiving phase) -- e.g., "[specific behavioral concern from dependency phase]"
+   - **Constraint** (needs a Rule in the receiving phase) -- e.g., "[implementation constraint from dependency phase]"
    - **Informational** (context for the Protester, not directly actionable) -- e.g., "rate limiting deferred"
 
 ### Step 5: Map requirements to operations
@@ -183,7 +183,7 @@ The dispatch prompt will contain these XML tags:
 - **Authentication policy:** [system-wide auth requirements, if any]
 - **Global Rules:** [list of GR-N rules that apply to this phase's operations]
 - **Cross-component patterns:** [relevant interaction patterns]
-- **API conventions:** [naming, error handling conventions]
+- **Interface conventions:** [naming, error handling conventions]
 
 ## Existing Spec State
 
