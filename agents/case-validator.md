@@ -28,7 +28,7 @@ The validator recognizes these as valid CASES.md sections (present or absent):
 - Superseded Operations (conditional — valid when present, no gap when absent)
 - Superseded Rules (conditional — valid when present, no gap when absent)
 - Operation sections with OR-N rules
-- GR Candidates (renamed from SR Candidates)
+- GR Candidates
 - Configuration Behaviors
 - Forward Concerns
 - Cross-Operation Concerns
