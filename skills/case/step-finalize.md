@@ -6,16 +6,16 @@ After all individual operations are discussed, check consistency one category at
 
 ### 4a: Error response consistency
 
-Build a comparison table categorizing each operation's errors by type. Column headers are not fixed -- derive error categories from the actual cases discussed (e.g., Auth, Validation, Infra, Ceremony, Conflict, NotFound, etc.):
+Build a comparison table categorizing each operation's errors by type. Column headers are not fixed -- derive error categories from the actual cases discussed (e.g., Auth, Validation, Infra, Conflict, NotFound, etc.):
 
 ```
 | Operation | [Category A] | [Category B] | ... | Infra |
 |-----------|-------------|-------------|-----|-------|
-| OpA       | 400         | 401         | ... | 500   |
-| OpB       | --          | 401         | ... | 500   |
+| OpA       | (ErrorName) | (ErrorName) | ... | (ErrorName) |
+| OpB       | --          | (ErrorName) | ... | (ErrorName) |
 ```
 
-Flag rows where the same error category has different status codes across operations. Present inconsistencies to developer for resolution.
+Flag rows where the same error category has inconsistent error handling across operations. Present inconsistencies to developer for resolution.
 
 ### 4b: Cross-phase consistency
 
@@ -257,7 +257,7 @@ CASES.md written. Next steps:
 
 **Description:** [what it does, from the caller's perspective]
 **Interface:** [how it is called]
-**Auth required:** [none / authenticated / role:X]
+**Caller:** [who/what can invoke this]
 
 ### Rules
 
@@ -268,8 +268,7 @@ CASES.md written. Next steps:
 
 ### Side Effects
 
-- Domain event: "[entity].[action]" emitted on success
-- [category]: [description]
+- [describe each observable side effect]
 > If the operation has no side effects, write: `None (read-only)` or `None (query operation)`.
 
 ### Success Cases
@@ -380,8 +379,8 @@ AI auto-assigns priority based on: data loss potential, security impact, user-fa
 
 **Expected Outcome column guidance:**
 - Include ALL observable effects: return value/status, state changes, AND side effects.
-- Success cases: assert side effects OCCURRED (e.g., "Success; 'entity.created' event emitted").
-- Failure cases: specify concrete error type/status with domain error name in parentheses (e.g., "400 bad request (ValidationError)", "401 unauthorized (TokenExpired)", "500 internal error (DatabaseUnavailable)"), not generic "error". Omit the parenthetical only when the error is intentionally opaque by design. Assert side effects DID NOT occur where relevant.
+- Success cases: describe the primary result, any state changes, AND any side effects that occurred — all at a level a test can assert against.
+- Failure cases: use the structural rule `[error description] (ErrorName)`. The error description uses terms natural to the operation's domain. `(ErrorName)` is always domain-level. Omit the parenthetical only when the error is intentionally opaque by design. Assert side effects DID NOT occur where relevant.
 - For complex side effects, use per-case footnotes to detail parameters and atomicity requirements.
 </output_format>
 
