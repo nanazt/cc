@@ -59,7 +59,7 @@ Locked decisions: {key decisions from CONTEXT.md}
 - .planning/ROADMAP.md -- phase description, success criteria, requirement IDs
 - {phase_dir}/*-CONTEXT.md -- locked decisions, constraints
 - .planning/REQUIREMENTS.md -- requirement ID descriptions
-- .planning/PROJECT.md -- architecture reference (service topology, patterns)
+- .planning/PROJECT.md -- architecture reference (component topology, patterns)
 </files_to_read>
 
 <output>

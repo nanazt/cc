@@ -2,18 +2,18 @@
 
 ## 2.5: Phase Rules Confirmation
 
-Before starting per-operation discussion, present Phase Rules and System Rules from the briefing's Cross-Cutting Constraints section. This happens once, before the first operation.
+Before starting per-operation discussion, present Phase Rules and Global Rules from the briefing's Cross-Cutting Constraints section. This happens once, before the first operation.
 
 ```
 From the briefing, I identified these phase-wide constraints:
 
 Phase Rules (apply to all operations below):
-  - PR1: [constraint description] (D-XX)
-  - PR2: [constraint description] (D-XX)
+  - PR-1: [constraint description] (D-XX)
+  - PR-2: [constraint description] (D-XX)
 
-System Rules (from PROJECT.md, apply to this phase):
-  - SR-01: [brief description] — applies to: [Op1, Op2, ...]
-  - SR-02: [brief description] — applies to: [Op1, Op2]
+Global Rules (from PROJECT.md, apply to this phase):
+  - GR-1: [brief description] — applies to: [Op1, Op2, ...]
+  - GR-2: [brief description] — applies to: [Op1, Op2]
 
 Confirm these phase rules? Any to add, remove, or adjust?
 ```
@@ -52,17 +52,17 @@ Track confirmed inherited concerns and raise them at the relevant operation duri
 
 **Mid-discussion PR promotion:** During per-operation discussion, if a constraint discovered for one operation applies to multiple operations, propose promoting it to PR:
 ```
-That sounds like a phase-wide rule. I'll add it as PR[N]: [description].
+That sounds like a phase-wide rule. I'll add it as PR-[N]: [description].
 It will apply to the remaining operations too. Confirm?
 ```
 
-**SR-candidate discovery:** When the developer uses "project policy" or "same everywhere" language, flag as SR-candidate:
+**GR-candidate discovery:** When the developer uses "project policy" or "same everywhere" language, flag as GR-candidate:
 ```
-That sounds like a system-wide rule (all services, all phases).
-I'll flag it as SR-candidate for PROJECT.md promotion.
-For now, I'll treat it as Phase Rule PR[N].
+That sounds like a global rule (all components, all phases).
+I'll flag it as GR-candidate for PROJECT.md promotion.
+For now, I'll treat it as Phase Rule PR-[N].
 ```
-Record SR-candidates in the `## SR Candidates` section of CASES.md (written during finalize). Do not modify PROJECT.md.
+Record GR-candidates in the `## GR Candidates` section of CASES.md (written during finalize). Do not modify PROJECT.md.
 
 ---
 
@@ -77,11 +77,11 @@ The Interface section replaces verbose anchor text. It provides the same context
 In the Rules section of the flow diagram, reference confirmed Phase Rules by ID instead of repeating their text:
 ```
 Rules:
-  - R1: [operation-specific rule]
-  - Inherits: PR1, PR2, SR-01
+  - OR-1: [operation-specific rule]
+  - Inherits: PR-1, PR-2, GR-1
 ```
 
-Only list operation-specific rules (R) in full. Phase Rules and System Rules are referenced by ID — their content is already established in Step 2.5.
+Only list operation-specific rules (OR) in full. Phase Rules and Global Rules are referenced by ID — their content is already established in Step 2.5.
 
 After presenting, ask the developer to confirm or correct via AskUserQuestion.
 
@@ -277,8 +277,8 @@ Append format per operation:
 ## Operation: [OperationName]
 
 ### Rules
-- R1: [rule]
-- Inherits: PR1, PR2, SR-01
+- OR-1: [rule]
+- Inherits: PR-1, PR-2, GR-1
 
 ### Side Effects
 - Domain event: "[entity].[action]" with [key fields]

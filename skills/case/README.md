@@ -37,7 +37,7 @@ case-briefer (sonnet)        /case orchestrator (opus)        case-validator (so
 
 2. **Select** — Present discovered operations grouped by category. Developer picks which to discuss.
 
-3. **Phase Rules + Inherited Concerns** — Present Phase Rules (PR) and System Rules (SR) for confirmation. If dependency phases forwarded concerns, present them grouped by classification (behavioral, constraint, informational). Developer confirms, dismisses, or defers each.
+3. **Phase Rules + Inherited Concerns** — Present Phase Rules (PR) and Global Rules (GR) for confirmation. If dependency phases forwarded concerns, present them grouped by classification (behavioral, constraint, informational). Developer confirms, dismisses, or defers each.
 
 4. **Discuss** — Depth-first per operation: anchor shared understanding, propose success cases, then systematically probe failures (input validation, auth, resource state, boundaries, concurrency, side effects, config-dependent behaviors, infrastructure). Confirmed inherited concerns are raised at the relevant operation. Each operation review is presented as an ASCII flow diagram. Each completed operation is saved to CASE-SCRATCH.md (table format) to survive context compression.
 
@@ -57,7 +57,7 @@ All artifacts live in `.planning/phases/{padded_phase}-{name}/`:
 | `CASE-SCRATCH.md` | Internal | Per-operation case data saved during discussion. Enables resume after interruption. |
 | `{padded}-CASES.md` | Downstream | Final output consumed by plan-phase and test-gen. |
 
-The CASES.md output contains: Phase Rules (PR) + System Rules (SR), per-operation sections (Rules, Side Effects, S/F/E case tables, Open Questions with Forward column), Forward Concerns, SR Candidates, Configuration Behaviors (CB), Cross-Operation Concerns, and Summary.
+The CASES.md output contains: Phase Rules (PR) + Global Rules (GR), per-operation sections (Rules, Side Effects, S/F/E case tables, Open Questions with Forward column), Forward Concerns, GR Candidates, Configuration Behaviors (CB), Cross-Operation Concerns, and Summary.
 
 ## Design Principles
 
@@ -65,7 +65,7 @@ The CASES.md output contains: Phase Rules (PR) + System Rules (SR), per-operatio
 
 **WHAT, not HOW.** Cases specify what the caller should observe, never implementation details. "What error does the caller see?" is in scope. "Should we use middleware for this?" is not. Exception: when the developer volunteers a specific implementation approach, it is recorded as a "Design intent:" note in Rules — preserving architectural decisions for the planner without the AI initiating implementation discussion.
 
-**3-tier rule hierarchy.** Rules follow a scoped hierarchy: SR (System Rules from PROJECT.md, zero-padded: SR-01), PR (Phase Rules, cross-cutting within phase: PR1), R (operation-specific: R1). Operations reference inherited rules via `Inherits: PR1, SR-01` lines. When a phase-wide pattern looks system-wide, it is flagged as an SR-candidate for PROJECT.md promotion.
+**5-tier rule hierarchy.** Rules follow a scoped hierarchy: GR (Global Rules from PROJECT.md: GR-1), CR (Component Rules in specs/: CR-1), PR (Phase Rules, cross-cutting within phase: PR-1), TR (Temp Rules, phase-scoped, excluded from specs: TR-1), OR (Operation-specific: OR-1). Operations reference inherited rules via `Inherits: PR-1, GR-1` lines. When a phase-wide pattern looks global, it is flagged as a GR-candidate for PROJECT.md promotion.
 
 **Error naming convention.** Failure case Expected Outcome includes a domain error name in parentheses after the error description: e.g., "400 Bad Request (DuplicateEmail)", "PERMISSION_DENIED (InsufficientQuota)". This names the error identity that maps to a code-level error variant. Omit only when the error is intentionally opaque.
 

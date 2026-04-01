@@ -116,7 +116,7 @@ The validation found [N] items to review:
 
 [2] Constraint Forwarding: D-XX (Phase-wide)
     "[constraint text]" — not documented as Phase Rule or operation Rule
-    Suggested action: Add as PR[N] in Phase Rules
+    Suggested action: Add as PR-[N] in Phase Rules
     -> Add this rule?
 
 [3] ...
@@ -174,15 +174,15 @@ CASES.md written. Next steps:
 ## Phase Rules
 
 > Constraints that apply to ALL operations in this phase.
-> Referenced by ID (PR1, PR2...) in operation Rules sections.
+> Referenced by ID (PR-1, PR-2...) in operation Rules sections.
 
-- PR1: [constraint description] (D-XX)
-- PR2: [constraint description] (D-XX, D-YY)
-- PR3: [constraint description]. Per SR-01: [system rule it derives from]
+- PR-1: [constraint description] (D-XX)
+- PR-2: [constraint description] (D-XX, D-YY)
+- PR-3: [constraint description]. Per GR-1: [global rule it derives from]
 
-**System Rules (from PROJECT.md) applicable to this phase:**
-- SR-01: [brief description] — [which operations]
-- SR-02: [brief description] — [which operations]
+**Global Rules (from PROJECT.md) applicable to this phase:**
+- GR-1: [brief description] — [which operations]
+- GR-2: [brief description] — [which operations]
 
 ---
 
@@ -194,10 +194,10 @@ CASES.md written. Next steps:
 
 ### Rules
 
-- R1: [business rule or constraint]
-- R2: [validation rule]
-- R3: [authorization rule]
-- Inherits: PR1, PR2, SR-01
+- OR-1: [business rule or constraint]
+- OR-2: [validation rule]
+- OR-3: [authorization rule]
+- Inherits: PR-1, PR-2, GR-1
 
 ### Side Effects
 
@@ -262,7 +262,7 @@ Omit this section if no forward concerns were identified.
 
 ---
 
-## SR Candidates
+## GR Candidates
 
 > Constraints discovered during discussion that may warrant PROJECT.md promotion.
 
