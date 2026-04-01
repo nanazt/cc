@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A personal Claude Code plugin project providing reusable skills, agents, and directives for use across any project type. The two primary tools — `/case` (behavioral case discovery) and `/consolidate` (spec consolidation after phase ship) — extend the GSD workflow pipeline: `discuss -> /case -> plan -> execute -> verify -> ship -> /consolidate`.
+A personal Claude Code toolkit that packages skills, agents, and behavioral directives for installation into arbitrary host projects. Currently ships `/case` (behavioral case discovery) and `/consolidate` (spec consolidation after phase ship) as GSD workflow extensions: `discuss -> /case -> plan -> execute -> verify -> ship -> /consolidate`.
 
 ## Core Value
 
