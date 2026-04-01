@@ -14,7 +14,9 @@
 |------------|---------|---------|-----|
 | `npm:unified` | `11.0.5` | Pipeline processor | Composes parser + compiler plugins. Stable, no changes in 1+ year. |
 | `npm:remark-parse` | `11.0.0` | Markdown-to-AST parser | CommonMark-compliant. Handles fenced code blocks, setext headers, ATX trailing hashes automatically. Eliminates ~40 lines of fragile regex. |
-| `npm:remark-stringify` | `11.0.0` | AST-to-Markdown serializer | Needed for deterministic section serialization before hashing. Normalizes AST back to text. |
+| `npm:mdast-util-to-string` | `4.0.0` | AST node text extraction | Extracts clean text from heading nodes for section identification. Used by hash-sections.ts and schema-parser.ts. |
+| `npm:remark-gfm` | `4.0.0` | GFM table parsing | Extends remark-parse with GitHub Flavored Markdown (tables, task lists). Used by schema-parser.ts. |
+| `npm:@types/mdast` | `4.0.0` | TypeScript AST types | Type definitions for mdast tree nodes. Used as a type import in hash-sections.ts. |
 
 ### Crypto: Web Crypto API (built-in)
 
@@ -75,7 +77,7 @@
 |-------|-------|-----------|
 | `spec-consolidator` | `sonnet` | Balanced capability/speed for structured merge operations |
 | `e2e-flows` | `sonnet` | Structured output generation, no deep reasoning needed |
-| `spec-verifier` | `opus` | 28-check verification needs strongest reasoning; downgrade candidate after usage data |
+| `spec-verifier` | `opus` | 28-check verification needs strongest reasoning; downgrade candidate after usage data. (not yet implemented) |
 | `case-briefer` | `sonnet` | Extraction from planning docs, no deep reasoning |
 | `case-validator` | `opus` | Cross-referencing gaps requires strong analytical reasoning |
 
@@ -106,8 +108,8 @@
 | Node.js | Requires tsconfig.json, build step or tsx, package.json. Deno does this with zero config. |
 | Bun | Similar DX to Deno but lacks Deno's permission sandbox. No benefit over Deno for this use case. |
 | Jest/Vitest/Mocha | External test frameworks. Deno's built-in test runner handles all 10 test cases without dependencies. |
-| `remark` (combined package) | Bundles `unified` + `remark-parse` + `remark-stringify`. We only need parse + stringify separately for the pipeline, and explicit imports make dependencies clear. |
-| `mdast-util-to-string` | Tempting for section serialization, but it strips formatting. We need full markdown serialization (including code blocks, emphasis, etc.) for accurate hashing. `remark-stringify` is correct. |
+| `remark` (combined package) | Bundles `unified` + `remark-parse` + `remark-stringify`. We only need specific packages; explicit imports make actual dependencies clear. |
+| `remark-stringify` | Not used. Section hashing uses source slicing rather than AST round-trip serialization, so no serializer is needed. |
 | `gray-matter` / YAML parsers | Not needed. Skills and agents are consumed by Claude Code, not by our code. The hash tool operates on markdown sections, not frontmatter. |
 | `esbuild` / bundlers | No build step. Deno runs TypeScript directly. Bundling would add complexity for zero benefit. |
 | `prettier` / formatters | Not applicable to prompt-engineering Markdown. Formatting is semantic in skills/agents (whitespace matters for readability by Claude). |
@@ -115,7 +117,7 @@
 
 ## Installation (for hash tool dependencies)
 
-First run fetches npm:unified, npm:remark-parse, npm:remark-stringify.
+First run fetches npm:unified, npm:remark-parse, npm:mdast-util-to-string, npm:remark-gfm.
 Subsequent runs use Deno's global cache (~/.cache/deno or DENO_DIR).
 
 ## Alternatives Considered
@@ -126,7 +128,7 @@ Subsequent runs use Deno's global cache (~/.cache/deno or DENO_DIR).
 | Runtime | Deno 2.7+ | Bun 1.2+ | No permission sandbox, less mature ecosystem |
 | Markdown parser | unified + remark-parse | `markdown-it` | Not AST-based (token stream). unified/remark gives mdast tree for structural traversal. |
 | Markdown parser | unified + remark-parse | Manual regex | IMPL-SPEC explicitly rejected. 40+ lines of fragile code vs. 10 lines of AST traversal. |
-| AST serializer | remark-stringify | `mdast-util-to-string` | Strips formatting; hashes would miss code block / emphasis changes (false negatives). |
+| AST heading text extraction | mdast-util-to-string | remark-stringify | remark-stringify is a full AST serializer; not needed since section hashing uses source slicing. mdast-util-to-string is correct for extracting heading node text. |
 | Test runner | Deno test | Vitest | External dependency, requires config. Deno test is built-in and sufficient for 10 test cases. |
 | Agent model | sonnet (default) / opus (verifier) | haiku | Too weak for consolidation reasoning. Haiku 4.5 is fast but consolidation needs sonnet-level structured output. |
 

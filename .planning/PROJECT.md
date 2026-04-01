@@ -66,7 +66,7 @@ Encode behavioral quality standards as installable artifacts — so projects get
 ## Constraints
 
 - **Runtime**: Deno required for hash-sections.ts (npm:unified, npm:remark-parse)
-- **Agent models**: consolidation agents use sonnet; verifier uses opus (downgrade candidate after usage data)
+- **Agent models**: consolidation agents (spec-consolidator, e2e-flows) and case-briefer use sonnet; case-validator uses opus
 - **No hardcoded project references**: Skills and agents must be technology-neutral and project-neutral
 - **GSD conventions**: Depends on CONTEXT.md, CASES.md, ROADMAP.md, PROJECT.md phase directory structure
 - **Content language**: All code, docs, commit messages in English (per CLAUDE.md)
