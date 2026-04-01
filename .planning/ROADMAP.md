@@ -88,7 +88,20 @@ Plans:
   3. /case discuss step prompts for PR (permanent) vs TR (temporary) classification on each rule; finalize step presents the full PR/TR list for review
   4. CASES.md output includes Superseded Operations and Superseded Rules tables when applicable; rules use OR-N prefix natively
   5. case-validator accepts TR-N, OR-N as valid rule formats and recognizes Superseded Operations/Rules as valid sections
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 12-01-PLAN.md -- Vocabulary migration and prefix unification across all /case files
+- [ ] 12-02-PLAN.md -- TR classification, supersession metadata, specs/ lookup, validator v2 completion
+
+### Phase 12.1: /case Example Rewrite (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 12
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 12.1 to break down)
 
 ### Phase 13: Verification
 **Goal**: Verifier produces accurate findings on any project type without false positives from service-specific assumptions
@@ -122,6 +135,6 @@ Note: Phase 12 depends only on Phase 9 and can run after Phase 9 completes, pote
 | 9. Universal Model Design | v2.0 | 2/2 | Complete   | 2026-03-31 |
 | 10. Schema System | v2.0 | 2/2 | Complete    | 2026-03-31 |
 | 11. Consolidation Pipeline | v2.0 | 3/3 | Complete    | 2026-03-31 |
-| 12. /case Updates | v2.0 | 0/0 | Not started | - |
+| 12. /case Updates | v2.0 | 0/2 | Planned | - |
 | 13. Verification | v2.0 | 0/0 | Not started | - |
 | 14. Cross-Unit Flows | v2.0 | 0/0 | Not started | - |
