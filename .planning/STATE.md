@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Universal Consolidation
-status: verifying
-stopped_at: Phase 12.1 context updated
-last_updated: "2026-04-01T09:50:02.980Z"
+status: executing
+stopped_at: Completed 12.1-01 SKILL.md and step-discuss.md neutralization
+last_updated: "2026-04-01T10:53:19.548Z"
 last_activity: 2026-04-01
 progress:
   total_phases: 7
   completed_phases: 4
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 11
+  completed_plans: 10
   percent: 0
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-31)
 
 **Core value:** Consolidate phase-scoped planning decisions into persistent spec files as authoritative source of truth. Project-type agnostic.
-**Current focus:** Phase 12 — case-updates
+**Current focus:** Phase 12.1 — case-example-rewrite
 
 ## Current Position
 
-Phase: 12.1
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 12.1 (case-example-rewrite) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
 Last activity: 2026-04-01
 
 Progress: [..........] 0%
@@ -61,6 +61,7 @@ Progress: [..........] 0%
 | Phase 11 P03 | 6 | 1 tasks | 1 files |
 | Phase 12-case-updates P01 | 15 | 2 tasks | 8 files |
 | Phase 12-case-updates P02 | 5 | 3 tasks | 5 files |
+| Phase 12.1-case-example-rewrite P01 | 191 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,9 @@ Recent decisions affecting current work:
 - [Phase 12-case-updates]: TR classification follows existing CB/PR promotion interaction pattern — no new paradigm introduced
 - [Phase 12-case-updates]: Supersession detection mirrors Configuration Behaviors: inline capture during discussion, Supersession Review at finalize
 - [Phase 12-case-updates]: specs/ lookup scoped to current phase components only; briefer does not classify TR (Protester's responsibility)
+- [Phase 12.1-case-example-rewrite]: Global adaptation instruction in SKILL.md philosophy: all examples use structural placeholders, Claude adapts to host project's actual interfaces and terminology
+- [Phase 12.1-case-example-rewrite]: 6 fixed side effect categories replaced with open format — adapts to host project architecture instead of prescribing Domain events, Cache mutations, etc.
+- [Phase 12.1-case-example-rewrite]: Multi-protocol error block replaced with structural rule only — no per-line exemptions, structural rule plus specificity criterion is sufficient
 
 ### Roadmap Evolution
 
@@ -115,6 +119,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T09:50:02.977Z
-Stopped at: Phase 12.1 context updated
-Resume file: .planning/phases/12.1-case-example-rewrite/12.1-CONTEXT.md
+Last session: 2026-04-01T10:53:19.546Z
+Stopped at: Completed 12.1-01 SKILL.md and step-discuss.md neutralization
+Resume file: None

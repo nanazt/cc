@@ -98,10 +98,10 @@ Plans:
 **Goal:** All /case skill prompts and agent definitions contain zero technology-biased examples -- structural placeholders and rules teach format and quality bar while Claude adapts content to each host project's actual interfaces, protocols, and terminology
 **Requirements**: CASE-01
 **Depends on:** Phase 12
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
-- [ ] 12.1-01-PLAN.md -- Neutralize SKILL.md (global adaptation instruction, canonical flow) and step-discuss.md (error naming block, side effects, inline examples)
+- [x] 12.1-01-PLAN.md -- Neutralize SKILL.md (global adaptation instruction, canonical flow) and step-discuss.md (error naming block, side effects, inline examples)
 - [ ] 12.1-02-PLAN.md -- Neutralize step-finalize.md (output format, Expected Outcome), case-briefer.md, case-validator.md, delete README.md
 
 ### Phase 13: Verification
@@ -137,6 +137,6 @@ Note: Phase 12 depends only on Phase 9 and can run after Phase 9 completes, pote
 | 10. Schema System | v2.0 | 2/2 | Complete    | 2026-03-31 |
 | 11. Consolidation Pipeline | v2.0 | 3/3 | Complete    | 2026-03-31 |
 | 12. /case Updates | v2.0 | 2/2 | Complete    | 2026-04-01 |
-| 12.1. /case Technology Neutralization | v2.0 | 0/2 | Planned | - |
+| 12.1. /case Technology Neutralization | v2.0 | 1/2 | In Progress|  |
 | 13. Verification | v2.0 | 0/0 | Not started | - |
 | 14. Cross-Unit Flows | v2.0 | 0/0 | Not started | - |
