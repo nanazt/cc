@@ -94,7 +94,7 @@ For each CONTEXT.md decision (D-XX):
 
 A decision is covered if it appears in ANY of these locations in CASE-SCRATCH.md:
 - Phase Rules (PR section)
-- Operation Rules (R section)
+- Operation Rules (OR section)
 - Side Effects
 - Case table Expected Outcome
 
@@ -184,7 +184,7 @@ Return structured findings directly in your response (no file written). Use this
 ## Completeness Gaps (missing case categories or unexercised rules)
 
 1. **[OperationName]: [brief description]**
-   [Operation has no failure cases / Rule R3 is not exercised / etc.]
+   [Operation has no failure cases / Rule OR-3 is not exercised / etc.]
    Suggested case: F3 [case description] -> [expected outcome]
 
 ## Briefing Gaps (briefed operation not discussed)

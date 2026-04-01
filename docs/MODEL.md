@@ -133,11 +133,11 @@ In this example, `worker`-typed components get 5 custom sections with no conditi
 
 | Prefix | Full Name | Scope | Lifecycle | Example |
 |---|---|---|---|---|
-| GR-XX | Global Rule | Project-wide | Defined in PROJECT.md; referenced in specs (never duplicated) | GR-01: All timestamps use UTC |
+| GR-N | Global Rule | Project-wide | Defined in PROJECT.md; referenced in specs (never duplicated) | GR-1: All timestamps use UTC |
 | CR-N | Component Rule | Single component | Promoted from PR at consolidation; permanent in specs | CR-1: Passwords require minimum 12 characters |
 | OR-N | Operation Rule | Single operation | Defined per operation in cases.md | OR-1: Input email must be normalized to lowercase |
-| PR-N | Phase Rule | Phase-scoped | Temporary; promotes to CR-N at consolidation | PR1: Rate limiting applies to all auth endpoints |
-| TR-N | Temp Rule | Phase-scoped | Temporary; excluded from specs, never consolidated | TR1: Use mock SMTP during development |
+| PR-N | Phase Rule | Phase-scoped | Temporary; promotes to CR-N at consolidation | PR-1: Rate limiting applies to all auth endpoints |
+| TR-N | Temp Rule | Phase-scoped | Temporary; excluded from specs, never consolidated | TR-1: Use mock SMTP during development |
 
 ### Rule Prefix Changes from v1
 
@@ -389,7 +389,7 @@ These rules govern how phase CASES.md content is merged into `specs/{component}/
 
 4. **R to OR transformation.** Operation Rules labeled `R-N` in the source CASES.md are renamed to `OR-N` in the consolidated output. This is a consolidation-time output transformation -- the source CASES.md is never modified.
 
-5. **GR reference only.** Global Rules (GR-XX, defined in PROJECT.md) are referenced with `See GR-XX` notation. Never duplicated into specs/.
+5. **GR reference only.** Global Rules (GR-N, defined in PROJECT.md) are referenced with `See GR-N` notation. Never duplicated into specs/.
 
 6. **Superseded operations.** For each entry in the Superseded Operations table, remove the old operation section from the existing spec. The Replacement column is for developer reference and verifier cross-checking only -- the consolidator's job is to remove the old operation.
 

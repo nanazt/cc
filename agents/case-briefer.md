@@ -30,10 +30,10 @@ Parse `<phase_context>` for phase orientation (number, name, description, key de
 - Architecture reference from PROJECT.md
 
 **PROJECT.md deep extraction:** Beyond general architecture reference, extract and retain these specific elements for use in later steps:
-- **Service topology** -- which services exist, their roles, communication patterns (REST, gRPC, CLI, event-driven, etc.)
+- **Component topology** -- which components exist, their roles, communication patterns (REST, gRPC, CLI, event-driven, etc.)
 - **Authentication policy** -- e.g., "all endpoints require authentication" applies to any phase with user-facing operations
-- **System-Wide Rules** (`## System-Wide Rules` section) -- these are authoritative constraints that apply across all phases
-- **Cross-service interaction patterns** -- gateway compose patterns, service-to-service contracts, orchestration flows
+- **Global Rules** (`## Global Rules` section) -- these are authoritative constraints that apply across all phases
+- **Cross-component interaction patterns** -- orchestration patterns, component-to-component contracts, composition flows
 - **API conventions** -- URL structure, naming patterns, error handling conventions
 
 Summarize these as an `## Architectural Context` section in the output briefing so the Protester has project-wide context when discussing cases.
@@ -48,7 +48,7 @@ Scan CONTEXT.md decisions as the primary source, supplemented by ROADMAP.md succ
 
 For each operation, extract:
 - **Name**: descriptive name derived from the interface definition
-- **Interface**: how it is called (the contract visible to callers)
+- **Interface**: how it is called (the component contract visible to callers)
 - **Auth**: access control requirements from decisions
 
 Cross-reference discovered operations: identify which are caller-facing vs. internal-only. Include internal operations only when they represent distinct behavioral contracts (not implementation details of caller-facing operations).
@@ -66,17 +66,17 @@ From decisions, extract business rules, validation rules, and constraints. Attac
 
 ### Step 4.5: Classify cross-cutting constraints
 
-After extracting per-operation constraints, scan ALL decisions for constraints that span multiple operations or the entire phase. Classify each as SR-candidate, PR-candidate, or operation-specific:
+After extracting per-operation constraints, scan ALL decisions for constraints that span multiple operations or the entire phase. Classify each as GR-candidate, PR-candidate, or operation-specific:
 
-- **SR-candidate:** Uses "all services/phases" language, or matches an existing System Rule in PROJECT.md's `## System-Wide Rules` section. Note in the "Existing SR?" column if already in PROJECT.md.
+- **GR-candidate:** Uses "all components/phases" language, or matches an existing Global Rule in PROJECT.md's `## Global Rules` section. Note in the "Existing GR?" column if already in PROJECT.md.
 - **PR-candidate:** Applies to 2+ operations in this phase but is not universal across all phases. Typically: security invariants, shared error policies, session/ceremony constraints.
-- **Operation-specific (R):** Default. Unique to one operation's flow. No change needed — these stay in per-operation "Decided constraints."
+- **Operation-specific (OR):** Default. Unique to one operation's flow. No change needed — these stay in per-operation "Decided constraints."
 
-Check PROJECT.md for an existing `## System-Wide Rules` section. For each existing SR, note which operations in this phase it applies to.
+Check PROJECT.md for an existing `## Global Rules` section. For each existing GR, note which operations in this phase it applies to.
 
 ### Step 4.6: Cross-reference operations from other phases
 
-Scan CONTEXT.md for references to operations defined in other phases. These appear as `{Service}.{OperationName}` patterns (e.g., "User.CreateUser", "Auth.ValidateSession") or plain-text mentions of operations from other services.
+Scan CONTEXT.md for references to operations defined in other phases. These appear as `{Component}.{OperationName}` patterns (e.g., "User.CreateUser", "Auth.ValidateSession") or plain-text mentions of operations from other components.
 
 1. **Extract references:** Find all mentions of external operations in CONTEXT.md decisions and descriptions.
 
@@ -127,7 +127,7 @@ Group operations by natural category (CONTEXT.md sections, interface prefixes, d
 
 **Decision tree for operation inclusion:**
 1. In CONTEXT.md interface definition? -> EXPLICIT operation
-2. In CONTEXT.md service contract? -> Check: caller-facing (already captured), internal cross-service (include as INTERNAL), or infrastructure-only (skip unless phase targets it)
+2. In CONTEXT.md component contract? -> Check: caller-facing (already captured), internal cross-component (include as INTERNAL), or infrastructure-only (skip unless phase targets it)
 3. In ROADMAP success criterion but not detailed? -> PARTIAL confidence
 4. Logically required by other operations? -> Note as side-effect, not separate operation
 5. None of the above? -> Do not include
@@ -162,10 +162,10 @@ The dispatch prompt will contain these XML tags:
 
 > Extracted from PROJECT.md. Provides project-wide context for case discussion.
 
-- **Service topology:** [summary of services and their roles]
+- **Component topology:** [summary of components and their roles]
 - **Authentication policy:** [system-wide auth requirements, if any]
-- **System-Wide Rules:** [list of SR-XX rules that apply to this phase's operations]
-- **Cross-service patterns:** [relevant interaction patterns]
+- **Global Rules:** [list of GR-N rules that apply to this phase's operations]
+- **Cross-component patterns:** [relevant interaction patterns]
 - **API conventions:** [naming, error handling conventions]
 
 ## Referenced Operations (from other phases)
@@ -175,7 +175,7 @@ The dispatch prompt will contain these XML tags:
 
 | Operation | Source Phase | Relevant Constraints | Impact on This Phase |
 |-----------|-------------|---------------------|---------------------|
-| [Service.Operation] | Phase XX | [constraint from source spec] | [how it affects current phase] |
+| [Component.Operation] | Phase XX | [constraint from source spec] | [how it affects current phase] |
 
 ---
 
@@ -208,11 +208,11 @@ The dispatch prompt will contain these XML tags:
 
 ## Cross-Cutting Constraints
 
-### System-Wide Candidates (may belong in PROJECT.md SR)
+### Global Candidates (may belong in PROJECT.md GR)
 
-| Constraint | Scope | Source | Existing SR? |
+| Constraint | Scope | Source | Existing GR? |
 |-----------|-------|--------|--------------|
-| [constraint text] | [All gRPC callers / All services / ...] | D-XX | SR-XX (yes) or New |
+| [constraint text] | [All components / All phases / ...] | D-XX | GR-N (yes) or New |
 
 ### Phase-Wide Constraints (PR candidates)
 
@@ -268,7 +268,7 @@ Reason: [what went wrong]
 Before returning, verify each item. If an item fails, fix the briefing and re-check. If an item cannot be satisfied (e.g., no ROADMAP criteria exist), note the exception in Observations.
 
 - [ ] All interface definitions from CONTEXT.md captured as operations
-- [ ] All service contracts accounted for (as operations or noted as infrastructure-skip)
+- [ ] All component contracts accounted for (as operations or noted as infrastructure-skip)
 - [ ] Each ROADMAP success criterion maps to at least one briefed operation
 - [ ] Decided constraints reference decision IDs (D-XX)
 - [ ] Open decisions reference Claude's Discretion items
@@ -279,7 +279,7 @@ Before returning, verify each item. If an item fails, fix the briefing and re-ch
 - [ ] No implementation recommendations
 - [ ] Extraction confidence table included
 - [ ] Operations grouped by natural category, not listed flat
-- [ ] Cross-Cutting Constraints section included with SR/PR classification
+- [ ] Cross-Cutting Constraints section included with GR/PR classification
 - [ ] Observations section captures remaining cross-cutting patterns
 - [ ] Inherited Concerns section included (empty if no dependency CASES.md exists)
 - [ ] Each inherited concern classified as behavioral/constraint/informational
