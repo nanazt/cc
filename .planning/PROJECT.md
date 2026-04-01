@@ -36,7 +36,7 @@ Consolidate phase-scoped planning decisions into persistent spec files that down
 - [x] Consolidation agent — merge rules, promotion, supersession handling (universal) — Validated in Phase 11: Consolidation Pipeline
 - [ ] Verification agent — read-only spec verification (universal)
 - [x] Template/schema system — extensible, user-defined (replaces 3 fixed archetype templates) — Validated in Phase 10: Schema System
-- [x] /case review — remove service-biased language and assumptions — Validated in Phase 12: /case Updates
+- [x] /case review — remove service-biased language and assumptions — Validated in Phase 12: /case Updates; technology neutralization completed in Phase 12.1
 - [x] /case update: PR/TR rule distinction (discuss + finalize classification) — Validated in Phase 12: /case Updates
 - [x] /case update: Superseded Operations and Rules sections — Validated in Phase 12: /case Updates
 - [x] /case update: OR-N prefix natively (replacing R-N) — Validated in Phase 12: /case Updates
@@ -100,4 +100,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-01 — Phase 12 complete (/case v2: universal vocabulary migration, PR/TR classification, supersession metadata, specs/ lookup, validator v2 acceptance)*
+*Last updated: 2026-04-01 — Phase 12.1 complete (/case technology neutralization: all skill prompts and agent definitions use structural placeholders, zero technology-biased examples remain)*
