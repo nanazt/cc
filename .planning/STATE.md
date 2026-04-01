@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Universal Consolidation
-status: verifying
-stopped_at: Phase 12 context gathered
-last_updated: "2026-04-01T06:59:41.544Z"
-last_activity: 2026-03-31
+status: executing
+stopped_at: Completed 12-01-PLAN.md vocabulary migration
+last_updated: "2026-04-01T07:38:29.507Z"
+last_activity: 2026-04-01
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 3
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 9
+  completed_plans: 8
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-31)
 
 **Core value:** Consolidate phase-scoped planning decisions into persistent spec files as authoritative source of truth. Project-type agnostic.
-**Current focus:** Phase 11 — consolidation-pipeline
+**Current focus:** Phase 12 — case-updates
 
 ## Current Position
 
-Phase: 12
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-03-31
+Phase: 12 (case-updates) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-01
 
 Progress: [..........] 0%
 
@@ -59,6 +59,7 @@ Progress: [..........] 0%
 | Phase 11-consolidation-pipeline P01 | 15 | 1 tasks | 1 files |
 | Phase 11-consolidation-pipeline P02 | 3 | 2 tasks | 2 files |
 | Phase 11 P03 | 6 | 1 tasks | 1 files |
+| Phase 12-case-updates P01 | 15 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,14 @@ Recent decisions affecting current work:
 - [Phase 11-consolidation-pipeline]: spec-consolidator uses <sections> dispatch tag (not template type) so it adapts to any schema-defined section structure
 - [Phase 11-consolidation-pipeline]: e2e-flows agent compares hashes only — orchestrator provides spec_hashes from hash-sections.ts, never computed by agent
 - [Phase 11]: IMPL-SPEC.md rewritten for universal v2 design: Component/CR terminology, schema-driven pipeline, zero archetype references, agent contracts match actual deliverables
+- [Phase 12-case-updates]: OR-N is the native operation rule prefix in /case output (no consolidation-time transform needed)
+- [Phase 12-case-updates]: All rule prefixes unified: dash+number no-padding format (OR-1, PR-1, GR-1, CR-1, TR-1)
+- [Phase 12-case-updates]: GR-candidate replaces SR-candidate in case-briefer classification
+- [Phase 12-case-updates]: MODEL.md GR-N format overrides Phase 9 D-11 zero-padding for all prefixes
+
+### Roadmap Evolution
+
+- Phase 12.1 inserted after Phase 12: /case Example Rewrite (INSERTED)
 
 ### Pending Todos
 
@@ -102,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T06:59:41.541Z
-Stopped at: Phase 12 context gathered
-Resume file: .planning/phases/12-case-updates/12-CONTEXT.md
+Last session: 2026-04-01T07:38:29.505Z
+Stopped at: Completed 12-01-PLAN.md vocabulary migration
+Resume file: None

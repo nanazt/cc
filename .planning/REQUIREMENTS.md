@@ -54,13 +54,13 @@ v1 requirements TMPL-01 through TMPL-06, CONS-01 through CONS-15, ORCH-01 throug
 
 ### /case Updates (CASE)
 
-- [ ] **CASE-01**: /case skill contains no service-biased language or assumptions
-- [ ] **CASE-02**: case-briefer uses "component topology" instead of "service topology"
+- [x] **CASE-01**: /case skill contains no service-biased language or assumptions
+- [x] **CASE-02**: case-briefer uses "component topology" instead of "service topology"
 - [ ] **CASE-03**: /case produces PR/TR-classified rules (permanent vs temporary)
 - [ ] **CASE-04**: CASES.md includes Superseded Operations table when applicable
 - [ ] **CASE-05**: CASES.md includes Superseded Rules table when applicable
-- [ ] **CASE-06**: Rules use OR-N prefix natively
-- [ ] **CASE-07**: case-validator accepts TR-N, OR-N and recognizes supersession sections
+- [x] **CASE-06**: Rules use OR-N prefix natively
+- [x] **CASE-07**: case-validator accepts TR-N, OR-N and recognizes supersession sections
 - [ ] **CASE-08**: case-briefer reads `specs/{unit}/cases.md` first, falling back to phase directories only when spec does not exist
 
 ### Cross-Unit Flows (FLOW)
@@ -117,13 +117,13 @@ v1 requirements TMPL-01 through TMPL-06, CONS-01 through CONS-15, ORCH-01 throug
 | PIPE-04 | Phase 11 | Complete |
 | PIPE-05 | Phase 11 | Complete |
 | PIPE-06 | Phase 11 | Complete |
-| CASE-01 | Phase 12 | Pending |
-| CASE-02 | Phase 12 | Pending |
+| CASE-01 | Phase 12 | Complete |
+| CASE-02 | Phase 12 | Complete |
 | CASE-03 | Phase 12 | Pending |
 | CASE-04 | Phase 12 | Pending |
 | CASE-05 | Phase 12 | Pending |
-| CASE-06 | Phase 12 | Pending |
-| CASE-07 | Phase 12 | Pending |
+| CASE-06 | Phase 12 | Complete |
+| CASE-07 | Phase 12 | Complete |
 | CASE-08 | Phase 12 | Pending |
 | VRFY-01 | Phase 13 | Pending |
 | VRFY-02 | Phase 13 | Pending |
