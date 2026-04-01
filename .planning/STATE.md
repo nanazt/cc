@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Universal Consolidation
-status: executing
-stopped_at: Completed 12-01-PLAN.md vocabulary migration
-last_updated: "2026-04-01T07:38:29.507Z"
+status: verifying
+stopped_at: Completed 12-02-PLAN.md feature additions
+last_updated: "2026-04-01T07:46:38.600Z"
 last_activity: 2026-04-01
 progress:
   total_phases: 7
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-03-31)
 
 Phase: 12 (case-updates) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-01
 
 Progress: [..........] 0%
@@ -60,6 +60,7 @@ Progress: [..........] 0%
 | Phase 11-consolidation-pipeline P02 | 3 | 2 tasks | 2 files |
 | Phase 11 P03 | 6 | 1 tasks | 1 files |
 | Phase 12-case-updates P01 | 15 | 2 tasks | 8 files |
+| Phase 12-case-updates P02 | 5 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,9 @@ Recent decisions affecting current work:
 - [Phase 12-case-updates]: All rule prefixes unified: dash+number no-padding format (OR-1, PR-1, GR-1, CR-1, TR-1)
 - [Phase 12-case-updates]: GR-candidate replaces SR-candidate in case-briefer classification
 - [Phase 12-case-updates]: MODEL.md GR-N format overrides Phase 9 D-11 zero-padding for all prefixes
+- [Phase 12-case-updates]: TR classification follows existing CB/PR promotion interaction pattern — no new paradigm introduced
+- [Phase 12-case-updates]: Supersession detection mirrors Configuration Behaviors: inline capture during discussion, Supersession Review at finalize
+- [Phase 12-case-updates]: specs/ lookup scoped to current phase components only; briefer does not classify TR (Protester's responsibility)
 
 ### Roadmap Evolution
 
@@ -111,6 +115,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T07:38:29.505Z
-Stopped at: Completed 12-01-PLAN.md vocabulary migration
+Last session: 2026-04-01T07:46:38.598Z
+Stopped at: Completed 12-02-PLAN.md feature additions
 Resume file: None

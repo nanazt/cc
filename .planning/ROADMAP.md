@@ -27,7 +27,7 @@ Phases 2-8 from v1.0 are **superseded** by v2.0 requirements. They assumed fixed
 - [x] **Phase 9: Universal Model Design** - Define project-type-agnostic consolidation units, default sections, and naming conventions (completed 2026-03-31)
 - [x] **Phase 10: Schema System** - User-authored schema file with bootstrap, overrides, and conditional sections (completed 2026-03-31)
 - [x] **Phase 11: Consolidation Pipeline** - Orchestrator + consolidator agent rewrite with schema-driven dispatch and IMPL-SPEC (completed 2026-03-31)
-- [ ] **Phase 12: /case Updates** - Remove service bias, add PR/TR classification, supersession sections, OR-N prefix, specs/ lookup
+- [x] **Phase 12: /case Updates** - Remove service bias, add PR/TR classification, supersession sections, OR-N prefix, specs/ lookup (completed 2026-04-01)
 - [ ] **Phase 13: Verification** - Universal verifier with schema-parameterized checks and no false positives on non-service projects
 - [ ] **Phase 14: Cross-Unit Flows** - Opt-in E2E flow generation with universal unit terminology and hash-based change detection
 
@@ -88,10 +88,10 @@ Plans:
   3. /case discuss step prompts for PR (permanent) vs TR (temporary) classification on each rule; finalize step presents the full PR/TR list for review
   4. CASES.md output includes Superseded Operations and Superseded Rules tables when applicable; rules use OR-N prefix natively
   5. case-validator accepts TR-N, OR-N as valid rule formats and recognizes Superseded Operations/Rules as valid sections
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 12-01-PLAN.md -- Vocabulary migration and prefix unification across all /case files
-- [ ] 12-02-PLAN.md -- TR classification, supersession metadata, specs/ lookup, validator v2 completion
+- [x] 12-02-PLAN.md -- TR classification, supersession metadata, specs/ lookup, validator v2 completion
 
 ### Phase 12.1: /case Example Rewrite (INSERTED)
 
@@ -135,6 +135,6 @@ Note: Phase 12 depends only on Phase 9 and can run after Phase 9 completes, pote
 | 9. Universal Model Design | v2.0 | 2/2 | Complete   | 2026-03-31 |
 | 10. Schema System | v2.0 | 2/2 | Complete    | 2026-03-31 |
 | 11. Consolidation Pipeline | v2.0 | 3/3 | Complete    | 2026-03-31 |
-| 12. /case Updates | v2.0 | 1/2 | In Progress|  |
+| 12. /case Updates | v2.0 | 2/2 | Complete   | 2026-04-01 |
 | 13. Verification | v2.0 | 0/0 | Not started | - |
 | 14. Cross-Unit Flows | v2.0 | 0/0 | Not started | - |
