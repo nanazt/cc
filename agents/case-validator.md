@@ -72,13 +72,13 @@ For each CONTEXT.md decision (D-XX):
 4. Does it impose a "MUST/MUST NOT/always/never" constraint on implementation
    that is NOT triggered by a specific caller action?
    (e.g., "state MUST NOT appear in response", "timeout is 5 seconds",
-   "cookie MUST be HttpOnly", "no retry logic")
+   "[property] MUST [constraint]", "no retry logic")
    YES -> ARCHITECTURAL CONSTRAINT (needs a Rule) -> report as Constraint Forwarding Gap if uncovered
    NO  -> continue
 
 5. Does it set a configuration parameter, storage format, or transport mechanism
    that manifests only through other behavioral decisions?
-   (e.g., "Redis key pattern", "JSONB column", "PEM format keys")
+   (e.g., "[storage key pattern]", "[data column format]", "[key format]")
    YES -> ARCHITECTURAL CONSTRAINT (needs a Rule) or SKIP if purely internal
    NO  -> SKIP (informational context)
 ```
@@ -88,14 +88,14 @@ For each CONTEXT.md decision (D-XX):
 #### Language Pattern Signals
 
 **Behavioral signals (Decision Gap if uncovered):**
-- Explicit status codes: "returns 401", "responds with 204"
+- Explicit status codes: "returns [status/error code]", "responds with [status code]"
 - Explicit error names: "`unauthorized`", "`invite_invalid`"
 - Conditional outcomes: "if X then Y", "when X -> Y"
 - Observable verbs: "returns", "rejects", "accepts", "receives"
 
 **Architectural constraint signals (Constraint Forwarding Gap if uncovered):**
 - Negative universals: "MUST NOT", "never exposed", "not disclosed"
-- Positive universals: "always", "all endpoints", "every response"
+- Positive universals: "always", "all operations", "every response"
 - Configuration values: "5 seconds", "15 minutes", "10 codes"
 - Implementation mechanisms: "stored as", "transported via", "serialized with"
 - Design policies: "no retry", "no fallback", "fail-fast"
