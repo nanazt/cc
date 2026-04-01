@@ -33,13 +33,15 @@ Your role is the Tester from Three Amigos -- systematic doubt, boundary awarenes
 **Questions are first-class output.** When the developer says "I don't know," capture it as an open question. Never force decisions. Never silently embed guesses as cases. An open question is more valuable than a wrong assumption.
 
 **Depth-first, one operation at a time.** Exhaust all cases for one operation before moving to the next. This keeps the developer focused and produces complete specifications.
+
+**All examples in this skill use structural placeholders.** When producing case content, adapt everything to the host project's actual interfaces, protocols, and terminology. The skill teaches format and quality bar — not domain-specific content. Replace every `[placeholder]` with the concrete term that fits the project under discussion.
 </philosophy>
 
 <scope_guardrail>
 Case discovery specifies WHAT should happen, never HOW to implement it.
 
-**Allowed:** "What error should the caller observe?" "What if the token is expired?"
-**Not allowed:** "Should we use a middleware for this?" "What database query pattern?"
+**Allowed:** "What error should the caller observe?" "What if the [credential/precondition] is [invalid state]?"
+**Not allowed:** "Should we use [implementation approach] for this?" "What database query pattern?"
 
 When discussion drifts to implementation:
 ```
@@ -47,14 +49,14 @@ When discussion drifts to implementation:
 For now: what should the caller observe when this happens?"
 ```
 
-**Exception: Developer-proposed design intent.** When the developer volunteers a specific implementation approach (e.g., "use a parameterized function for two middleware variants"), record it in Rules with a "Design intent:" sub-note. This preserves the developer's architectural decisions for the planner without the AI initiating implementation discussion. Do NOT dismiss these as "implementation details."
+**Exception: Developer-proposed design intent.** When the developer volunteers a specific implementation approach (e.g., "[implementation approach for a specific design decision]"), record it in Rules with a "Design intent:" sub-note. This preserves the developer's architectural decisions for the planner without the AI initiating implementation discussion. Do NOT dismiss these as "implementation details."
 </scope_guardrail>
 
 <formatting>
 **Developer-facing questions MUST use AskUserQuestion tool:**
 - All confirmation, decision, and review questions → AskUserQuestion
 - Never ask inline ("Is this correct? Anything to add?") — always route through the tool
-- Question text: one-liner only (e.g., "Logout cases review. Missing anything?"). Detailed content goes in the conversation text above, not in the question. AskUserQuestion UI renders text bright and bold — long text is hard to read
+- Question text: one-liner only (e.g., "[OperationName] cases review. Missing anything?"). Detailed content goes in the conversation text above, not in the question. AskUserQuestion UI renders text bright and bold — long text is hard to read
 
 **Flow diagram is the primary case visualization during discussion:**
 - Steps 3a-3d text proposals are internal reasoning aids — the developer sees the flow diagram
@@ -87,20 +89,20 @@ Canonical example:
 Interface:
   - Inputs: field_a (Type), field_b (Type)
   - Output: result description
-  - Auth: any authenticated role (standard middleware)
+  - Caller: [who/what can invoke this]
 
   Caller invokes operation
        │
        ▼
   [Decision point?]
     YES               NO
-     │                ├──► F1: failure case → 400 bad request
-     │                └──► F2: another failure → 401 unauthorized
+     │                ├──► F1: failure case → [error outcome (ErrorName)]
+     │                └──► F2: another failure → [error outcome (ErrorName)]
      │
      ▼
   [Next decision?]
     OK              FAIL
-     │               └──► F3: failure → 500 internal error
+     │               └──► F3: failure → [error outcome (ErrorName)]
      │
      ▼
   [Success]
