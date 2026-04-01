@@ -6,7 +6,7 @@ A personal Claude Code toolkit that packages skills, agents, and behavioral dire
 
 ## Core Value
 
-Consolidate phase-scoped planning decisions into persistent spec files that downstream agents (case-briefer, planner, executor) can consume as authoritative source of truth. The consolidation model must be project-type agnostic — not limited to services, backends, or any specific architecture style.
+Encode behavioral quality standards as installable artifacts — so projects get consistent case discovery, spec consolidation, and code conventions without reinventing them. All artifacts must be project-type agnostic.
 
 ## Current Milestone: v2.0 Universal Consolidation
 
