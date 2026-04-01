@@ -93,15 +93,16 @@ Plans:
 - [x] 12-01-PLAN.md -- Vocabulary migration and prefix unification across all /case files
 - [x] 12-02-PLAN.md -- TR classification, supersession metadata, specs/ lookup, validator v2 completion
 
-### Phase 12.1: /case Example Rewrite (INSERTED)
+### Phase 12.1: /case Technology Neutralization (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
+**Goal:** All /case skill prompts and agent definitions contain zero technology-biased examples -- structural placeholders and rules teach format and quality bar while Claude adapts content to each host project's actual interfaces, protocols, and terminology
+**Requirements**: CASE-01
 **Depends on:** Phase 12
-**Plans:** 0 plans
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 12.1 to break down)
+- [ ] 12.1-01-PLAN.md -- Neutralize SKILL.md (global adaptation instruction, canonical flow) and step-discuss.md (error naming block, side effects, inline examples)
+- [ ] 12.1-02-PLAN.md -- Neutralize step-finalize.md (output format, Expected Outcome), case-briefer.md, case-validator.md, delete README.md
 
 ### Phase 13: Verification
 **Goal**: Verifier produces accurate findings on any project type without false positives from service-specific assumptions
@@ -126,7 +127,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 9 -> 10 -> 11 -> 12 -> 13 -> 14
+Phases execute in numeric order: 9 -> 10 -> 11 -> 12 -> 12.1 -> 13 -> 14
 Note: Phase 12 depends only on Phase 9 and can run after Phase 9 completes, potentially parallel with Phases 10-11.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -136,5 +137,6 @@ Note: Phase 12 depends only on Phase 9 and can run after Phase 9 completes, pote
 | 10. Schema System | v2.0 | 2/2 | Complete    | 2026-03-31 |
 | 11. Consolidation Pipeline | v2.0 | 3/3 | Complete    | 2026-03-31 |
 | 12. /case Updates | v2.0 | 2/2 | Complete    | 2026-04-01 |
+| 12.1. /case Technology Neutralization | v2.0 | 0/2 | Planned | - |
 | 13. Verification | v2.0 | 0/0 | Not started | - |
 | 14. Cross-Unit Flows | v2.0 | 0/0 | Not started | - |
