@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Universal Consolidation
 status: executing
-stopped_at: Completed 12.1-01 SKILL.md and step-discuss.md neutralization
-last_updated: "2026-04-01T10:53:19.548Z"
+stopped_at: Completed 12.1-02 step-finalize, case-briefer, case-validator neutralization + README deletion
+last_updated: "2026-04-01T10:59:56.787Z"
 last_activity: 2026-04-01
 progress:
   total_phases: 7
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 11
-  completed_plans: 10
+  completed_plans: 11
   percent: 0
 ---
 
@@ -62,6 +62,7 @@ Progress: [..........] 0%
 | Phase 12-case-updates P01 | 15 | 2 tasks | 8 files |
 | Phase 12-case-updates P02 | 5 | 3 tasks | 5 files |
 | Phase 12.1-case-example-rewrite P01 | 191 | 2 tasks | 2 files |
+| Phase 12.1-case-example-rewrite P02 | 300 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,10 @@ Recent decisions affecting current work:
 - [Phase 12.1-case-example-rewrite]: Global adaptation instruction in SKILL.md philosophy: all examples use structural placeholders, Claude adapts to host project's actual interfaces and terminology
 - [Phase 12.1-case-example-rewrite]: 6 fixed side effect categories replaced with open format — adapts to host project architecture instead of prescribing Domain events, Cache mutations, etc.
 - [Phase 12.1-case-example-rewrite]: Multi-protocol error block replaced with structural rule only — no per-line exemptions, structural rule plus specificity criterion is sufficient
+- [Phase 12.1-case-example-rewrite]: step-finalize output format uses Caller: field, (ErrorName) error names, structural Expected Outcome guidance, open side effects format — all consistent with SKILL.md and step-discuss.md conventions
+- [Phase 12.1-case-example-rewrite]: case-briefer Interface conventions replaces API conventions — universal across REST, RPC, CLI, event-driven, and any other interface style
+- [Phase 12.1-case-example-rewrite]: case-validator Language Pattern Signals use structural placeholder examples; category structure (Behavioral/Architectural constraint signals) preserved
+- [Phase 12.1-case-example-rewrite]: README.md deleted entirely — user docs not Claude system prompt, zero functional impact, rewrite deferred to a future phase
 
 ### Roadmap Evolution
 
@@ -119,6 +124,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T10:53:19.546Z
-Stopped at: Completed 12.1-01 SKILL.md and step-discuss.md neutralization
+Last session: 2026-04-01T10:59:56.785Z
+Stopped at: Completed 12.1-02 step-finalize, case-briefer, case-validator neutralization + README deletion
 Resume file: None
