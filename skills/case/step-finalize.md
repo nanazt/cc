@@ -71,6 +71,45 @@ Developer: you can also add explicit forward concerns for anything I missed.
 
 After developer confirmation, these populate the `## Forward Concerns` section in CASES.md. Also check Open Questions — for any with `Forward` tags, confirm the target is correct.
 
+### 4f: Supersession review
+
+If restructuring was detected during per-operation discussion (operations renamed, split, merged, moved, or removed; rules replaced by newer rules), present a supersession summary for confirmation:
+
+```
+I detected these structural changes:
+
+Superseded Operations:
+| Old Operation | Replacement | Reason |
+|---|---|---|
+| Component.OldOp | Component.NewOp | Renamed |
+
+Superseded Rules:
+| Phase | Rule ID | Reason |
+|---|---|---|
+| 8 | PR-2 | Replaced by PR-1 in this phase |
+
+Confirm these supersession entries? Any to add, remove, or adjust?
+```
+
+Reason types for Superseded Operations: Renamed, Split, Merged, Moved, Removed.
+
+If no restructuring was detected during discussion, skip this step silently (same conditional pattern as CB in 4d — omit when empty).
+
+### 4g: TR review pass
+
+If any rules were classified as TR (temporary) during Phase Rules confirmation (Step 2.5) or per-operation discussion, present them all for final confirmation:
+
+```
+These rules are classified as temporary (TR) and will be excluded from consolidated specs:
+
+- TR-1: [rule text] (from Phase Rules)
+- TR-2: [rule text] (from Operation.Name)
+
+Confirm TR classification? Any to reclassify back to PR/OR?
+```
+
+If no TR rules exist, skip this step silently. This is a safety net — the developer may want to reclassify rules they marked TR during discussion now that they see the full picture.
+
 ---
 
 ## Step 5: Validate with case-validator
@@ -140,8 +179,10 @@ Ready to write CASES.md:
 [Operation 1]: S:[n] F:[n] E:[n] Q:[n] -- [ready/needs-answers]
 [Operation 2]: S:[n] F:[n] E:[n] Q:[n] -- [ready/needs-answers]
 Configuration Behaviors: [n] items
+TR Rules: [n] items
+Superseded Operations: [n] | Superseded Rules: [n]
 
-Total: [N] success, [M] failure, [K] edge, [P] questions, [C] config behaviors across [Q] operations.
+Total: [N] success, [M] failure, [K] edge, [P] questions, [C] config behaviors, [T] TR rules across [Q] operations.
 
 Shall I write it?
 ```
@@ -175,14 +216,40 @@ CASES.md written. Next steps:
 
 > Constraints that apply to ALL operations in this phase.
 > Referenced by ID (PR-1, PR-2...) in operation Rules sections.
+> TR rules are temporary and excluded from consolidated specs.
 
 - PR-1: [constraint description] (D-XX)
 - PR-2: [constraint description] (D-XX, D-YY)
+- TR-1: [temporary constraint] (D-XX) -- excluded from specs
 - PR-3: [constraint description]. Per GR-1: [global rule it derives from]
 
 **Global Rules (from PROJECT.md) applicable to this phase:**
 - GR-1: [brief description] — [which operations]
 - GR-2: [brief description] — [which operations]
+
+---
+
+## Superseded Operations
+
+> Operations from previous phases that this phase restructures.
+> Omit this section if no operations were superseded.
+
+| Old Operation | Replacement | Reason |
+|---|---|---|
+| Component.OldName | Component.NewName | Renamed |
+| Component.SplitOp | Component.PartA, Component.PartB | Split |
+
+---
+
+## Superseded Rules
+
+> Rules from previous phases that this phase replaces.
+> Omit this section if no rules were superseded.
+
+| Phase | Rule ID | Reason |
+|---|---|---|
+| 8 | PR-2 | Replaced by PR-1 in this phase |
+| 5 | OR-3 | Operation removed |
 
 ---
 
