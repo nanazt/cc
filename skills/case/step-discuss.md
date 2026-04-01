@@ -24,7 +24,7 @@ The developer can:
 - Promote an R to PR ("that applies to all ops")
 - Add new PRs the briefer missed
 
-After presenting Phase Rules for confirmation, review each rule's content for temporary signals. If a rule describes behavior that is explicitly temporary, migration-only, or development-only (e.g., "use mock SMTP during development", "maintain v1 compatibility until migration completes"), propose TR classification:
+After presenting Phase Rules for confirmation, review each rule's content for temporary signals. If a rule describes behavior that is explicitly temporary, migration-only, or development-only (e.g., "[implementation approach that is explicitly temporary]", "maintain v1 compatibility until migration completes"), propose TR classification:
 
 ```
 This rule sounds temporary: PR-3 "[rule text]"
@@ -44,7 +44,7 @@ From dependency phases, I found these inherited concerns:
 
 Behavioral (may need cases or Open Questions):
   - IC1: [concern] (from Phase 3A, Q2 ->3B)
-  - IC3: [concern] (from Phase 3A, RefreshToken R4, heuristic match)
+  - IC3: [concern] (from Phase 3A, [OperationName rule-ref], heuristic match)
 
 Constraints (may need Rules):
   - IC2: [concern] (from Phase 3A, FC1)
@@ -195,29 +195,17 @@ Probe side effects systematically by category. Batch all applicable categories i
 ```
 When this operation succeeds, I expect these side effects:
 
-Domain events:
-- SE_: "[entity].[action]" event emitted with [key fields]
+- SE_: [describe each observable side effect]
 
-Related entity updates:
-- SE_: [related entity] [created/updated/deleted] as consequence
-
-Cache mutations:
-- SE_: [cache key/region] invalidated
-
-Audit / logging:
-- SE_: Audit log entry with [action, actor, target]
-
-Notifications:
-- SE_: [notification type] sent to [recipient]
-
-External system calls:
-- SE_: [system] called with [payload summary]
+List all effects beyond the primary return value: state changes in related data,
+notifications, external calls, audit records, or any other observable consequence.
+Adapt categories to the host project's actual architecture.
 
 Which of these apply? Any I'm missing?
 What if the operation partially succeeds then fails -- are side effects rolled back or left in place?
 ```
 
-Omit categories that clearly do not apply (e.g., skip "Notifications" for an internal data migration operation). Use SE_ as a working label during discussion; in the final case tables, side effects are recorded in the Expected Outcome column of the relevant S/F/E case, not as a separate category.
+Use SE_ as a working label during discussion; in the final case tables, side effects are recorded in the Expected Outcome column of the relevant S/F/E case, not as a separate category.
 
 **3c-vii: Configuration-dependent behaviors**
 
@@ -268,11 +256,9 @@ Restructuring signals to watch for:
 
 Always specify a concrete error outcome in Expected Outcome, not generic "error". Append the domain error name in parentheses `(ErrorName)` after the error description that emerged from discussion. This names the error identity that will map to a code-level error variant, bridging specification to implementation. Omit the parenthetical only when the error is intentionally opaque by design.
 
-Examples (the error description uses terms natural to the operation's context; `(ErrorName)` is always domain-level):
-- `file too large (FileSizeExceeded); upload not started` -- domain-level (unit test, CLI, library)
-- `400 Bad Request (DuplicateEmail)` -- HTTP
-- `PERMISSION_DENIED (InsufficientQuota)` -- gRPC
-- `credentials invalid` -- intentionally opaque, no parenthetical
+The structural rule for error outcomes: `[error description] (ErrorName)`. Omit the parenthetical only when the error is intentionally opaque by design.
+
+The error description uses terms natural to the operation's domain. `(ErrorName)` is always domain-level -- it names the error identity that maps to a code-level error variant. The specificity criterion: be specific enough that a test can assert against it.
 
 Each failure case must make the observable outcome unambiguous -- this is what tests will assert against.
 
@@ -309,8 +295,7 @@ Append format per operation:
 - Inherits: PR-1, PR-2, GR-1
 
 ### Side Effects
-- Domain event: "[entity].[action]" with [key fields]
-- [other side effects by category]
+- [describe each observable side effect]
 > If the operation has no side effects, write: `None (read-only)` or `None (query operation)`.
 
 ### Cases
@@ -333,7 +318,7 @@ Append format per operation:
 **Forward column values:**
 - `--` — resolve in this phase (default)
 - `->XX` — forward to Phase XX (e.g., `->3B`)
-- `->XX:OpName` — forward to specific operation in Phase XX (e.g., `->3B:AddPasskey`)
+- `->XX:OpName` — forward to specific operation in Phase XX (e.g., `->XX:[OperationName]`)
 
 Tag a question for forwarding when: it cannot be answered until a downstream phase introduces the relevant operation or feature. The developer confirms the tag during review.
 
