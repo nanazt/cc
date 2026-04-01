@@ -20,6 +20,21 @@ Cross-check behavioral cases discovered through /case discussion against plannin
 
 Perform exactly 5 checks, ordered from highest-value to lowest.
 
+### Valid CASES.md Sections
+
+The validator recognizes these as valid CASES.md sections (present or absent):
+- Phase Rules (with PR-N and TR-N entries)
+- Global Rules (with GR-N entries)
+- Superseded Operations (conditional — valid when present, no gap when absent)
+- Superseded Rules (conditional — valid when present, no gap when absent)
+- Operation sections with OR-N rules
+- GR Candidates (renamed from SR Candidates)
+- Configuration Behaviors
+- Forward Concerns
+- Cross-Operation Concerns
+
+**Valid rule prefix format:** `(GR|CR|OR|PR|TR)-\d+` (all prefixes use dash + number, no padding).
+
 ### Check A: Requirement Coverage
 
 Cross-reference ROADMAP.md requirements for this phase against CASE-SCRATCH.md. Read REQUIREMENTS.md for full requirement descriptions when REQ-IDs need interpretation.
@@ -93,10 +108,12 @@ For each CONTEXT.md decision (D-XX):
 #### Coverage scope
 
 A decision is covered if it appears in ANY of these locations in CASE-SCRATCH.md:
-- Phase Rules (PR section)
+- Phase Rules (PR/TR section)
 - Operation Rules (OR section)
 - Side Effects
 - Case table Expected Outcome
+- Superseded Operations table
+- Superseded Rules table
 
 Do not flag a decision as a gap if it is already documented in any of these locations.
 
@@ -130,6 +147,8 @@ Find:
 Cross-reference CASE-BRIEFING.md operations against CASE-SCRATCH.md.
 
 Find: Operations identified by the briefer but absent from scratch (accidentally forgotten during discussion).
+
+**Exception:** Briefed operations that appear only in the Superseded Operations table (as "Old Operation") should NOT be flagged as missing — they were intentionally superseded and are documented in the supersession metadata.
 
 ## Input Contract
 

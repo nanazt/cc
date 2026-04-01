@@ -38,6 +38,21 @@ Parse `<phase_context>` for phase orientation (number, name, description, key de
 
 Summarize these as an `## Architectural Context` section in the output briefing so the Protester has project-wide context when discussing cases.
 
+### Step 1.5: Check consolidated specs (current phase only)
+
+For each component referenced in this phase's CONTEXT.md:
+1. Check if `specs/{component}/cases.md` exists using Glob
+2. If exists: read it and note existing operations, their rules and case counts
+3. If not exists: proceed with phase directories only (no warning, no fallback message)
+
+This lookup applies ONLY to the phase being discussed. Do NOT read specs/ for dependency phases — those are handled by Step 4.7 (Inherited Concerns).
+
+When a spec exists:
+- Include an "Existing Spec State" subsection in the briefing for that component
+- Note: "Operation {Component.Op} exists in spec with {N} rules, {M} cases"
+- If CONTEXT.md has decisions affecting an operation that already exists in the spec, flag: "Operation exists in spec but current phase has new decisions affecting it"
+- Do NOT merge spec content with phase content — they are distinct sources (spec = historical consolidated state; phase CONTEXT.md = current phase changes)
+
 ### Step 2: Discover operations
 
 Scan CONTEXT.md decisions as the primary source, supplemented by ROADMAP.md success criteria and REQUIREMENTS.md, for all callable interfaces this phase defines. Operations may appear as:
@@ -71,6 +86,8 @@ After extracting per-operation constraints, scan ALL decisions for constraints t
 - **GR-candidate:** Uses "all components/phases" language, or matches an existing Global Rule in PROJECT.md's `## Global Rules` section. Note in the "Existing GR?" column if already in PROJECT.md.
 - **PR-candidate:** Applies to 2+ operations in this phase but is not universal across all phases. Typically: security invariants, shared error policies, session/ceremony constraints.
 - **Operation-specific (OR):** Default. Unique to one operation's flow. No change needed — these stay in per-operation "Decided constraints."
+
+**TR exclusion:** This agent does NOT classify rules as TR (temporary). TR judgment is the Protester's (orchestrator's) responsibility during discussion. Classify constraints as GR-candidate, PR-candidate, or operation-specific (OR) only.
 
 Check PROJECT.md for an existing `## Global Rules` section. For each existing GR, note which operations in this phase it applies to.
 
@@ -167,6 +184,21 @@ The dispatch prompt will contain these XML tags:
 - **Global Rules:** [list of GR-N rules that apply to this phase's operations]
 - **Cross-component patterns:** [relevant interaction patterns]
 - **API conventions:** [naming, error handling conventions]
+
+## Existing Spec State
+
+> For components in this phase that have consolidated specs.
+> Omit this section if no specs/ exist for any component in this phase.
+
+### [ComponentName]
+
+- **Spec location:** `specs/{component}/cases.md`
+- **Existing operations:** [count]
+  - {Component.Op1}: {N} rules, {M} cases
+  - {Component.Op2}: {N} rules, {M} cases
+- **Operations with new decisions in this phase:** [list or "none"]
+
+---
 
 ## Referenced Operations (from other phases)
 
@@ -287,6 +319,9 @@ Before returning, verify each item. If an item fails, fix the briefing and re-ch
 - [ ] Architectural Context section included with PROJECT.md extractions
 - [ ] Referenced Operations section included (empty if no cross-references found)
 - [ ] If PROJECT.md contains system-wide policies applicable to this phase, policy-implementing phases included in Inherited Concerns as implicit dependencies
+- [ ] specs/{component}/cases.md checked for each component in this phase (silent skip if absent)
+- [ ] Existing Spec State section included when specs exist (omitted when none exist)
+- [ ] No spec content merged with phase content (distinct sources)
 
 ## Guidelines
 
