@@ -34,7 +34,7 @@ Encode behavioral quality standards as installable artifacts — so projects get
 - [x] Consolidation model redesign — project-type-agnostic unit and structure (replaces fixed archetypes) — Validated in Phase 9: Universal Model Design
 - [x] Consolidate v2 SKILL.md — orchestrator pipeline with schema-driven dispatch — Validated in Phase 11: Consolidation Pipeline
 - [x] Consolidation agent — merge rules, promotion, supersession handling (universal) — Validated in Phase 11: Consolidation Pipeline
-- [ ] Verification agent — read-only spec verification (universal)
+- [x] Verification agent — read-only spec verification (universal) — Validated in Phase 13: Verification
 - [x] Template/schema system — extensible, user-defined (replaces 3 fixed archetype templates) — Validated in Phase 10: Schema System
 - [x] /case review — remove service-biased language and assumptions — Validated in Phase 12: /case Updates; technology neutralization completed in Phase 12.1
 - [x] /case update: PR/TR rule distinction (discuss + finalize classification) — Validated in Phase 12: /case Updates
@@ -43,7 +43,7 @@ Encode behavioral quality standards as installable artifacts — so projects get
 - [x] case-briefer update: specs/ priority lookup with phase directory fallback — Validated in Phase 12: /case Updates
 - [x] case-validator update: TR/OR recognition, supersession sections — Validated in Phase 12: /case Updates
 - [x] IMPL-SPEC rewrite reflecting universal design — Validated in Phase 11: Consolidation Pipeline
-- [ ] Test fixtures for skill/agent validation
+- [x] Test fixtures for skill/agent validation — Validated in Phase 13: Verification
 
 ### Out of Scope
 
@@ -66,7 +66,7 @@ Encode behavioral quality standards as installable artifacts — so projects get
 ## Constraints
 
 - **Runtime**: Deno required for hash-sections.ts (npm:unified, npm:remark-parse)
-- **Agent models**: consolidation agents (spec-consolidator, e2e-flows) and case-briefer use sonnet; case-validator uses opus
+- **Agent models**: consolidation agents (spec-consolidator, e2e-flows) and case-briefer use sonnet; case-validator and spec-verifier use opus
 - **No hardcoded project references**: Skills and agents must be technology-neutral and project-neutral
 - **GSD conventions**: Depends on CONTEXT.md, CASES.md, ROADMAP.md, PROJECT.md phase directory structure
 - **Content language**: All code, docs, commit messages in English (per CLAUDE.md)
@@ -100,4 +100,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-01 — Phase 12.1 complete (/case technology neutralization: all skill prompts and agent definitions use structural placeholders, zero technology-biased examples remain)*
+*Last updated: 2026-04-02 — Phase 13 complete (spec-verifier agent: 27 schema-parameterized checks, pipeline wired, 3 project-type test fixtures validating zero false positives)*
