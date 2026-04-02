@@ -342,7 +342,7 @@ Reason: {what went wrong}
 
 ## Agent: spec-verifier
 
-> **Phase 13 deliverable.** The SKILL.md Step 5 includes a skip branch that activates when `agents/spec-verifier.md` is absent. When Phase 13 creates the verifier, Step 5 activates automatically.
+> **Transferred to `agents/spec-verifier.md`.** Content below retained as reference until Phase 14 deletion. See agents/spec-verifier.md for the authoritative agent definition.
 
 ### Frontmatter
 
