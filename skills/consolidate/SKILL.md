@@ -204,14 +204,24 @@ Only runs if `meta.e2eFlows` was true (checked in Step 3.5).
 
 **Error handling:** E2E agent failure does NOT rollback component spec consolidation. Mark "E2E flows: SKIPPED (agent failed)" in summary.
 
-## Step 5: Dispatch Spec-Verifier Agent (Conditional)
+## Step 5: Dispatch Spec-Verifier Agent
 
-<!-- Remove this skip branch once agents/spec-verifier.md exists in the agents/ directory -->
+Build dispatch prompt for `agents/spec-verifier.md` with these XML tags:
 
-Check if `agents/spec-verifier.md` exists (use Glob).
+| Tag | Required | Contents |
+|-----|----------|----------|
+| `<objective>` | Yes | "Verify consolidated specs for Phase {id}. Check all applicable verification items." |
+| `<schema_data>` | Yes | Full JSON output from schema-parser.ts (parsed in Step 1) |
+| `<specs_dir>` | Yes | Path to `specs/` directory root |
+| `<index_file>` | Yes | Path to `specs/INDEX.md` |
+| `<phase_id>` | Yes | Phase identifier being verified |
+| `<phase_context_file>` | Yes | Path to phase CONTEXT.md |
+| `<phase_cases_file>` | No | Path to source phase CASES.md. Omit for Phase 1 backfill. |
+| `<project_file>` | Yes | Path to PROJECT.md |
+| `<changed_components>` | Yes | JSON manifest from consolidator results |
+| `<e2e_dir>` | No | Path to `specs/e2e/`. Omit if E2E flows disabled or no flows exist. |
 
-- **Absent:** Log "Verification skipped (spec-verifier agent not yet created)". Mark output as "UNVERIFIED" in the confirmation summary.
-- **Present:** Build dispatch prompt with full XML contract and dispatch the spec-verifier agent. Collect return: `## VERIFICATION COMPLETE` or `## VERIFICATION FAILED`.
+Dispatch the spec-verifier agent. Collect return: `## VERIFICATION COMPLETE` or `## VERIFICATION FAILED`.
 
 **Error handling:** Verifier failure → mark "UNVERIFIED", proceed. Verifier is read-only: no rollback.
 
