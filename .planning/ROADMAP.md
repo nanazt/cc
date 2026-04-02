@@ -28,7 +28,7 @@ Phases 2-8 from v1.0 are **superseded** by v2.0 requirements. They assumed fixed
 - [x] **Phase 10: Schema System** - User-authored schema file with bootstrap, overrides, and conditional sections (completed 2026-03-31)
 - [x] **Phase 11: Consolidation Pipeline** - Orchestrator + consolidator agent rewrite with schema-driven dispatch and IMPL-SPEC (completed 2026-03-31)
 - [x] **Phase 12: /case Updates** - Remove service bias, add PR/TR classification, supersession sections, OR-N prefix, specs/ lookup (completed 2026-04-01)
-- [ ] **Phase 13: Verification** - Universal verifier with schema-parameterized checks and no false positives on non-service projects
+- [x] **Phase 13: Verification** - Universal verifier with schema-parameterized checks and no false positives on non-service projects (completed 2026-04-02)
 - [ ] **Phase 14: Cross-Unit Flows** - Opt-in E2E flow generation with universal unit terminology and hash-based change detection
 
 ## Phase Details
@@ -112,11 +112,11 @@ Plans:
   1. Verifier checks are parameterized against the active schema -- section presence checks use schema-declared sections, not hardcoded lists
   2. The 6 service-specific checks (V-04, V-10, V-11, V-15, V-27, V-29) are either universalized or made conditional on schema configuration
   3. Running the verifier against a non-service project (CLI tool or library) produces zero false positives
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 13-01-PLAN.md -- Create spec-verifier agent with 27 schema-parameterized checks and IMPL-SPEC transfer annotation
-- [ ] 13-02-PLAN.md -- Wire verifier dispatch in SKILL.md Step 5 and create test fixtures for 3 project types
+- [x] 13-02-PLAN.md -- Wire verifier dispatch in SKILL.md Step 5 and create test fixtures for 3 project types
 
 ### Phase 14: Cross-Unit Flows
 **Goal**: Projects with cross-unit communication can opt into flow documentation; projects without it are unaffected
@@ -142,5 +142,5 @@ Note: Phase 12 depends only on Phase 9 and can run after Phase 9 completes, pote
 | 11. Consolidation Pipeline | v2.0 | 3/3 | Complete    | 2026-03-31 |
 | 12. /case Updates | v2.0 | 2/2 | Complete    | 2026-04-01 |
 | 12.1. /case Technology Neutralization | v2.0 | 2/2 | Complete    | 2026-04-01 |
-| 13. Verification | v2.0 | 1/2 | In Progress|  |
+| 13. Verification | v2.0 | 2/2 | Complete   | 2026-04-02 |
 | 14. Cross-Unit Flows | v2.0 | 0/0 | Not started | - |
