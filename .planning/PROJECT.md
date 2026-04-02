@@ -44,13 +44,13 @@ Encode behavioral quality standards as installable artifacts — so projects get
 - [x] case-validator update: TR/OR recognition, supersession sections — Validated in Phase 12: /case Updates
 - [x] IMPL-SPEC rewrite reflecting universal design — Validated in Phase 11: Consolidation Pipeline
 - [x] Test fixtures for skill/agent validation — Validated in Phase 13: Verification
+- [x] Cross-component E2E flow pipeline — schema-driven opt-in, structured Dependencies, universal flow format — Validated in Phase 14: Cross-Unit Flows
 
 ### Out of Scope
 
 - Installation/distribution mechanism — deferred to separate discussion after implementation
 - `/gsd:next` integration — manual invocation only
 - Spec-vs-code drift detection (Layer 3 verification) — deferred to future gsd:verify expansion
-- E2E cross-component flow documentation — deferred until consolidation model is proven
 - Rule tier rename migration (SR->GR, SvcR->SR in existing projects) — separate atomic task
 
 ## Context
@@ -100,4 +100,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 — Phase 13 complete (spec-verifier agent: 27 schema-parameterized checks, pipeline wired, 3 project-type test fixtures validating zero false positives)*
+*Last updated: 2026-04-02 — Phase 14 complete (cross-unit E2E flow pipeline: structured Dependencies format, schema-driven e2eFlows opt-in, universal flow file format with real hash anchors)*
