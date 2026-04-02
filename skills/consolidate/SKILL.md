@@ -18,7 +18,7 @@ disable-model-invocation: true
 ---
 
 <purpose>
-After a phase ships, consolidate its decisions into per-component spec files at `.planning/specs/{component}/`. Each spec file is the **current truth** about a component — latest decision wins. Use "component" throughout, never "service" in user-facing text.
+After a phase ships, consolidate its decisions into per-component spec files at `specs/{component}/`. Each spec file is the **current truth** about a component — latest decision wins. Use "component" throughout, never "service" in user-facing text.
 </purpose>
 
 <principles>
@@ -117,8 +117,8 @@ For each affected component, build a dispatch prompt containing these XML tags:
 | `<files_to_read>` | Yes | Phase CONTEXT.md, CASES.md, PROJECT.md paths |
 | `<existing_spec>` | No | Path to existing specs/{component}/context.md (omit for new) |
 | `<existing_cases>` | No | Path to existing specs/{component}/cases.md (omit for new) |
-| `<output_context>` | Yes | `.planning/specs/{component}/context.md` |
-| `<output_cases>` | Yes | `.planning/specs/{component}/cases.md` |
+| `<output_context>` | Yes | `specs/{component}/context.md` |
+| `<output_cases>` | Yes | `specs/{component}/cases.md` |
 | `<phase_id>` | Yes | Phase identifier string |
 | `<superseded_operations>` | No | JSON from CASES.md Superseded Operations table (if present) |
 | `<superseded_rules>` | No | JSON from CASES.md Superseded Rules table (if present) |
@@ -130,7 +130,7 @@ Dispatch all agents in parallel using the Agent tool. Collect return messages. P
 **Error handling (fail-fast + selective retry):**
 - If ANY agent returns `## CONSOLIDATION FAILED`: halt, report failure with context, offer:
   - **retry:** Re-dispatch the failed agent only. On retry success, proceed normally.
-  - **abort:** `git checkout -- .planning/specs/`
+  - **abort:** `git checkout -- specs/`
 
 ## Step 3: Collect Results, Update INDEX.md
 
@@ -138,7 +138,7 @@ Parse each successful consolidator return for: component name, files written, op
 
 Build `<changed_components>` manifest JSON.
 
-Write `.planning/specs/INDEX.md` (fully rewritten each run — not surgically edited):
+Write `specs/INDEX.md` (fully rewritten each run — not surgically edited):
 
 ```markdown
 # Spec Index
@@ -261,9 +261,9 @@ If T1 findings are present, warn: "T1 (must-fix) findings detected. Review befor
 
 ## Step 7: Commit or Rollback
 
-- **Confirmed:** Stage `.planning/specs/`, commit:
+- **Confirmed:** Stage `specs/`, commit:
   `consolidate: Phase {id} -> specs/ ({component list})`
-- **Rejected:** `git checkout -- .planning/specs/`. Report rollback.
+- **Rejected:** `git checkout -- specs/`. Report rollback.
 
 </procedure>
 
