@@ -59,7 +59,7 @@ Encode behavioral quality standards as installable artifacts — so projects get
 - GSD conventions assumed: CONTEXT.md, ROADMAP.md, phase directory structure, PROJECT.md with service topology
 - `/case` already produces CASE-SCRATCH.md -> CASES.md pipeline; consolidate v2 consumes the finalized CASES.md
 - v1 consolidate skill exists but was never executed — v2 is a full rewrite, not incremental update
-- IMPL-SPEC.md (`docs/IMPL-SPEC.md`) is the authoritative design document for consolidate v2
+- MODEL.md and agent frontmatter are the authoritative sources for consolidate v2 design (IMPL-SPEC.md deleted in Phase 15)
 - Reference implementation patterns exist in madome project's case-briefer and case-validator agents
 - Hash tool requires Deno runtime and npm packages (unified, remark-parse) — first run needs network
 
@@ -100,4 +100,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 — Phase 14 complete (cross-unit E2E flow pipeline: structured Dependencies format, schema-driven e2eFlows opt-in, universal flow file format with real hash anchors)*
+*Last updated: 2026-04-03 — Phase 16 complete (e2e-dispatch-alignment: aligned SKILL.md Step 4 dispatch table to e2e-flows agent contract, closed integration gap INT-01). All v2.0 milestone phases complete.*
