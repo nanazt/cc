@@ -65,10 +65,10 @@ v1 requirements TMPL-01 through TMPL-06, CONS-01 through CONS-15, ORCH-01 throug
 
 ### Cross-Unit Flows (FLOW)
 
-- [ ] **FLOW-01**: E2E flow generation is opt-in via schema flag (not default)
-- [ ] **FLOW-02**: Orchestrator skips flow steps when E2E is disabled
-- [ ] **FLOW-03**: When enabled, flow agent uses universal unit terminology
-- [ ] **FLOW-04**: Hash-based change detection works with universal unit structure
+- [x] **FLOW-01**: E2E flow generation is opt-in via schema flag (not default)
+- [x] **FLOW-02**: Orchestrator skips flow steps when E2E is disabled
+- [x] **FLOW-03**: When enabled, flow agent uses universal unit terminology
+- [x] **FLOW-04**: Hash-based change detection works with universal unit structure
 
 ## Future Requirements
 
@@ -128,10 +128,10 @@ v1 requirements TMPL-01 through TMPL-06, CONS-01 through CONS-15, ORCH-01 throug
 | VRFY-01 | Phase 13 | Complete |
 | VRFY-02 | Phase 13 | Complete |
 | VRFY-03 | Phase 13 | Complete |
-| FLOW-01 | Phase 14 | Pending |
-| FLOW-02 | Phase 14 | Pending |
-| FLOW-03 | Phase 14 | Pending |
-| FLOW-04 | Phase 14 | Pending |
+| FLOW-01 | Phase 14 | Complete |
+| FLOW-02 | Phase 14 | Complete |
+| FLOW-03 | Phase 14 | Complete |
+| FLOW-04 | Phase 14 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 30 total
