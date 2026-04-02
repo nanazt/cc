@@ -59,7 +59,7 @@
 | `description` | Yes | Yes |
 | `tools` | No | Yes (restricted per agent) |
 | `disallowedTools` | No | No |
-| `model` | No | Yes (`sonnet` or `opus` per IMPL-SPEC) |
+| `model` | No | Yes (`sonnet` or `opus` per MODEL.md and agent frontmatter) |
 | `permissionMode` | No | No |
 | `maxTurns` | No | Consider for verifier |
 | `skills` | No | No |
@@ -71,7 +71,7 @@
 | `isolation` | No | No |
 | `initialPrompt` | No | No |
 
-### Agent Model Assignments (from IMPL-SPEC)
+### Agent Model Assignments (from MODEL.md)
 
 | Agent | Model | Rationale |
 |-------|-------|-----------|
@@ -127,7 +127,7 @@ Subsequent runs use Deno's global cache (~/.cache/deno or DENO_DIR).
 | Runtime | Deno 2.7+ | Node.js 22+ | Zero-config TypeScript, built-in test runner, permission sandbox, npm: specifiers |
 | Runtime | Deno 2.7+ | Bun 1.2+ | No permission sandbox, less mature ecosystem |
 | Markdown parser | unified + remark-parse | `markdown-it` | Not AST-based (token stream). unified/remark gives mdast tree for structural traversal. |
-| Markdown parser | unified + remark-parse | Manual regex | IMPL-SPEC explicitly rejected. 40+ lines of fragile code vs. 10 lines of AST traversal. |
+| Markdown parser | unified + remark-parse | Manual regex | Rejected early in project design. 40+ lines of fragile code vs. 10 lines of AST traversal. |
 | AST heading text extraction | mdast-util-to-string | remark-stringify | remark-stringify is a full AST serializer; not needed since section hashing uses source slicing. mdast-util-to-string is correct for extracting heading node text. |
 | Test runner | Deno test | Vitest | External dependency, requires config. Deno test is built-in and sufficient for 10 test cases. |
 | Agent model | sonnet (default) / opus (verifier) | haiku | Too weak for consolidation reasoning. Haiku 4.5 is fast but consolidation needs sonnet-level structured output. |

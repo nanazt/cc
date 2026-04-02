@@ -55,7 +55,7 @@ Scope examples:
 ```
 feat(case): add PR/TR classification to discuss step
 fix(hash-tool): correct empty section handling
-docs: update IMPL-SPEC with review findings
+docs: update MODEL.md with section override syntax
 refactor(briefer): extract operation discovery into helper
 ```
 
