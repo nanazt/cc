@@ -21,7 +21,7 @@ Cancellation takes effect at end of billing period.
 - subscription_not_found (SubscriptionNotFound) -- returned on invalid subscription ID
 
 ## Dependencies
-Requires Auth component for caller identity.
+- **auth** -- caller identity and session validation
 
 ## Configuration
 STRIPE_API_KEY environment variable.

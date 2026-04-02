@@ -24,7 +24,7 @@ Token validation via JWT with configurable expiry.
 - token_expired (TokenExpired) -- returned on expired JWT
 
 ## Dependencies
-Requires User component for profile lookup.
+- **billing** -- payment processing for premium account upgrades
 
 ## Configuration
 JWT_SECRET, TOKEN_EXPIRY_SECONDS environment variables.

@@ -11,7 +11,9 @@ Last updated: 2026-01-15
 
 ## E2E Flows
 
-No E2E flows.
+| Flow | Description | Components | File |
+|------|-------------|------------|------|
+| Auth-Billing Flow | User creates a premium subscription requiring authentication and billing | auth, billing | [auth-billing-flow](e2e/auth-billing-flow.md) |
 
 ## Operation Index
 
