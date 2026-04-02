@@ -126,7 +126,11 @@ Plans:
   1. E2E flow generation is controlled by a schema flag and defaults to off -- projects that do not set it never see flow-related prompts or output
   2. When E2E is disabled, the orchestrator skips all flow-related steps entirely (no hash computation, no agent dispatch, no flow output)
   3. When E2E is enabled, the flow agent uses universal unit terminology and hash-based change detection works with the universal unit directory structure
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 14-01-PLAN.md -- Structured Dependencies format, e2e-flows bias fix, IMPL-SPEC reference cleanup
+- [ ] 14-02-PLAN.md -- Test fixtures for FLOW validation (schemas, E2E flow file, Dependencies format adoption)
 
 ## Progress
 
@@ -143,4 +147,4 @@ Note: Phase 12 depends only on Phase 9 and can run after Phase 9 completes, pote
 | 12. /case Updates | v2.0 | 2/2 | Complete    | 2026-04-01 |
 | 12.1. /case Technology Neutralization | v2.0 | 2/2 | Complete    | 2026-04-01 |
 | 13. Verification | v2.0 | 2/2 | Complete    | 2026-04-02 |
-| 14. Cross-Unit Flows | v2.0 | 0/0 | Not started | - |
+| 14. Cross-Unit Flows | v2.0 | 0/2 | In progress | - |
