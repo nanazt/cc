@@ -227,5 +227,4 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,node,linux,deno
 
-docs/IMPL-SPEC.md
 .claude/worktrees
