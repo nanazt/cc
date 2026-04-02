@@ -50,7 +50,7 @@ v1 requirements TMPL-01 through TMPL-06, CONS-01 through CONS-15, ORCH-01 throug
 
 - [x] **VRFY-01**: Verifier checks are parameterized against active schema (not hardcoded archetypes)
 - [x] **VRFY-02**: Service-specific checks (V-04, V-10, V-11, V-15, V-27, V-29) are universalized or made conditional
-- [ ] **VRFY-03**: Verifier produces no false positives on non-service projects
+- [x] **VRFY-03**: Verifier produces no false positives on non-service projects
 
 ### /case Updates (CASE)
 
@@ -127,7 +127,7 @@ v1 requirements TMPL-01 through TMPL-06, CONS-01 through CONS-15, ORCH-01 throug
 | CASE-08 | Phase 12 | Complete |
 | VRFY-01 | Phase 13 | Complete |
 | VRFY-02 | Phase 13 | Complete |
-| VRFY-03 | Phase 13 | Pending |
+| VRFY-03 | Phase 13 | Complete |
 | FLOW-01 | Phase 14 | Pending |
 | FLOW-02 | Phase 14 | Pending |
 | FLOW-03 | Phase 14 | Pending |
