@@ -31,7 +31,7 @@ Phases 2-8 from v1.0 are **superseded** by v2.0 requirements. They assumed fixed
 - [x] **Phase 13: Verification** - Universal verifier with schema-parameterized checks and no false positives on non-service projects (completed 2026-04-02)
 - [x] **Phase 14: Cross-Unit Flows** - Opt-in E2E flow generation with universal unit terminology and hash-based change detection (completed 2026-04-02)
 - [x] **Phase 15: Fix Artifact Paths and Remove Stale Doc** - Fix specs/ path mismatch in SKILL.md and delete stale IMPL-SPEC.md (gap closure) (completed 2026-04-02)
-- [ ] **Phase 16: Align E2E Flows Dispatch Contract** - Resolve 3-way dispatch tag mismatch between SKILL.md, e2e-flows agent, and plan (gap closure)
+- [x] **Phase 16: Align E2E Flows Dispatch Contract** - Resolve 3-way dispatch tag mismatch between SKILL.md, e2e-flows agent, and plan (gap closure) (completed 2026-04-02)
 
 ## Phase Details
 
@@ -154,7 +154,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. SKILL.md Step 4 dispatch tags and e2e-flows.md Input Contract list the same tag set
   2. The chosen tag set includes all information the agent needs to produce correct output
-  3. No phantom tags exist (tags listed in one place but unused/undefined elsewhere)
+  3. No phantom tags exist (tags listed in one place but unused/defined elsewhere)
+**Plans:** 1/1 plans complete
+Plans:
+- [x] 16-01-PLAN.md -- Rewrite Step 4 dispatch table with correct 7-tag contract, remove phantom phase_id
 
 ## Progress
 
@@ -172,5 +175,5 @@ Note: Phase 12 depends only on Phase 9 and can run after Phase 9 completes, pote
 | 12.1. /case Technology Neutralization | v2.0 | 2/2 | Complete    | 2026-04-01 |
 | 13. Verification | v2.0 | 2/2 | Complete    | 2026-04-02 |
 | 14. Cross-Unit Flows | v2.0 | 2/2 | Complete    | 2026-04-02 |
-| 15. Fix Artifact Paths and Remove Stale Doc | v2.0 | 1/1 | Complete   | 2026-04-02 |
-| 16. Align E2E Flows Dispatch Contract | v2.0 | 0/0 | Pending | — |
+| 15. Fix Artifact Paths and Remove Stale Doc | v2.0 | 1/1 | Complete    | 2026-04-02 |
+| 16. Align E2E Flows Dispatch Contract | v2.0 | 1/1 | Complete   | 2026-04-02 |
