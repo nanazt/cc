@@ -198,7 +198,17 @@ Only runs if `meta.e2eFlows` was true (checked in Step 3.5).
    deno run --no-lock --allow-read tools/hash-sections.ts {all spec files}
    ```
 3. Parse hash JSON output: `{ files: [{ path, sections: [{ heading, hash }] }] }`.
-4. Build dispatch prompt with XML tags for the e2e-flows agent (include `<existing_flows>`, `<new_flows>`, `<spec_hashes>`, `<phase_id>`).
+4. Build dispatch prompt containing these XML tags:
+
+   | Tag | Required | Contents |
+   |-----|----------|----------|
+   | `<objective>` | Yes | "Generate/update E2E flow documentation for changed components." |
+   | `<changed_components>` | Yes | JSON manifest from consolidator results (Step 3) |
+   | `<spec_hashes>` | Yes | JSON output from hash-sections.ts (computed in sub-step 2 above) |
+   | `<existing_flows>` | No | JSON array of existing flow file paths from `specs/e2e/` (Step 3.5). Omit if none exist. |
+   | `<new_flows>` | No | JSON array of developer-confirmed new flow names (Step 3.5). Omit if none confirmed. |
+   | `<project_file>` | Yes | Path to PROJECT.md |
+   | `<specs_dir>` | Yes | Path to `specs/` directory root |
 5. Dispatch the e2e-flows agent (sequential, after Step 3).
 6. Parse return.
 
