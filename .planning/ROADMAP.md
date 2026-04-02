@@ -30,7 +30,7 @@ Phases 2-8 from v1.0 are **superseded** by v2.0 requirements. They assumed fixed
 - [x] **Phase 12: /case Updates** - Remove service bias, add PR/TR classification, supersession sections, OR-N prefix, specs/ lookup (completed 2026-04-01)
 - [x] **Phase 13: Verification** - Universal verifier with schema-parameterized checks and no false positives on non-service projects (completed 2026-04-02)
 - [x] **Phase 14: Cross-Unit Flows** - Opt-in E2E flow generation with universal unit terminology and hash-based change detection (completed 2026-04-02)
-- [ ] **Phase 15: Fix Artifact Paths and Remove Stale Doc** - Fix specs/ path mismatch in SKILL.md and delete stale IMPL-SPEC.md (gap closure)
+- [x] **Phase 15: Fix Artifact Paths and Remove Stale Doc** - Fix specs/ path mismatch in SKILL.md and delete stale IMPL-SPEC.md (gap closure) (completed 2026-04-02)
 - [ ] **Phase 16: Align E2E Flows Dispatch Contract** - Resolve 3-way dispatch tag mismatch between SKILL.md, e2e-flows agent, and plan (gap closure)
 
 ## Phase Details
@@ -142,9 +142,9 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. SKILL.md contains zero occurrences of `.planning/specs/` -- all references use `specs/` (project-root relative)
   2. IMPL-SPEC.md is deleted -- no stale documentation remains that contradicts current pipeline behavior
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
-- [ ] 15-01-PLAN.md -- Fix specs/ path references in SKILL.md, delete IMPL-SPEC.md, clean .gitignore
+- [x] 15-01-PLAN.md -- Fix specs/ path references in SKILL.md, delete IMPL-SPEC.md, clean .gitignore
 
 ### Phase 16: Align E2E Flows Dispatch Contract
 **Goal**: SKILL.md Step 4 dispatch, e2e-flows.md agent input contract, and actual behavior all agree on the same tag set
@@ -172,5 +172,5 @@ Note: Phase 12 depends only on Phase 9 and can run after Phase 9 completes, pote
 | 12.1. /case Technology Neutralization | v2.0 | 2/2 | Complete    | 2026-04-01 |
 | 13. Verification | v2.0 | 2/2 | Complete    | 2026-04-02 |
 | 14. Cross-Unit Flows | v2.0 | 2/2 | Complete    | 2026-04-02 |
-| 15. Fix Artifact Paths and Remove Stale Doc | v2.0 | 0/1 | Planned | — |
+| 15. Fix Artifact Paths and Remove Stale Doc | v2.0 | 1/1 | Complete   | 2026-04-02 |
 | 16. Align E2E Flows Dispatch Contract | v2.0 | 0/0 | Pending | — |

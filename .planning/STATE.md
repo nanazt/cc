@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Universal Consolidation
 status: verifying
-stopped_at: Phase 15 context gathered
-last_updated: "2026-04-02T14:49:58.681Z"
-last_activity: "2026-04-02 - Completed quick task 260402-rc9: Fix remaining technology bias"
+stopped_at: Completed 15-artifact-paths-cleanup plan 01
+last_updated: "2026-04-02T15:11:26.927Z"
+last_activity: 2026-04-02
 progress:
   total_phases: 9
-  completed_phases: 7
-  total_plans: 15
-  completed_plans: 15
+  completed_phases: 8
+  total_plans: 16
+  completed_plans: 16
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-31)
 
 **Core value:** Consolidate phase-scoped planning decisions into persistent spec files as authoritative source of truth. Project-type agnostic.
-**Current focus:** Phase 14 — cross-unit-flows
+**Current focus:** Phase 15 — artifact-paths-cleanup
 
 ## Current Position
 
-Phase: 14
-Plan: Not started
+Phase: 15 (artifact-paths-cleanup) — EXECUTING
+Plan: 1 of 1
 Status: Phase complete — ready for verification
-Last activity: 2026-04-02 - Completed quick task 260402-rc9: Fix remaining technology bias
+Last activity: 2026-04-02
 
 Progress: [..........] 0%
 
@@ -67,6 +67,7 @@ Progress: [..........] 0%
 | Phase 13-verification P02 | 3 | 2 tasks | 16 files |
 | Phase 14-cross-unit-flows P02 | 10 | 2 tasks | 7 files |
 | Phase 14-cross-unit-flows P01 | 8 | 2 tasks | 6 files |
+| Phase 15-artifact-paths-cleanup P01 | 3 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -123,6 +124,8 @@ Recent decisions affecting current work:
 - [Phase 14-cross-unit-flows]: Structured Dependencies format with bold component name as parsing anchor replaces NLP-dependent prose scanning for deterministic E2E flow discovery
 - [Phase 14-cross-unit-flows]: External dependencies use plain text without bold formatting so they are excluded from flow discovery
 - [Phase 14-cross-unit-flows]: IMPL-SPEC references replaced with MODEL.md and agent frontmatter as current authoritative sources
+- [Phase 15-artifact-paths-cleanup]: Hard-delete IMPL-SPEC.md with no redirect stub — MODEL.md and agent frontmatter are already the authoritative sources
+- [Phase 15-artifact-paths-cleanup]: 7 mechanical .planning/specs/ -> specs/ replacements in SKILL.md; zero judgment required
 
 ### Roadmap Evolution
 
@@ -147,6 +150,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02T14:49:58.678Z
-Stopped at: Phase 15 context gathered
-Resume file: .planning/phases/15-artifact-paths-cleanup/15-CONTEXT.md
+Last session: 2026-04-02T15:11:26.925Z
+Stopped at: Completed 15-artifact-paths-cleanup plan 01
+Resume file: None
