@@ -155,6 +155,22 @@ cckit is a **plugin installed into arbitrary host projects**. Every artifact it 
 Full details: `docs/STACK.md`
 <!-- GSD:stack-end -->
 
+## Commands
+
+```bash
+# Run all tests
+deno test --allow-read --allow-write tools/
+
+# Parse a schema file
+deno run --allow-read tools/schema-parser.ts .planning/consolidation.schema.md
+
+# Bootstrap a new schema
+deno run --allow-read --allow-write tools/schema-bootstrap.ts .planning/consolidation.schema.md
+
+# Hash markdown sections
+deno run --no-lock --allow-read tools/hash-sections.ts <file>...
+```
+
 <!-- GSD:conventions-start source:CONVENTIONS.md -->
 ## Conventions
 
