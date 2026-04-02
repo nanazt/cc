@@ -49,7 +49,7 @@ Each E2E flow file lives at `specs/e2e/{flow-name}.md` and contains exactly thes
 
 | # | From | To | Action | Data | Ref |
 |---|------|----|--------|------|-----|
-| 1 | {caller} | {component} | {operation or HTTP call} | {key fields} | {Component.Op} |
+| 1 | {caller} | {component} | {operation} | {key fields} | {Component.Op} |
 | 2 | {component} | {component} | {operation} | {key fields} | {component}/cases.md#{Component.Op} |
 ```
 

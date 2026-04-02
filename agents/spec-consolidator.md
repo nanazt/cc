@@ -59,6 +59,8 @@ Last consolidated: Phase {id} ({YYYY-MM-DD})
 
 Replace `{Component}` with the component name (title-cased for display). Replace `{prefix}` with the `<rule_prefix>` value.
 
+**Dependencies section format:** When writing the Dependencies section, use structured entries for cross-component references: `- **{component-name}** -- {description}`. The bold component name is the parsing anchor for flow discovery. External dependencies (libraries, databases, third-party services) use plain text without bold formatting.
+
 ### cases.md
 
 ```markdown

@@ -175,7 +175,7 @@ Check `meta.e2eFlows` from Step 1.
 - **If false:** Skip Steps 3.5 and 4 entirely. Log: "E2E flows disabled in schema. Skipping."
 - **If true:** Proceed with flow discovery:
   1. Scan existing `specs/e2e/` for current flow files.
-  2. For each changed component, check Dependencies section for cross-component references.
+  2. For each changed component, parse Dependencies section for structured cross-component entries. Look for bold component names matching the pattern `- **{name}** --`. Each bold name that matches a known component from the schema is a cross-component dependency. Ignore non-bold entries (external dependencies).
   3. New flow candidates → AskUserQuestion for confirmation: "New E2E flow candidates detected: {list}. Create these? (confirm / modify / skip)"
   4. Build `<existing_flows>` and `<new_flows>` lists.
 

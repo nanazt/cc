@@ -69,6 +69,24 @@ These sections are included or excluded by the consolidation agent based on natu
 
 All 7 mandatory sections produce meaningful content for web service, CLI tool, and library project types. Conditional sections appropriately skip for stateless or eventless components. See `docs/examples/` for concrete proof across 3 project types.
 
+### Dependencies Format
+
+The Dependencies section uses a structured format for cross-component references. Each dependency is a bullet with a bold component name followed by a description:
+
+```markdown
+## Dependencies
+- **{component-name}** -- {what this component requires from it}
+```
+
+Example:
+```markdown
+## Dependencies
+- **auth** -- caller identity and session validation
+- **notification** -- sends confirmation after account changes
+```
+
+The bold component name (`**{name}**`) is the parsing anchor. SKILL.md Step 3.5 uses this format to discover cross-component flows deterministically. Free-text prose dependencies (external systems, libraries) do not use bold formatting and are ignored by flow discovery.
+
 ---
 
 ## Section Overrides
