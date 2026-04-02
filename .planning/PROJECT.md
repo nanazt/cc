@@ -2,49 +2,42 @@
 
 ## What This Is
 
-A personal Claude Code toolkit that packages skills, agents, and behavioral directives for installation into arbitrary host projects. Currently ships `/case` (behavioral case discovery) and `/consolidate` (spec consolidation after phase ship) as GSD workflow extensions: `discuss -> /case -> plan -> execute -> verify -> ship -> /consolidate`.
+A personal Claude Code toolkit that packages skills, agents, and behavioral directives for installation into arbitrary host projects. Ships `/case` (behavioral case discovery) and `/consolidate` (spec consolidation after phase ship) as GSD workflow extensions: `discuss -> /case -> plan -> execute -> verify -> ship -> /consolidate`.
 
 ## Core Value
 
 Encode behavioral quality standards as installable artifacts — so projects get consistent case discovery, spec consolidation, and code conventions without reinventing them. All artifacts must be project-type agnostic.
 
-## Current Milestone: v2.0 Universal Consolidation
+## Current State
 
-**Goal:** Redesign consolidate v2 pipeline and /case skill to be truly project-type-agnostic — no fixed archetypes, no service assumptions.
+Shipped v0.1.0 Universal Consolidation milestone (2026-04-03).
 
-**Target features:**
-- `/consolidate` v2 with extensible/user-defined consolidation model (replaces 3 fixed archetypes)
-- Consolidation unit redesign — define what gets consolidated when "per-service" is not the assumption
-- `/case` review and fix for any service-biased language/structure
-- IMPL-SPEC rewrite reflecting universal design
-- Hash tool carry over from v1.0 (already complete, already universal)
+**Delivered:**
+- `/consolidate` v2 with extensible user-defined consolidation model (schema-driven, no fixed archetypes)
+- `/case` v2 with universal vocabulary, PR/TR classification, supersession metadata, technology-neutral placeholders
+- Schema system: bootstrap tool + AST-based parser (`schema-bootstrap.ts`, `schema-parser.ts`)
+- Verification agent (`spec-verifier`) with 27 schema-parameterized checks
+- Cross-unit E2E flow pipeline with opt-in schema flag and hash-based change detection
+- Hash tool (v1.0 carry-over): Deno SHA-256 section hashing with 10 test cases
+
+**Codebase:** 52 files (46 md + 6 ts), ~5,583 LOC. Runtime: Deno.
 
 ## Requirements
 
 ### Validated
 
-- `/case` skill working (migrated from madome) — S/F/E table discovery, CASE-SCRATCH.md and CASES.md production
-- `case-briefer` agent working — extracts operations from phase planning documents
-- `case-validator` agent working — validates CASES.md structure and completeness
-- hash-sections.ts — Validated in Phase 1: Hash Tool (10/10 tests pass, all 8 requirements verified)
-- hash-sections_test.ts — Validated in Phase 1: Hash Tool (HASH-07, TEST-04)
+- ✓ hash-sections.ts — deterministic SHA-256/8 section hashing (10/10 tests) — v0.0.1
+- ✓ Consolidation model redesign — project-type-agnostic unit and structure — v0.1.0
+- ✓ Schema system — bootstrap, parser, override syntax, conditional sections — v0.1.0
+- ✓ Consolidation pipeline — schema-driven orchestrator, spec-consolidator, e2e-flows agents — v0.1.0
+- ✓ /case skill — universal vocabulary, PR/TR classification, supersession, OR-N prefix — v0.1.0
+- ✓ /case technology neutralization — structural placeholders, open formats, no domain bias — v0.1.0
+- ✓ Verification — schema-parameterized checks, no false positives on non-service projects — v0.1.0
+- ✓ Cross-unit flows — opt-in E2E generation, structured Dependencies, hash change detection — v0.1.0
 
-### Active (v2.0)
+### Active
 
-- [x] Consolidation model redesign — project-type-agnostic unit and structure (replaces fixed archetypes) — Validated in Phase 9: Universal Model Design
-- [x] Consolidate v2 SKILL.md — orchestrator pipeline with schema-driven dispatch — Validated in Phase 11: Consolidation Pipeline
-- [x] Consolidation agent — merge rules, promotion, supersession handling (universal) — Validated in Phase 11: Consolidation Pipeline
-- [x] Verification agent — read-only spec verification (universal) — Validated in Phase 13: Verification
-- [x] Template/schema system — extensible, user-defined (replaces 3 fixed archetype templates) — Validated in Phase 10: Schema System
-- [x] /case review — remove service-biased language and assumptions — Validated in Phase 12: /case Updates; technology neutralization completed in Phase 12.1
-- [x] /case update: PR/TR rule distinction (discuss + finalize classification) — Validated in Phase 12: /case Updates
-- [x] /case update: Superseded Operations and Rules sections — Validated in Phase 12: /case Updates
-- [x] /case update: OR-N prefix natively (replacing R-N) — Validated in Phase 12: /case Updates
-- [x] case-briefer update: specs/ priority lookup with phase directory fallback — Validated in Phase 12: /case Updates
-- [x] case-validator update: TR/OR recognition, supersession sections — Validated in Phase 12: /case Updates
-- [x] IMPL-SPEC rewrite reflecting universal design — Validated in Phase 11: Consolidation Pipeline
-- [x] Test fixtures for skill/agent validation — Validated in Phase 13: Verification
-- [x] Cross-component E2E flow pipeline — schema-driven opt-in, structured Dependencies, universal flow format — Validated in Phase 14: Cross-Unit Flows
+(No active milestone — next milestone not yet defined)
 
 ### Out of Scope
 
@@ -52,16 +45,20 @@ Encode behavioral quality standards as installable artifacts — so projects get
 - `/gsd:next` integration — manual invocation only
 - Spec-vs-code drift detection (Layer 3 verification) — deferred to future gsd:verify expansion
 - Rule tier rename migration (SR->GR, SvcR->SR in existing projects) — separate atomic task
+- Fixed archetype templates — violates technology neutrality, replaced by user-defined schema
+- Keyword-based service classification — masks structural problems in phase documents
+- Case-level merge (within operations) — /case produces complete per-operation specs
+- Automatic PR/TR classification — consolidator cannot make judgment calls
+- Manual spec file editing — specs must be machine-maintained for consistency
 
 ## Context
 
 - Plugin project lives at `/Users/syr/Developments/cckit`, installed into host projects' `.claude/` directory
-- GSD conventions assumed: CONTEXT.md, ROADMAP.md, phase directory structure, PROJECT.md with service topology
-- `/case` already produces CASE-SCRATCH.md -> CASES.md pipeline; consolidate v2 consumes the finalized CASES.md
-- v1 consolidate skill exists but was never executed — v2 is a full rewrite, not incremental update
-- MODEL.md and agent frontmatter are the authoritative sources for consolidate v2 design (IMPL-SPEC.md deleted in Phase 15)
-- Reference implementation patterns exist in madome project's case-briefer and case-validator agents
+- GSD conventions assumed: CONTEXT.md, ROADMAP.md, phase directory structure, PROJECT.md
+- `/case` produces CASE-SCRATCH.md -> CASES.md pipeline; `/consolidate` consumes the finalized CASES.md
+- MODEL.md and agent frontmatter are the authoritative sources for consolidation pipeline design (IMPL-SPEC.md deleted)
 - Hash tool requires Deno runtime and npm packages (unified, remark-parse) — first run needs network
+- All v0.1.0 requirements (30/30) validated and shipped
 
 ## Constraints
 
@@ -75,12 +72,17 @@ Encode behavioral quality standards as installable artifacts — so projects get
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| AST-based hashing over manual regex | remark-parse handles all CommonMark edge cases (fenced blocks, setext headers) automatically | Validated Phase 1 |
-| Orchestrator computes hashes, E2E agent compares only | Single source of truth; avoids agent-side non-deterministic normalization | Validated Phase 11 |
-| 2-step component discovery (no keyword fallback) | Keyword guessing masks structural problems in phase documents | Validated Phase 11 |
-| PR mechanically promoted to CR (no filtering) | Consolidator cannot make judgment calls; /case finalizes PR/TR before consolidation | Validated Phase 11 |
-| Separate test fixtures (not madome dry-run) | Isolated, reproducible tests independent of any host project state | Validated Phase 1 |
-| Installation method deferred | Need research on global vs project install options before committing | -- Pending |
+| AST-based hashing over manual regex | remark-parse handles all CommonMark edge cases | ✓ Good |
+| Orchestrator computes hashes, E2E agent compares only | Single source of truth; avoids agent-side non-determinism | ✓ Good |
+| 2-step component discovery (no keyword fallback) | Keyword guessing masks structural problems | ✓ Good |
+| PR mechanically promoted to CR (no filtering) | Consolidator cannot make judgment calls | ✓ Good |
+| Separate test fixtures (not madome dry-run) | Isolated, reproducible tests | ✓ Good |
+| Schema file over template files | Explicit unit registry, configurable naming, single source of truth | ✓ Good |
+| Component as universal unit | User-named, no predefined categories, works for any project type | ✓ Good |
+| 7+2 section structure | 7 mandatory + 2 conditional covers all project types without bias | ✓ Good |
+| Structural placeholders over domain examples | Teaches format/quality bar; Claude adapts to host project | ✓ Good |
+| IMPL-SPEC.md deleted | MODEL.md and agent frontmatter are authoritative; IMPL-SPEC was stale | ✓ Good |
+| Installation method deferred | Need research on global vs project install options | — Pending |
 
 ## Evolution
 
@@ -100,4 +102,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 — Phase 16 complete (e2e-dispatch-alignment: aligned SKILL.md Step 4 dispatch table to e2e-flows agent contract, closed integration gap INT-01). All v2.0 milestone phases complete.*
+*Last updated: 2026-04-03 after v0.1.0 milestone completion*
