@@ -147,4 +147,4 @@ Note: Phase 12 depends only on Phase 9 and can run after Phase 9 completes, pote
 | 12. /case Updates | v2.0 | 2/2 | Complete    | 2026-04-01 |
 | 12.1. /case Technology Neutralization | v2.0 | 2/2 | Complete    | 2026-04-01 |
 | 13. Verification | v2.0 | 2/2 | Complete    | 2026-04-02 |
-| 14. Cross-Unit Flows | v2.0 | 2/2 | Complete   | 2026-04-02 |
+| 14. Cross-Unit Flows | v2.0 | 2/2 | Complete    | 2026-04-02 |
