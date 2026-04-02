@@ -3,7 +3,7 @@
 ## Milestones
 
 - [x] **v1.0 Hash Tool** - Phase 1 (shipped)
-- [ ] **v2.0 Universal Consolidation** - Phases 9-14 (in progress)
+- [ ] **v2.0 Universal Consolidation** - Phases 9-16 (in progress)
 
 ## Phases
 
@@ -30,6 +30,8 @@ Phases 2-8 from v1.0 are **superseded** by v2.0 requirements. They assumed fixed
 - [x] **Phase 12: /case Updates** - Remove service bias, add PR/TR classification, supersession sections, OR-N prefix, specs/ lookup (completed 2026-04-01)
 - [x] **Phase 13: Verification** - Universal verifier with schema-parameterized checks and no false positives on non-service projects (completed 2026-04-02)
 - [x] **Phase 14: Cross-Unit Flows** - Opt-in E2E flow generation with universal unit terminology and hash-based change detection (completed 2026-04-02)
+- [ ] **Phase 15: Fix Artifact Paths and Remove Stale Doc** - Fix specs/ path mismatch in SKILL.md and delete stale IMPL-SPEC.md (gap closure)
+- [ ] **Phase 16: Align E2E Flows Dispatch Contract** - Resolve 3-way dispatch tag mismatch between SKILL.md, e2e-flows agent, and plan (gap closure)
 
 ## Phase Details
 
@@ -132,10 +134,29 @@ Plans:
 - [x] 14-01-PLAN.md -- Structured Dependencies format, e2e-flows bias fix, IMPL-SPEC reference cleanup
 - [x] 14-02-PLAN.md -- Test fixtures for FLOW validation (schemas, E2E flow file, Dependencies format adoption)
 
+### Phase 15: Fix Artifact Paths and Remove Stale Doc
+**Goal**: Production artifacts reference correct paths and stale documentation is removed
+**Depends on**: None (mechanical fixes to existing files)
+**Requirements**: Addresses integration gaps INT-02 (PIPE-01, PIPE-05, CASE-08) and INT-03 (PIPE-06)
+**Gap Closure**: Closes INT-02, INT-03 from v2.0 milestone audit
+**Success Criteria** (what must be TRUE):
+  1. SKILL.md contains zero occurrences of `.planning/specs/` -- all references use `specs/` (project-root relative)
+  2. IMPL-SPEC.md is deleted -- no stale documentation remains that contradicts current pipeline behavior
+
+### Phase 16: Align E2E Flows Dispatch Contract
+**Goal**: SKILL.md Step 4 dispatch, e2e-flows.md agent input contract, and actual behavior all agree on the same tag set
+**Depends on**: Phase 15 (path fixes should land first so dispatch alignment works against correct paths)
+**Requirements**: Addresses integration gap INT-01 (FLOW-01, FLOW-02, FLOW-03, FLOW-04)
+**Gap Closure**: Closes INT-01 and partial flow "/consolidate with e2e-flows enabled"
+**Success Criteria** (what must be TRUE):
+  1. SKILL.md Step 4 dispatch tags and e2e-flows.md Input Contract list the same tag set
+  2. The chosen tag set includes all information the agent needs to produce correct output
+  3. No phantom tags exist (tags listed in one place but unused/undefined elsewhere)
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 9 -> 10 -> 11 -> 12 -> 12.1 -> 13 -> 14
+Phases execute in numeric order: 9 -> 10 -> 11 -> 12 -> 12.1 -> 13 -> 14 -> 15 -> 16
 Note: Phase 12 depends only on Phase 9 and can run after Phase 9 completes, potentially parallel with Phases 10-11.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -148,3 +169,5 @@ Note: Phase 12 depends only on Phase 9 and can run after Phase 9 completes, pote
 | 12.1. /case Technology Neutralization | v2.0 | 2/2 | Complete    | 2026-04-01 |
 | 13. Verification | v2.0 | 2/2 | Complete    | 2026-04-02 |
 | 14. Cross-Unit Flows | v2.0 | 2/2 | Complete    | 2026-04-02 |
+| 15. Fix Artifact Paths and Remove Stale Doc | v2.0 | 0/0 | Pending | — |
+| 16. Align E2E Flows Dispatch Contract | v2.0 | 0/0 | Pending | — |
