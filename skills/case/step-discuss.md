@@ -231,7 +231,7 @@ If a CB affects multiple operations, note all affected ops. The developer may al
 ```
 Standard infrastructure probes:
 - Database unavailable -> [specific status] (ErrorName)
-- Downstream service timeout -> [specific status] (ErrorName)
+- External dependency timeout -> [specific status] (ErrorName)
 - What specific error does the caller see?
 
 These are usually the same across operations. Confirm or adjust.

@@ -57,7 +57,7 @@ When a spec exists:
 
 Scan CONTEXT.md decisions as the primary source, supplemented by ROADMAP.md success criteria and REQUIREMENTS.md, for all callable interfaces this phase defines. Operations may appear as:
 - Interface definition tables (API routes, commands, event handlers, etc.)
-- Service contract definitions (RPC methods, message handlers, etc.)
+- Interface contract definitions (exported functions, protocol methods, handler registrations, etc.)
 - Workflow step descriptions
 - Any other pattern that represents "caller does X, system responds with Y"
 
