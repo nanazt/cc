@@ -18,10 +18,10 @@ Requirements for the Portable Conventions milestone. Each maps to roadmap phases
 
 ### Convention Architecture (ARCH)
 
-- [ ] **ARCH-01**: Each convention has base (tech-neutral) + tech pack (tech-specific) layers in separate files
-- [ ] **ARCH-02**: Tech packs are organized per-technology, opt-in via config, discoverable
-- [ ] **ARCH-03**: Conventions only teach what LLM doesn't already know or where user style diverges from defaults
-- [ ] **ARCH-04**: Tech-neutral base conventions stand alone with real value — not empty abstraction
+- [ ] **ARCH-01**: Conventions use a layered structure: base (tech-neutral, `CONVENTION.md`) and language-specific (`{lang}.md`) in separate files within the same `conventions/{area}/` directory. Base is optional — only created when it passes the delta test (ARCH-03)
+- [ ] **ARCH-02**: Language-specific conventions are named by language (`rust.md`, `typescript.md`), discoverable by directory scan, and opt-in via installer selection
+- [ ] **ARCH-03**: Conventions only teach what LLM doesn't already know or where user style diverges from defaults (delta test, embedded in /convention skill authoring process)
+- [ ] **ARCH-04**: When a base convention exists, it stands alone with real value — not empty abstraction. If it cannot pass the delta test, it is omitted and only language-specific conventions are shipped
 
 ### /convention Skill (SKILL)
 
@@ -43,7 +43,7 @@ Requirements for the Portable Conventions milestone. Each maps to roadmap phases
 - [ ] **SEC-01**: Security basics convention (secrets, validation, OWASP)
 - [ ] **ERR-01**: Error handling patterns convention (errors, logging, failures)
 
-### Conventions — Rust Tech Pack (authored via /convention)
+### Conventions — Rust Language-Specific (authored via /convention)
 
 - [ ] **CODE-R01**: Rust coding conventions (idioms, patterns, clippy rules)
 - [ ] **TEST-R01**: Rust test conventions with framework recommendation
@@ -53,13 +53,13 @@ Requirements for the Portable Conventions milestone. Each maps to roadmap phases
 
 Deferred to later phases in this open milestone or subsequent milestones.
 
-### Additional Tech Packs
+### Additional Rust Language-Specific Conventions
 
 - **DOC-R01**: Rust documentation conventions (rustdoc, docs.rs)
 - **SEC-R01**: Rust security conventions
 - **WFLOW-R01**: Rust workflow conventions (cargo, clippy CI)
 
-### Other Technology Tech Packs
+### Other Language-Specific Conventions
 
 - **CODE-T01**: TypeScript coding conventions
 - **CODE-P01**: Python coding conventions
@@ -121,4 +121,4 @@ Deferred to later phases in this open milestone or subsequent milestones.
 
 ---
 *Requirements defined: 2026-04-03*
-*Last updated: 2026-04-03 after roadmap creation*
+*Last updated: 2026-04-03 after Phase 17 discuss-phase (terminology and base optionality updates)*
