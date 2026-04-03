@@ -166,7 +166,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22 -> 23
 | 14. Cross-Unit Flows | v0.1.0 | 2/2 | Complete | 2026-04-02 |
 | 15. Fix Artifact Paths and Remove Stale Doc | v0.1.0 | 1/1 | Complete | 2026-04-02 |
 | 16. Align E2E Flows Dispatch Contract | v0.1.0 | 1/1 | Complete | 2026-04-02 |
-| 17. Convention Architecture | v0.2.0 | 1/1 | Complete   | 2026-04-03 |
+| 17. Convention Architecture | v0.2.0 | 1/1 | Complete    | 2026-04-03 |
 | 18. /convention Skill | v0.2.0 | 0/? | Not started | - |
 | 19. First Convention — Commit | v0.2.0 | 0/? | Not started | - |
 | 20. Installation Infrastructure | v0.2.0 | 0/? | Not started | - |
