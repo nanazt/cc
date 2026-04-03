@@ -26,10 +26,10 @@ Requirements for the Portable Conventions milestone. Each maps to roadmap phases
 ### /convention Skill (SKILL)
 
 - [ ] **SKILL-01**: Skill researches best practices for a given convention area
-- [ ] **SKILL-02**: Skill compares and recommends libraries for tech pack conventions
+- [ ] **SKILL-02**: Skill compares and recommends libraries for language-specific conventions
 - [ ] **SKILL-03**: Skill identifies what LLM already knows vs what needs explicit teaching
 - [ ] **SKILL-04**: Skill collects user's personal style preferences via interactive questioning
-- [ ] **SKILL-05**: Skill generates convention file following ARCH rules (base/tech pack separation)
+- [ ] **SKILL-05**: Skill generates convention file following ARCH rules (base/language-specific separation)
 - [ ] **SKILL-06**: Skill validates tech-neutrality for base conventions
 - [ ] **SKILL-07**: Skill works in any project, not just cckit (for project-specific conventions)
 
@@ -121,4 +121,4 @@ Deferred to later phases in this open milestone or subsequent milestones.
 
 ---
 *Requirements defined: 2026-04-03*
-*Last updated: 2026-04-03 after Phase 17 discuss-phase (terminology and base optionality updates)*
+*Last updated: 2026-04-03 after Phase 17 plan-phase (retired obsolete terminology, aligned with CONTEXT.md D-27)*
