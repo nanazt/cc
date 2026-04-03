@@ -38,7 +38,7 @@ Full details: [milestones/v0.1.0-ROADMAP.md](milestones/v0.1.0-ROADMAP.md)
 
 **Milestone Goal:** Research-driven, high-quality conventions packaged as installable artifacts with selective project installation. Open milestone -- convention phases can be added later.
 
-- [ ] **Phase 17: Convention Architecture** — Define layered convention file structure (base + language-specific) and authoring principles
+- [x] **Phase 17: Convention Architecture** — Define layered convention file structure (base + language-specific) and authoring principles (completed 2026-04-03)
 - [ ] **Phase 18: /convention Skill** — Build the research-driven convention authoring tool
 - [ ] **Phase 19: First Convention — Commit** — Validate skill + architecture end-to-end with commit conventions
 - [ ] **Phase 20: Installation Infrastructure** — Plugin manifest and convention distribution mechanism
@@ -60,7 +60,7 @@ Full details: [milestones/v0.1.0-ROADMAP.md](milestones/v0.1.0-ROADMAP.md)
 **Plans**: 1 plan
 
 Plans:
-- [ ] 17-01-PLAN.md — Convention architecture document and requirements update
+- [x] 17-01-PLAN.md — Convention architecture document and requirements update
 
 ### Phase 18: /convention Skill
 **Goal**: A `/convention` skill exists that can research, author, and validate convention files following the architecture from Phase 17
@@ -74,6 +74,7 @@ Plans:
   5. The skill works when invoked from any project, not just cckit
 **Plans**: TBD
 **UI hint**: yes
+**Discuss notes**: Revisit D-01 boundary — are all conventions rules, or do some need to be skills (e.g., conventions requiring tool access or interactive workflows)?
 
 ### Phase 19: First Convention — Commit
 **Goal**: A complete commit message convention exists (base + no tech pack needed), authored via `/convention`, validating the entire authoring pipeline end-to-end
@@ -96,7 +97,7 @@ Plans:
   1. GSD commit command output reflects the host project's commit conventions
   2. Self-application verified on cckit itself
   3. Projects without conventions keep GSD default behavior
-**Plans:** 0 plans
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 19.1 to break down)
@@ -165,7 +166,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22 -> 23
 | 14. Cross-Unit Flows | v0.1.0 | 2/2 | Complete | 2026-04-02 |
 | 15. Fix Artifact Paths and Remove Stale Doc | v0.1.0 | 1/1 | Complete | 2026-04-02 |
 | 16. Align E2E Flows Dispatch Contract | v0.1.0 | 1/1 | Complete | 2026-04-02 |
-| 17. Convention Architecture | v0.2.0 | 0/1 | Planning | - |
+| 17. Convention Architecture | v0.2.0 | 1/1 | Complete   | 2026-04-03 |
 | 18. /convention Skill | v0.2.0 | 0/? | Not started | - |
 | 19. First Convention — Commit | v0.2.0 | 0/? | Not started | - |
 | 20. Installation Infrastructure | v0.2.0 | 0/? | Not started | - |

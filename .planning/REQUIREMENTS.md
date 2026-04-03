@@ -18,10 +18,10 @@ Requirements for the Portable Conventions milestone. Each maps to roadmap phases
 
 ### Convention Architecture (ARCH)
 
-- [ ] **ARCH-01**: Conventions use a layered structure: base (tech-neutral, `CONVENTION.md`) and language-specific (`{lang}.md`) in separate files within the same `conventions/{area}/` directory. Base is optional — only created when it passes the delta test (ARCH-03)
-- [ ] **ARCH-02**: Language-specific conventions are named by language (`rust.md`, `typescript.md`), discoverable by directory scan, and opt-in via installer selection
-- [ ] **ARCH-03**: Conventions only teach what LLM doesn't already know or where user style diverges from defaults (delta test, embedded in /convention skill authoring process)
-- [ ] **ARCH-04**: When a base convention exists, it stands alone with real value — not empty abstraction. If it cannot pass the delta test, it is omitted and only language-specific conventions are shipped
+- [x] **ARCH-01**: Conventions use a layered structure: base (tech-neutral, `CONVENTION.md`) and language-specific (`{lang}.md`) in separate files within the same `conventions/{area}/` directory. Base is optional — only created when it passes the delta test (ARCH-03)
+- [x] **ARCH-02**: Language-specific conventions are named by language (`rust.md`, `typescript.md`), discoverable by directory scan, and opt-in via installer selection
+- [x] **ARCH-03**: Conventions only teach what LLM doesn't already know or where user style diverges from defaults (delta test, embedded in /convention skill authoring process)
+- [x] **ARCH-04**: When a base convention exists, it stands alone with real value — not empty abstraction. If it cannot pass the delta test, it is omitted and only language-specific conventions are shipped
 
 ### /convention Skill (SKILL)
 
@@ -86,10 +86,10 @@ Deferred to later phases in this open milestone or subsequent milestones.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ARCH-01 | Phase 17 | Pending |
-| ARCH-02 | Phase 17 | Pending |
-| ARCH-03 | Phase 17 | Pending |
-| ARCH-04 | Phase 17 | Pending |
+| ARCH-01 | Phase 17 | Complete |
+| ARCH-02 | Phase 17 | Complete |
+| ARCH-03 | Phase 17 | Complete |
+| ARCH-04 | Phase 17 | Complete |
 | SKILL-01 | Phase 18 | Pending |
 | SKILL-02 | Phase 18 | Pending |
 | SKILL-03 | Phase 18 | Pending |

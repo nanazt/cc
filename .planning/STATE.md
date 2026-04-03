@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.2.0
 milestone_name: Portable Conventions
-status: planning
-stopped_at: Phase 17 context gathered
-last_updated: "2026-04-03T08:31:02.447Z"
-last_activity: 2026-04-03 — Roadmap created for v0.2.0 Portable Conventions
+status: verifying
+stopped_at: Completed 17-convention-architecture plan 01
+last_updated: "2026-04-03T10:04:13.582Z"
+last_activity: 2026-04-03
 progress:
   total_phases: 8
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-03)
 
 **Core value:** Encode behavioral quality standards as installable artifacts — project-type agnostic.
-**Current focus:** Phase 17 — Convention Architecture
+**Current focus:** Phase 17 — convention-architecture
 
 ## Current Position
 
-Phase: 17 (Convention Architecture) — first of 7 in v0.2.0
-Plan: —
-Status: Ready to plan
-Last activity: 2026-04-03 — Roadmap created for v0.2.0 Portable Conventions
+Phase: 17 (convention-architecture) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-04-03
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -47,6 +47,7 @@ Progress: [░░░░░░░░░░] 0%
 | - | - | - | - |
 
 *Updated after each plan completion*
+| Phase 17-convention-architecture P01 | 3min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -57,6 +58,9 @@ Recent decisions affecting current work:
 
 - Research recommends native Claude Code plugin system over custom Deno installer — affects INST requirements implementation
 - Convention architecture uses base (tech-neutral) + tech pack (tech-specific) layered structure
+- [Phase 17-convention-architecture]: Convention files are Claude Code rules (.claude/rules/), not skills — rules are passive behavioral guidance
+- [Phase 17-convention-architecture]: Base convention (CONVENTION.md) is optional — only created when it passes the delta test
+- [Phase 17-convention-architecture]: paths frontmatter requires unquoted CSV format plus alwaysApply: false for lazy loading (Claude Code known behavior)
 
 ### Pending Todos
 
@@ -73,6 +77,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T08:31:02.445Z
-Stopped at: Phase 17 context gathered
-Resume file: .planning/phases/17-convention-architecture/17-CONTEXT.md
+Last session: 2026-04-03T10:04:13.580Z
+Stopped at: Completed 17-convention-architecture plan 01
+Resume file: None
