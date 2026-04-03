@@ -108,6 +108,14 @@ None — no external service configuration required.
 - Phase 18 executor should read `docs/CONVENTIONS.md` before implementing the skill — particularly the delta test definition and frontmatter format sections
 - REQUIREMENTS.md is clean of obsolete terminology
 
+## Self-Check: PASSED
+
+- `docs/CONVENTIONS.md` — FOUND (387 lines)
+- `.planning/REQUIREMENTS.md` — FOUND (zero "tech pack" occurrences)
+- `.planning/phases/17-convention-architecture/17-01-SUMMARY.md` — FOUND
+- Commit `8bbc905` — FOUND
+- Commit `2031e21` — FOUND
+
 ---
 
 *Phase: 17-convention-architecture*
