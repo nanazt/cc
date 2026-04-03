@@ -8,19 +8,17 @@ A personal Claude Code toolkit that packages skills, agents, and behavioral dire
 
 Encode behavioral quality standards as installable artifacts — so projects get consistent case discovery, spec consolidation, and code conventions without reinventing them. All artifacts must be project-type agnostic.
 
-## Current State
+## Current Milestone: v0.2.0 Portable Conventions
 
-Shipped v0.1.0 Universal Consolidation milestone (2026-04-03).
+**Goal:** Research-driven, high-quality conventions packaged as installable artifacts with selective project installation via Deno remote script.
 
-**Delivered:**
-- `/consolidate` v2 with extensible user-defined consolidation model (schema-driven, no fixed archetypes)
-- `/case` v2 with universal vocabulary, PR/TR classification, supersession metadata, technology-neutral placeholders
-- Schema system: bootstrap tool + AST-based parser (`schema-bootstrap.ts`, `schema-parser.ts`)
-- Verification agent (`spec-verifier`) with 27 schema-parameterized checks
-- Cross-unit E2E flow pipeline with opt-in schema flag and hash-based change detection
-- Hash tool (v1.0 carry-over): Deno SHA-256 section hashing with 10 test cases
+**Target features:**
+- Installation infrastructure: Deno-based remote installer (`deno run https://...`), project-only (no global)
+- Config system: settings file for selective convention installation, self-applicable to cckit
+- Convention packages: coding, workflow, documentation, commit, test, project structure, security, AI collaboration, release/versioning, error handling — each individually researched
+- Open milestone: infrastructure first, conventions added incrementally as phases
 
-**Codebase:** 52 files (46 md + 6 ts), ~5,583 LOC. Runtime: Deno.
+**Previous:** Shipped v0.1.0 Universal Consolidation (2026-04-03) — 52 files, ~5,583 LOC.
 
 ## Requirements
 
@@ -37,7 +35,9 @@ Shipped v0.1.0 Universal Consolidation milestone (2026-04-03).
 
 ### Active
 
-(No active milestone — next milestone not yet defined)
+- [ ] Installation infrastructure (Deno remote script, project-only install)
+- [ ] Config system for selective convention installation
+- [ ] Convention packages (individually researched, added as phases)
 
 ### Out of Scope
 
@@ -102,4 +102,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after v0.1.0 milestone completion*
+*Last updated: 2026-04-03 after v0.2.0 milestone start*
