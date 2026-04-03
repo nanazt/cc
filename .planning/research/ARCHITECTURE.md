@@ -1,593 +1,536 @@
-# Architecture: Universal Consolidation Model
+# Architecture: Portable Convention Distribution
 
-**Domain:** Claude Code multi-agent skill pipeline (plugin toolkit)
-**Researched:** 2026-03-31
-**Confidence:** HIGH (derived from complete analysis of existing codebase, IMPL-SPEC.md, and all skill/agent definitions)
-**Supersedes:** Previous ARCHITECTURE.md (2026-03-30) which documented the v1 service-archetype model
+**Domain:** Convention packaging and installation for Claude Code toolkit (cckit)
+**Researched:** 2026-04-03
+**Confidence:** HIGH (based on official Claude Code plugin documentation, codebase analysis, and verified .claude/ directory structure)
 
 ## Executive Summary
 
-The current IMPL-SPEC.md and ROADMAP are built entirely around a "service archetype" model: 3 fixed templates (domain-service, gateway-bff, event-driven), per-service directory output (`specs/{service}/`), `{Service}.{Op}` naming, and classification via PROJECT.md service topology table. This model works for backend microservice projects but fails the technology neutrality test: "Could a CLI tool project, a design system, a library, or a documentation project install this and use it without editing the plugin?"
+cckit already ships skills (`skills/`) and agents (`agents/`) that Claude Code can consume. The v0.2.0 milestone adds a third artifact type: **conventions** -- behavioral rules, coding standards, and project structure guidelines that are installed into a host project's `.claude/` directory and consumed as CLAUDE.md instructions, skills, or hooks.
 
-The universal model replaces **fixed archetypes** with **user-defined consolidation units** and **user-defined section schemas**, while preserving the proven orchestrator-agent pipeline pattern and all merge/verification mechanics.
+The critical architectural insight is that Claude Code's **native plugin system** (`.claude-plugin/plugin.json` manifest, namespaced skills, plugin hooks, `bin/` directory, settings.json) is the correct distribution mechanism. cckit should be structured as a Claude Code plugin. This avoids building a custom installer script entirely -- Claude Code already handles installation, enabling/disabling, scoping (user/project/local), and namespacing. The "Deno remote installer" idea from the original milestone description should be replaced with native plugin distribution, optionally supplemented by a plugin marketplace entry.
+
+Conventions themselves are not a new artifact format. They are **skills with `user-invocable: false`** (background knowledge Claude loads automatically when relevant) and **hooks** (automated enforcement). A "commit convention" is a PreToolUse hook that validates commit messages + a skill with commit guidelines. A "coding convention" is a skill with coding standards that Claude loads when writing code. This maps perfectly to Claude Code's existing architecture.
+
+The self-application pattern (dogfooding) works naturally: cckit enables itself as a plugin via `--plugin-dir .` during development or by adding its own path to `enabledPlugins` in `.claude/settings.local.json`.
 
 ---
 
-## Question 1: What Replaces Fixed Archetype Templates?
+## Key Architectural Decision: Native Plugin vs Custom Installer
 
-### Problem
+### Recommendation: Native Claude Code Plugin
 
-The current design has 3 fixed template files:
-- `templates/domain-service.md` (8 sections: Domain Model, Adapter Contracts, Business Rules, ...)
-- `templates/gateway-bff.md` (7 sections: Route/Endpoint Table, Middleware Stack, ...)
-- `templates/event-driven.md` (7 sections: Event Subscriptions, Event Publications, ...)
+**Use Claude Code's native plugin system.** Do not build a custom Deno installer script.
 
-These encode backend-service assumptions into the plugin. A CLI tool has no "Route Table." A library has no "Event Subscriptions." A design system has no "Cross-Service Dependencies."
+### Evidence
 
-### Solution: Consolidation Schema File
+Claude Code's plugin system (documented at [code.claude.com/docs/en/plugins](https://code.claude.com/docs/en/plugins)) provides everything the v0.2.0 milestone requires:
 
-Replace the 3 fixed templates with a single **user-authored schema file** per host project: `.planning/consolidation.schema.md`.
+| Requirement | Plugin System Support |
+|---|---|
+| Selective installation | `enabledPlugins` in settings.json, per-plugin enable/disable |
+| Project-only (no global) | `--scope project` installs to `.claude/settings.json` |
+| Convention packaging | Skills (`user-invocable: false`) + hooks (`hooks/hooks.json`) |
+| Self-application | `--plugin-dir .` or `enabledPlugins` entry |
+| Versioning | `plugin.json` version field, semver |
+| Namespacing | Automatic `cckit:skill-name` prefix |
+| Distribution | Plugin marketplace or `--plugin-dir` for local |
 
-The host project defines its own consolidation units and their section structures. The plugin provides no built-in templates. Instead, it provides:
+A custom Deno installer would duplicate all of this and fight against Claude Code's expectations. The plugin system is the sanctioned mechanism for exactly this use case.
 
-1. **Schema format specification** -- how to write a valid schema file (documented in the /consolidate SKILL.md)
-2. **Starter examples** -- shipped as reference docs in `docs/examples/`, never auto-applied
+### What Changes from Original Milestone Description
 
-### Schema File Format
+| Original Plan | Revised Plan |
+|---|---|
+| Deno-based remote installer (`deno run https://...`) | Native plugin installation (`claude plugin install cckit@marketplace` or `--plugin-dir`) |
+| Custom config file for selective convention installation | Convention skills with `disable-model-invocation: false` + `paths` frontmatter for targeting |
+| Config file location and format | Standard `plugin.json` manifest + convention skills individually enableable |
+| Convention "packages" as separate entities | Convention skills within the plugin's `skills/` directory |
 
-```markdown
-# Consolidation Schema
+### What Stays the Same
 
-## Units
+- Conventions researched and authored individually (phased)
+- Technology-neutral and project-type-agnostic
+- Self-applicable to cckit
+- Deno runtime still used for existing tools (hash-sections.ts, schema-parser.ts)
+- Existing skills (`/case`, `/consolidate`) and agents unchanged
 
-| Unit | Directory | Description |
-|------|-----------|-------------|
-| auth | specs/auth | Authentication and session management |
-| cli-parser | specs/cli-parser | Argument parsing and validation |
-| renderer | specs/renderer | Output formatting subsystem |
+---
 
-## Sections: default
+## Component Architecture
 
-> Applied to all units unless overridden.
+### Directory Structure (cckit as Plugin)
 
-### Context Sections
-1. **Overview** -- What this unit does, its role in the system
-2. **Interface** -- Operations this unit exposes (inputs, outputs, contracts)
-3. **Rules** -- Business rules and constraints governing behavior
-4. **Error Categories** -- Error types this unit produces
-5. **Dependencies** -- What this unit requires from other units or external systems
-6. **Configuration** -- Environment variables and tunable parameters
+cckit needs a `.claude-plugin/plugin.json` manifest to become a plugin. The existing directory structure maps almost directly to the plugin layout:
 
-### Cases Sections
-- Per-operation sections using `## {Unit}.{Operation}` headings
-- Each contains: Unit Rules (UR-N), Operation Rules (OR-N), Side Effects, Cases table
-
-## Sections: renderer
-
-> Override for renderer unit (different structure needed).
-
-### Context Sections
-1. **Overview** -- What this unit does
-2. **Output Formats** -- Supported formats and their rendering rules
-3. **Theme System** -- Customization hooks and defaults
-4. **Dependencies** -- External rendering libraries
-5. **Configuration** -- Format defaults, color support detection
+```
+cckit/                              # Plugin root
+├── .claude-plugin/
+│   └── plugin.json                 # NEW: Plugin manifest
+├── skills/
+│   ├── case/                       # EXISTING: /cckit:case
+│   │   ├── SKILL.md
+│   │   ├── step-discuss.md
+│   │   ├── step-finalize.md
+│   │   └── step-init.md
+│   ├── consolidate/                # EXISTING: /cckit:consolidate
+│   │   └── SKILL.md
+│   ├── commit-conventions/         # NEW: Convention skill
+│   │   └── SKILL.md
+│   ├── coding-conventions/         # NEW: Convention skill
+│   │   └── SKILL.md
+│   ├── test-conventions/           # NEW: Convention skill
+│   │   └── SKILL.md
+│   └── [other-conventions]/        # NEW: Future convention skills
+│       └── SKILL.md
+├── agents/                         # EXISTING: unchanged
+│   ├── case-briefer.md
+│   ├── case-validator.md
+│   ├── e2e-flows.md
+│   ├── spec-consolidator.md
+│   └── spec-verifier.md
+├── hooks/                          # NEW: Plugin hooks directory
+│   └── hooks.json                  # Convention enforcement hooks
+├── bin/                            # NEW: CLI tools exposed to Bash
+│   └── (symlinks or wrappers)
+├── tools/                          # EXISTING: Deno runtime tools
+│   ├── hash-sections.ts
+│   ├── schema-bootstrap.ts
+│   └── schema-parser.ts
+├── docs/                           # EXISTING: unchanged
+├── directives/                     # EXISTING: can remain empty or hold raw content
+├── tests/                          # EXISTING: unchanged
+├── CLAUDE.md                       # EXISTING: project instructions
+└── .claude/                        # EXISTING: cckit's own Claude Code settings
+    ├── settings.json
+    └── settings.local.json
 ```
 
-### Why This Design
+### New Files Required
 
-**User defines the taxonomy.** The plugin never assumes what "kinds of things" exist in a project. A microservice project will define units that look like services. A CLI project will define units like "parser," "executor," "formatter." A library project might have a single unit.
+| File | Purpose | Priority |
+|---|---|---|
+| `.claude-plugin/plugin.json` | Plugin manifest -- makes cckit installable as a Claude Code plugin | Phase 1 (infrastructure) |
+| `hooks/hooks.json` | Convention enforcement hooks (commit validation, etc.) | Phase 1 (infrastructure) |
+| `skills/commit-conventions/SKILL.md` | Commit message conventions as background knowledge | Phase 2+ (individual conventions) |
+| `skills/coding-conventions/SKILL.md` | Coding standards as background knowledge | Phase 2+ |
+| `skills/[convention-name]/SKILL.md` | Each convention as a separate skill | Phase 2+ |
 
-**Default + override model.** Most projects have a dominant pattern (most units share the same section structure). The `default` sections apply unless a specific unit has an override. This avoids N copies of identical section lists.
+### Modified Files
 
-**Sections are just H2 headings.** The consolidator agent uses the section list to know what H2 headings to produce in `context.md`. The agent does not need to understand what "Domain Model" means vs "Output Formats" -- it extracts content from phase docs and organizes it under the specified headings.
+| File | Change | Priority |
+|---|---|---|
+| `.claude/settings.local.json` | Add cckit self-reference in `enabledPlugins` for dogfooding | Phase 1 |
+| `.gitignore` | No change needed -- `.claude/settings.local.json` already gitignored by Claude Code default behavior | -- |
 
-**No behavioral logic in the schema.** The schema defines structure, not rules. Merge rules (latest-wins, PR->SR promotion, supersession) are universal and live in the agent prompt, not in the schema.
+### Unchanged Files
 
-### What Stays, What Changes
-
-| Concept | v1 (Current IMPL-SPEC) | v2 (Universal) |
-|---------|------------------------|-----------------|
-| Template files | 3 fixed `.md` files in `templates/` | 1 user-authored `.planning/consolidation.schema.md` |
-| Section definitions | Hardcoded per archetype | User-defined per unit, with defaults |
-| Template selection | Orchestrator maps from PROJECT.md topology | Orchestrator reads schema file directly |
-| `templates/` directory | Required in plugin | Removed. `docs/examples/` has starter schemas |
-| Archetype concept | Core abstraction | Eliminated entirely |
-
-### Migration Path for Existing IMPL-SPEC
-
-- Delete `templates/` directory references from File Inventory
-- Delete "Three Archetypes" section entirely
-- Delete `<template_type>` from spec-consolidator input contract (replaced by `<sections>`)
-- Delete archetype determination from Step 1
-- Add schema file reading to Step 1
+All existing skills, agents, tools, docs, and tests remain unchanged. The plugin manifest wraps them; it does not restructure them.
 
 ---
 
-## Question 2: How Does the Orchestrator Classify/Dispatch Without Archetypes?
+## Convention Skill Format
 
-### Problem
+Conventions are skills with specific frontmatter patterns that distinguish them from action skills like `/case` and `/consolidate`.
 
-The current Step 1 uses a 2-step service classification:
-1. Scan CASES.md for `## {Service}.{Op}` headings, extract service names
-2. Scan CONTEXT.md for service names matching PROJECT.md topology
-Then maps each service to an archetype via PROJECT.md communication patterns.
+### Convention Skill Template
 
-Without archetypes, what drives classification and dispatch?
+```yaml
+---
+name: [convention-name]
+description: >
+  [Convention purpose]. Applies when [trigger conditions].
+  Loaded automatically when Claude is [working with relevant files/tasks].
+user-invocable: false
+disable-model-invocation: false
+paths: "**/*"
+---
 
-### Solution: Schema-Driven Unit Resolution
+# [Convention Name]
 
-The orchestrator no longer "classifies" units by type. Instead:
-
-**Step 1 (revised):**
-
-1. Read `.planning/consolidation.schema.md` for the unit registry.
-2. Scan CASES.md for `## {Unit}.{Op}` headings. Extract unique unit names from the prefix before the dot.
-3. Match extracted unit names against the schema's Units table.
-4. For each matched unit, look up its sections (unit-specific override or `default`).
-5. On unmatched unit name (in CASES.md but not in schema): ask the developer. "Unit '{name}' found in CASES.md but not in consolidation schema. Add it? (yes with sections / skip)"
-6. On miss (no units found): same as current -- error + ask developer.
-
-**Step 2 dispatch changes:**
-
-The `<template_type>` XML tag is replaced by `<sections>`:
-
-```xml
-<objective>Consolidate Phase {id} decisions for {unit} into specs/{unit}/.</objective>
-<unit>auth</unit>
-<sections>
-Context:
-1. Overview
-2. Interface
-3. Rules
-4. Error Categories
-5. Dependencies
-6. Configuration
-
-Cases:
-- Per-operation using ## {Unit}.{Operation} headings
-- Unit Rules (UR-N), Operation Rules (OR-N), Side Effects, Cases table
-</sections>
+[Convention content -- rules, standards, examples]
 ```
 
-The consolidator agent uses `<sections>` as its structural guide instead of reading a template file from disk. This eliminates the template read step and makes the section structure explicit in the dispatch prompt.
+Key frontmatter differences from action skills:
 
-### What Changes in the Pipeline
+| Field | Action Skill (`/case`) | Convention Skill |
+|---|---|---|
+| `user-invocable` | `true` (default) | `false` -- conventions are background knowledge, not commands |
+| `disable-model-invocation` | `true` -- user triggers manually | `false` (default) -- Claude loads automatically when relevant |
+| `paths` | not set | set to target relevant files (e.g., `"*.ts,*.js"` for coding conventions) |
+| `allowed-tools` | extensive list | minimal or none -- conventions provide guidance, not tool access |
 
-| Step | v1 | v2 |
-|------|----|----|
-| 1 (classify) | Extract services from CASES.md, match PROJECT.md topology, determine archetype | Extract units from CASES.md, match schema Units table, look up sections |
-| 2 (dispatch) | `<template_type>domain-service</template_type>` | `<sections>` with actual section list from schema |
-| 3.7 (orphan) | Check service dirs for 0 operations | Check unit dirs for 0 operations (same logic, different terminology) |
+### Convention Categories Mapped to Skill + Hook
 
-### Schema Bootstrapping
+| Convention | Skill (guidance) | Hook (enforcement) | Notes |
+|---|---|---|---|
+| Commit | `skills/commit-conventions/SKILL.md` | `hooks/hooks.json` PreToolUse on `Bash(git commit*)` | Hook validates format; skill teaches style |
+| Coding | `skills/coding-conventions/SKILL.md` | Optional PostToolUse linting | Skill is primary; hook optional |
+| Documentation | `skills/doc-conventions/SKILL.md` | None | Pure guidance |
+| Test | `skills/test-conventions/SKILL.md` | None | Pure guidance |
+| Workflow | `skills/workflow-conventions/SKILL.md` | None | Pure guidance |
+| Project structure | `skills/structure-conventions/SKILL.md` | None | Pure guidance |
+| Security | `skills/security-conventions/SKILL.md` | Optional PreToolUse checks | Hook can block dangerous patterns |
+| AI collaboration | `skills/ai-collab-conventions/SKILL.md` | None | Pure guidance |
+| Release/versioning | `skills/release-conventions/SKILL.md` | None | Pure guidance |
+| Error handling | `skills/error-conventions/SKILL.md` | None | Pure guidance |
 
-**First run (no schema exists):** The orchestrator detects missing schema and offers two paths:
-1. "No consolidation schema found. Create one from a starter? (microservice / cli / library / custom)" -- generates a starter in `.planning/consolidation.schema.md`
-2. "Define units manually for this run?" -- developer specifies units and sections ad-hoc, orchestrator writes the schema file for future runs
+### Selective Convention Installation
 
-This preserves the existing "ask the developer" pattern for ambiguity resolution.
+Claude Code's plugin system does not support enabling individual skills within a plugin. The plugin is either enabled or disabled as a whole. However, there are two mechanisms for selectivity:
 
----
+**Mechanism 1: `paths` frontmatter.** Each convention skill specifies file patterns where it applies. A commit convention uses `paths: "**/*"` (always active). A coding convention might use `paths: "*.ts,*.tsx,*.js,*.jsx"`. Claude only loads the skill when working with matching files.
 
-## Question 3: How Does /case Change?
+**Mechanism 2: `disable-model-invocation: true` per convention.** A convention skill with `disable-model-invocation: true` is never auto-loaded. The host project's CLAUDE.md can selectively reference it: "When writing code, load the cckit:coding-conventions skill." This is explicit opt-in.
 
-### Current Service Assumptions in /case
+**Mechanism 3 (if granularity needed): Multiple plugins.** If truly independent selection is required, cckit could be split into multiple plugins: `cckit-core` (skills + agents), `cckit-conventions-commit`, `cckit-conventions-coding`, etc. This is the nuclear option and should be deferred unless user demand warrants it.
 
-After thorough analysis of all /case files, the service bias is narrower than expected. The /case skill is already substantially project-type-agnostic. The key finding:
-
-**SKILL.md (case orchestrator):** No service-specific language. Uses generic "operation" throughout. The formatting example uses `[OperationName]` without service prefix. The `{Service}.{Op}` format appears only in the Rules section's `Inherits: SR-01` reference pattern, which is a rule-tier convention, not a service assumption.
-
-**step-init.md:** Project-type-agnostic. Dispatches case-briefer with generic planning docs.
-
-**step-discuss.md:** Project-type-agnostic. Probes are behavioral (auth, validation, state, boundaries), not service-specific. The probing techniques (ZOMBIES, EP/BVA) are universal.
-
-**step-finalize.md:** Project-type-agnostic. Cross-operation consistency checks are generic.
-
-**case-briefer.md:** Mostly agnostic. Step 2 says "operations may appear as: Interface definition tables (API routes, commands, event handlers, etc.)." However, Step 4.6 has service-biased language: scans for `{Service}.{OperationName}` patterns. Step 1's PROJECT.md extraction mentions "Service topology," "gRPC," "Cross-service interaction patterns."
-
-**case-validator.md:** Project-type-agnostic. Validates against planning artifacts generically.
-
-### Required Changes
-
-| File | Change | Severity |
-|------|--------|----------|
-| **SKILL.md** | No changes needed. | None |
-| **step-init.md** | No changes needed. | None |
-| **step-discuss.md** | No changes needed. | None |
-| **step-finalize.md** | No changes needed. | None |
-| **case-briefer.md** | Rename "service topology" to "system topology" or "component topology" in Step 1 extraction. Step 4.6: change `{Service}.{OperationName}` to `{Unit}.{Operation}` or keep it generic ("dot-prefixed operation names"). | Low |
-| **case-validator.md** | No changes needed. | None |
-| **SKILL.md formatting** | The `{Service}.{Op}` naming in the canonical example should use `{Unit}.{Op}` or remain generic `[OperationName]` (it already does). | None/cosmetic |
-
-### Rule Tier Rename
-
-The rule tier system needs terminology updates:
-
-| Current | Universal | Notes |
-|---------|-----------|-------|
-| SR-N (Service Rules) | UR-N (Unit Rules) | Rules scoped to one consolidation unit |
-| `specs/{service}/` | `specs/{unit}/` | Directory naming |
-| `{Service}.{Op}` | `{Unit}.{Op}` | Operation naming convention |
-| GR-XX (Global Rules) | GR-XX (unchanged) | Already universal |
-| OR-N (Operation Rules) | OR-N (unchanged) | Already universal |
-| PR-N (Phase Rules) | PR-N (unchanged) | Already universal |
-| TR-N (Temp Rules) | TR-N (unchanged) | Already universal |
-
-The SR -> UR rename is the only tier change. GR, OR, PR, TR are already project-type-agnostic.
-
-**IMPORTANT:** The IMPL-SPEC already has a pending "SR-to-GR and SvcR-to-SR rename" task. In the universal model, this simplifies: the old `SR-XX` (system-wide) is already `GR-XX`, and `SvcR-N` / new `SR-N` becomes `UR-N`. The rename mapping is:
-
-| IMPL-SPEC v1 Prefix | Universal Prefix |
-|---------------------|------------------|
-| GR-XX (was SR-XX in v0) | GR-XX (no change) |
-| SR-N (was SvcR-N in v0) | UR-N |
-
-### /case Does NOT Need to Know About the Schema
-
-The /case skill discovers operations from phase planning documents. It does not need to know about consolidation units or the schema file. The consolidator maps operations to units at consolidation time. This is an important separation: /case is about behavioral discovery, /consolidate is about structural organization.
-
-The only change /case needs is using `{Unit}.{Op}` naming in output (if the host project uses that convention). But this is already handled: the case-briefer extracts operation names from whatever structure CONTEXT.md uses. The naming convention is a host-project concern, not a plugin concern.
+**Recommendation:** Start with Mechanism 1 (paths-based auto-loading). All conventions ship in a single plugin. The `paths` field provides natural selectivity. If evidence shows users need granular enable/disable, evaluate Mechanism 3 later.
 
 ---
 
-## Question 4: Schema for User-Defined Consolidation Units
+## Plugin Manifest Design
 
-### Complete Schema Specification
+### `.claude-plugin/plugin.json`
 
-```markdown
-# Consolidation Schema
-
-## Meta
-
-| Key | Value |
-|-----|-------|
-| version | 1 |
-| operation-prefix | {unit}.{operation} |
-| rule-prefix | UR |
-| specs-dir | specs |
-
-## Units
-
-| Unit | Directory | Description |
-|------|-----------|-------------|
-| {name} | specs/{name} | {what this unit is} |
-
-## Sections: default
-
-### Context Sections
-1. **{Section Name}** -- {one-line guide text}
-2. **{Section Name}** -- {one-line guide text}
-...
-
-### Conditional Sections
-- **{Section Name}** -- Include when: {condition}
-
-### Cases Format
-{Description of how cases.md is structured for this unit type}
-
-## Sections: {unit-name}
-
-> Override: {why this unit needs different sections}
-
-### Context Sections
-1. **{Section Name}** -- {one-line guide text}
-...
+```json
+{
+  "name": "cckit",
+  "description": "Claude Code toolkit: behavioral quality standards as installable artifacts. Skills for case discovery (/case), spec consolidation (/consolidate), and project conventions.",
+  "version": "0.2.0",
+  "author": {
+    "name": "syr"
+  },
+  "repository": "https://github.com/syr/cckit",
+  "license": "MIT",
+  "keywords": [
+    "conventions",
+    "quality",
+    "case-discovery",
+    "consolidation",
+    "standards"
+  ]
+}
 ```
 
-### Schema Fields Explained
+No custom component paths needed -- cckit already uses the default plugin directory names (`skills/`, `agents/`, `hooks/`).
 
-**Meta section:**
-- `version`: Schema format version (for future evolution). Always `1` for now.
-- `operation-prefix`: How operations are named. Default `{unit}.{operation}`. Some projects might use `{module}::{function}` or just `{operation}`.
-- `rule-prefix`: What replaces "SR" for unit-scoped rules. Default `UR`. A project could use `SR` if it prefers.
-- `specs-dir`: Output directory name under `.planning/`. Default `specs`.
+### `hooks/hooks.json`
 
-**Units table:** The exhaustive list of consolidation units. Each unit gets a `specs/{name}/` directory. The orchestrator only consolidates into listed units.
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git commit*)",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/validate-commit-conventions.sh",
+            "statusMessage": "Validating commit conventions..."
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 
-**Sections: default:** Applied to any unit without a specific override. The consolidator agent uses this section list to structure `context.md`.
-
-**Sections: {unit-name}:** Override for a specific unit. Completely replaces the default -- no inheritance/merging between default and override.
-
-**Conditional sections:** Sections included only when certain conditions are met (e.g., "State Management -- Include when: unit manages stateful entities"). The consolidator agent evaluates the condition and includes or omits.
-
-**Cases Format:** Description of how `cases.md` is structured. Usually the same across all units (operation headings with rules + cases tables), but overridable for units where cases don't apply (e.g., a "shared-types" unit might have no cases.md).
-
-### Validation Rules (Orchestrator Enforces)
-
-1. Schema file must exist at `.planning/consolidation.schema.md` (or orchestrator bootstraps it)
-2. Every unit in the Units table must have a unique name and directory
-3. A `Sections: default` block must exist
-4. Section names within a block must be unique
-5. Operation prefix must contain `{unit}` and `{operation}` placeholders (or be empty for flat naming)
-
-### Why Markdown, Not YAML/JSON
-
-The schema is a human-authored planning artifact. It lives in `.planning/` alongside other markdown docs. Markdown is:
-- Readable by Claude Code agents without a parser
-- Editable by developers in any text editor
-- Consistent with every other `.planning/` artifact
-- Diffable in PRs
-
-YAML would require a parser. JSON is hostile to human editing. Markdown tables are the native format for planning artifacts in the GSD ecosystem.
+Note: The existing `.claude/hooks/validate-commit-scope.sh` is cckit's **own** project hook (validates cckit's commit scopes). The `hooks/hooks.json` contains hooks that the **plugin distributes to host projects**. These are different concerns with different locations.
 
 ---
 
-## Question 5: Integration with the Existing Hash Tool
+## Self-Application Pattern (Dogfooding)
 
-### Hash Tool Is Already Universal
+### How cckit Uses Its Own Conventions
 
-The hash tool (`tools/hash-sections.ts`) operates on markdown H2 sections generically. It does not know or care about service archetypes, unit types, or consolidation schemas. Its input is file paths; its output is section headings + SHA-256/8 hashes.
+cckit should consume its own convention skills during development. There are two approaches:
 
-**No changes needed to hash-sections.ts.**
-
-### What Changes in Hash Tool Invocation
-
-The orchestrator currently assumes `specs/{service}/context.md` paths. In the universal model, the paths are `specs/{unit}/context.md` -- same structure, different naming. The orchestrator reads the schema's Units table to build the file list:
+**Approach A: `--plugin-dir .` flag (recommended for development)**
 
 ```bash
-# v1 (from IMPL-SPEC)
-deno run --no-lock --allow-read tools/hash-sections.ts specs/auth/context.md specs/auth/cases.md specs/user/context.md ...
-
-# v2 (universal) -- identical invocation, different path source
-deno run --no-lock --allow-read tools/hash-sections.ts specs/auth/context.md specs/auth/cases.md specs/cli-parser/context.md ...
+claude --plugin-dir .
 ```
 
-The hash tool path in IMPL-SPEC (`skills/consolidate/hash-sections.ts`) is wrong -- the tool actually lives at `tools/hash-sections.ts`. This should be corrected in the IMPL-SPEC rewrite.
+This loads cckit as a plugin from the current directory. Convention skills become active, hooks fire. No permanent config change needed. Ideal for development sessions.
 
-### E2E Flows Impact
+**Approach B: `enabledPlugins` in settings.local.json**
 
-E2E flows document cross-unit interactions. The E2E agent receives hash JSON and uses it to detect staleness. This mechanism is unit-name-agnostic -- the hash JSON contains file paths and section headings, which work regardless of what the units represent.
-
-However, the E2E flow format in IMPL-SPEC assumes multi-service architecture (Step Table with From/To service columns, Mermaid sequence diagrams with service participants). For projects with a single unit or non-service architecture, E2E flows may not apply.
-
-**Recommendation:** Make E2E flows opt-in via the schema:
-
-```markdown
-## Meta
-
-| Key | Value |
-|-----|-------|
-| e2e-flows | true |
+```json
+{
+  "enabledPlugins": {
+    "cckit@local": true
+  }
+}
 ```
 
-Default `false`. The orchestrator skips Steps 3.5 and 4 entirely when `e2e-flows` is false. This eliminates the E2E machinery for projects where it adds no value (single-unit projects, libraries, CLI tools).
+This approach requires the plugin to be "installed" which may not apply for the source directory itself. Approach A is cleaner.
+
+**Approach C: Separate `.claude/skills/` symlinks (fallback)**
+
+If plugin self-loading proves awkward, symlink convention skills into cckit's own `.claude/skills/`:
+
+```bash
+ln -s ../../skills/commit-conventions .claude/skills/commit-conventions
+```
+
+This makes conventions available without the plugin machinery, but duplicates the path and is fragile.
+
+**Recommendation:** Use Approach A (`--plugin-dir .`) for development. Document it in CLAUDE.md or a startup script. This is the approach Claude Code's own docs recommend for plugin development.
+
+### Interaction Between Plugin and Project Configs
+
+When cckit is loaded as a plugin via `--plugin-dir .`:
+
+| Source | What It Provides |
+|---|---|
+| `.claude/settings.json` | cckit project permissions, model, hooks (project-specific) |
+| `.claude-plugin/plugin.json` | Plugin manifest -- identity, version |
+| `skills/` | All skills (both action and convention) load as plugin skills |
+| `agents/` | All agents load as plugin agents |
+| `hooks/hooks.json` | Plugin hooks fire alongside project hooks |
+| `CLAUDE.md` | Project instructions (loaded independently of plugin) |
+
+There is no conflict. Project settings and plugin settings serve different purposes and merge cleanly per Claude Code's settings hierarchy.
 
 ---
 
-## Revised Component Architecture
-
-### System Context (Universal)
+## Data Flow: Convention Source to Host Project
 
 ```
-Host Project (.planning/)
-  |
-  +-- consolidation.schema.md            (input: unit definitions + section schemas)
-  +-- phases/{NN}-CONTEXT.md, CASES.md   (input: phase decisions)
-  +-- PROJECT.md                         (input: GR rules, system topology)
-  +-- specs/
-  |     {unit}/
-  |       context.md                     (output: consolidated decisions)
-  |       cases.md                       (output: consolidated rules + cases)
-  |     e2e/                             (output: cross-unit flows, opt-in)
-  |     INDEX.md                         (output: navigation index)
+1. Author writes convention
+   └─> skills/[convention-name]/SKILL.md
 
-Plugin Project (cckit/)
-  |
-  +-- skills/consolidate/
-  |     +-- SKILL.md                     (orchestrator: 7+2 step state machine)
-  |
-  +-- tools/
-  |     +-- hash-sections.ts             (Deno tool: deterministic section hashing)
-  |     +-- hash-sections_test.ts
-  |
-  +-- agents/
-  |     +-- spec-consolidator.md         (sonnet: per-unit merge)
-  |     +-- e2e-flows.md                 (sonnet: cross-unit flow docs, opt-in)
-  |     +-- spec-verifier.md             (opus: verification checks)
-  |
-  +-- docs/examples/
-        +-- schema-microservice.md       (starter schema: backend services)
-        +-- schema-cli.md                (starter schema: CLI application)
-        +-- schema-library.md            (starter schema: reusable library)
-```
+2. Convention tested on cckit itself
+   └─> claude --plugin-dir .
+   └─> Verify skill loads, guidance applies, hooks fire
 
-### Component Changes Summary
+3. Plugin distributed
+   └─> Option A: Marketplace (claude plugin install cckit@marketplace)
+   └─> Option B: Local dir (claude --plugin-dir /path/to/cckit)
+   └─> Option C: Git clone + --plugin-dir
 
-| Component | Status | Changes |
-|-----------|--------|---------|
-| **SKILL.md orchestrator** | REWRITE | Schema reading replaces archetype determination; unit terminology; E2E opt-in gate; schema bootstrapping flow |
-| **spec-consolidator.md** | MODIFY | `<template_type>` replaced by `<sections>`; `<service>` replaced by `<unit>`; SR -> UR in merge rules; remove template file reading |
-| **e2e-flows.md** | MODIFY | Service -> unit terminology; opt-in gating handled by orchestrator |
-| **spec-verifier.md** | MODIFY | Service -> unit terminology; V-04 (archetype-appropriate sections) replaced by schema-appropriate sections; V-27 (PROJECT.md topology match) replaced by schema Units match |
-| **hash-sections.ts** | NO CHANGE | Already universal |
-| **case-briefer.md** | MINOR | Service -> unit/component in guide text |
-| **case-validator.md** | NO CHANGE | Already universal |
-| **SKILL.md (/case)** | NO CHANGE | Already universal |
-| **templates/** | DELETE | Replaced by user-authored schema + starter examples |
-| **docs/examples/** | NEW | Starter schema examples for common project types |
+4. Host project enables plugin
+   └─> enabledPlugins: { "cckit@marketplace": true }
+   └─> OR --plugin-dir flag
 
-### Data Flow (Universal)
+5. Claude Code loads plugin at session start
+   └─> Skill descriptions enter context budget
+   └─> Hooks registered for lifecycle events
+   └─> Agents available for delegation
 
-```
-Developer invokes: /consolidate {phase-number}
-         |
-         v
-[Step 1] Read consolidation.schema.md
-         |  - Parse Units table
-         |  - Parse default + override sections
-         |  - Read phase CONTEXT.md, CASES.md
-         |  - Extract unit names from CASES.md headings
-         |  - Match against schema Units table
-         |  - On unknown unit: ask developer (add to schema or skip)
-         |  - For each unit: resolve its section list (override or default)
-         |  - Read existing specs/{unit}/ if present
-         |
-         v
-[Step 2] Dispatch N spec-consolidator agents (PARALLEL)
-         |  - One per affected unit
-         |  - Each receives: <unit>, <sections>, phase docs, existing spec
-         |  - Each writes: specs/{unit}/context.md + cases.md
-         |
-         v
-[Step 3] Collect results, update INDEX.md
-         |
-         v
-[Step 3.5] Identify E2E flows (ONLY if schema.meta.e2e-flows == true)
-         |
-         v
-[Step 3.7] Orphan unit cleanup
-         |
-         v
-[Step 4] Hash computation + E2E dispatch (ONLY if e2e-flows enabled)
-         |
-         v
-[Step 5] Verification dispatch
-         |
-         v
-[Step 6] Confirmation summary
-         |
-         v
-[Step 7] Commit or rollback
+6. During session, Claude auto-loads convention skills
+   └─> When working with files matching skill's `paths` pattern
+   └─> Guidance applies to Claude's behavior
+   └─> Hooks enforce rules automatically
 ```
 
 ---
 
-## Merge Rule Changes for Universal Model
+## Integration Points Between New and Existing Components
 
-The 11 merge rules from IMPL-SPEC need minimal changes:
+### No-Change Components
 
-| Rule | Current | Universal | Change |
-|------|---------|-----------|--------|
-| 1. Operation-level replacement | Same `{Service}.{Op}` heading | `{Unit}.{Op}` heading (configurable via schema `operation-prefix`) | Terminology |
-| 2. PR to SR promotion | PR -> SR | PR -> UR (configurable via schema `rule-prefix`) | Terminology |
-| 3. TR exclusion | Unchanged | Unchanged | None |
-| 4. R to OR transformation | Unchanged | Unchanged | None |
-| 5. GR reference only | Unchanged | Unchanged | None |
-| 6. Superseded operations | Unchanged (unit-scoped) | Unchanged | None |
-| 7. Superseded rules | Unchanged | Unchanged | None |
-| 8. Section-level rewrite | "Template sections" | "Schema-defined sections" | Source reference |
-| 9. Provenance | Unchanged | Unchanged | None |
-| 10. Forward Concerns exclusion | Unchanged | Unchanged | None |
-| 11. Exclusions | Unchanged | Unchanged | None |
+| Component | Why Unchanged |
+|---|---|
+| `tools/hash-sections.ts` | Runtime tool, not a plugin component. Used by `/consolidate` skill internally. |
+| `tools/schema-parser.ts` | Same -- internal tool. |
+| `tools/schema-bootstrap.ts` | Same -- internal tool. |
+| `agents/*.md` | Agent definitions already match plugin directory layout. No modification needed. |
+| `skills/case/SKILL.md` | Already a valid plugin skill. Gets namespaced as `cckit:case`. |
+| `skills/consolidate/SKILL.md` | Same. Gets namespaced as `cckit:consolidate`. |
+| `docs/` | Documentation. Not a plugin component. |
+| `CLAUDE.md` | Project-level instructions. Not distributed by plugin. |
 
-The merge rules are fundamentally universal. Only the naming convention (service -> unit, SR -> UR) and the section source (template file -> schema) change.
+### New-to-Existing Touchpoints
+
+| New Component | Touches | Nature of Interaction |
+|---|---|---|
+| `.claude-plugin/plugin.json` | `skills/`, `agents/`, `hooks/` | Manifest wraps existing dirs. No file changes in those dirs. |
+| `hooks/hooks.json` | Existing `.claude/hooks/validate-commit-scope.sh` | **No conflict.** Plugin hooks (`hooks/hooks.json`) and project hooks (`.claude/settings.json` hooks section) are independent. Plugin hooks apply to **host projects**. Project hooks apply to **cckit development**. |
+| Convention skills | Existing action skills | Co-exist in `skills/` directory. Different frontmatter patterns (convention: `user-invocable: false`; action: `disable-model-invocation: true`). |
+| `bin/` directory (future) | `tools/` directory | If Deno tools need to be exposed to host projects' Bash tool, symlinks or wrapper scripts in `bin/` can call tools from `tools/`. Not needed for v0.2.0 initial phases. |
+
+### Naming Collision Prevention
+
+When cckit is installed as a plugin, all skills get the `cckit:` namespace prefix:
+
+| Skill | Standalone Name | Plugin Name |
+|---|---|---|
+| case | `/case` | `/cckit:case` |
+| consolidate | `/consolidate` | `/cckit:consolidate` |
+| commit-conventions | (not invocable) | Background knowledge, auto-loaded |
+| coding-conventions | (not invocable) | Background knowledge, auto-loaded |
+
+Convention skills with `user-invocable: false` never appear in the `/` menu and are never invoked by name. They only matter as background context.
 
 ---
 
-## Verification Check Changes
+## Scalability Considerations
 
-| Check | Current | Universal | Change |
-|-------|---------|-----------|--------|
-| V-04 | "Archetype-appropriate sections present" | "Schema-defined sections present" | Reference source |
-| V-27 | "specs/ service list matches PROJECT.md service topology" | "specs/ unit list matches schema Units table" | Reference source |
-| All others | Service-agnostic already | Unchanged | None/terminology |
-
-Most verification checks are structural (provenance tags exist, operations have cases, INDEX matches filesystem). These are universal by nature.
+| Concern | At 1-3 Conventions | At 10 Conventions | At 20+ Conventions |
+|---|---|---|---|
+| Skill description budget | Trivial. ~500 chars per convention, well within 8k default budget. | ~5k chars. Approaching default budget limit. May need `SLASH_COMMAND_TOOL_CHAR_BUDGET` increase. | Exceeds default budget. Consider splitting into multiple plugins or using `paths` to reduce active descriptions. |
+| Session start time | Imperceptible. | Minimal. Skill loading is file reads. | Measurable if hooks are complex. Keep hooks lightweight. |
+| Convention conflicts | None. Each convention covers a distinct domain. | Low risk. Review for overlapping guidance. | Higher risk. Need explicit precedence rules in convention content. |
+| Plugin size | <100 KB | <500 KB | <1 MB. Still fine for plugin caching. |
 
 ---
 
-## Suggested Build Order (Revised for Universal Model)
+## Build Order (Dependency-Respecting)
 
-The original 8-phase ROADMAP assumed service archetypes throughout. Here is the revised build order:
+### Phase 1: Plugin Infrastructure (no conventions yet)
 
-### Phase 1: Hash Tool (COMPLETE -- no changes)
+**Goal:** Make cckit installable as a Claude Code plugin without changing any existing functionality.
 
-Already built. Already universal. Carry forward as-is.
+1. Create `.claude-plugin/plugin.json` manifest
+2. Create empty `hooks/hooks.json` (valid JSON structure, no hooks yet)
+3. Verify existing skills load correctly under plugin namespace (`cckit:case`, `cckit:consolidate`)
+4. Verify existing agents are discoverable
+5. Test self-application with `claude --plugin-dir .`
+6. Document plugin usage in docs/
 
-### Phase 2: Schema Design + Examples (REPLACES: Templates)
+**Dependencies:** None. Pure additive.
+**Risk:** LOW. Adding a manifest does not change existing behavior.
 
-**Build:** Schema format specification (in SKILL.md), 3 starter examples in `docs/examples/`.
+### Phase 2: First Convention (commit conventions)
 
-**Why:** Defines the structural foundation. Everything downstream reads the schema. But the deliverable is simpler than 3 archetype templates -- it is a format spec + examples, not behavioral code.
+**Goal:** Prove the convention-as-skill pattern works end-to-end.
 
-**Key difference from original Phase 2:** No `templates/` directory. The schema format is documented in the consolidate SKILL.md (or a referenced file). Starter examples are reference docs, not consumed by the pipeline.
+1. Research commit convention content (Conventional Commits, scope rules, etc.)
+2. Author `skills/commit-conventions/SKILL.md` with `user-invocable: false`
+3. Create `hooks/validate-commit-conventions.sh` script
+4. Wire script into `hooks/hooks.json`
+5. Test on cckit itself (existing `.claude/hooks/validate-commit-scope.sh` should be subsumed or kept separate)
+6. Verify convention loads as background knowledge in host project sessions
 
-### Phase 3: Spec Consolidator Agent (MODIFIED)
+**Dependencies:** Phase 1 (plugin infrastructure).
+**Risk:** LOW. Well-understood domain, clear enforcement via hooks.
 
-**Changes:** Receives `<sections>` instead of `<template_type>`. Uses UR instead of SR. Reads section list from dispatch prompt instead of template file.
+### Phase 3+: Additional Conventions (incremental)
 
-**Impact:** Agent prompt rewrite, but merge rule logic is identical.
+Each convention follows the same pattern:
+1. Research the convention domain
+2. Author `skills/[name]/SKILL.md`
+3. Optionally add hooks to `hooks/hooks.json`
+4. Test on cckit
+5. Test on a separate host project
 
-### Phase 4: /case Updates (MINOR CHANGES)
+**Dependencies:** Phase 1. Each convention is independent of other conventions.
+**Risk:** MEDIUM for conventions that need hooks (enforcement complexity). LOW for pure guidance conventions.
 
-**Changes:** UR prefix instead of SR. Case-briefer terminology tweaks.
+---
 
-**Impact:** Smaller than originally planned. /case is already mostly universal.
+## Anti-Patterns to Avoid
 
-### Phase 5: Orchestrator Core (MODIFIED)
+### Anti-Pattern 1: Custom Installer Script
 
-**Changes:** Schema reading replaces archetype determination. Unit resolution replaces service classification. Schema bootstrapping flow. E2E opt-in gate.
+**What:** Building a Deno script that copies files into `.claude/skills/`, modifies CLAUDE.md, or writes config files in the host project.
+**Why bad:** Fights against Claude Code's plugin system. Creates maintenance burden for something Claude Code already does. Risk of corrupting host project's `.claude/` directory.
+**Instead:** Use native plugin installation via `claude plugin install` or `--plugin-dir`.
 
-**Impact:** Step 1 is significantly different. Steps 2-3.7 are structurally similar with terminology changes.
+### Anti-Pattern 2: Convention Config File
 
-### Phase 6: E2E Flows Agent (MODIFIED, POTENTIALLY DEFERRABLE)
+**What:** A `cckit.config.json` or `.cckit.yaml` that lists which conventions to enable.
+**Why bad:** Claude Code already has `enabledPlugins` for plugin-level control and `paths` frontmatter for skill-level targeting. A custom config file is a parallel system that Claude Code doesn't know about.
+**Instead:** Use `paths` frontmatter for per-convention targeting. If granular enable/disable is needed, use multiple smaller plugins.
 
-**Changes:** Unit terminology. Opt-in gating means this phase only runs for projects that enable E2E flows.
+### Anti-Pattern 3: Conventions as CLAUDE.md Fragments
 
-**Impact:** Could be deferred if no immediate test project needs cross-unit flows. The opt-in gate (schema `e2e-flows: true`) makes this safely skippable.
+**What:** Distributing conventions as text blocks that get appended to the host project's CLAUDE.md.
+**Why bad:** CLAUDE.md is hand-edited and project-specific. Injecting toolkit content into it creates merge conflicts, staleness, and confusion about what's project-specific vs what's from the toolkit.
+**Instead:** Use skills (`user-invocable: false`). Claude Code loads skill content into context separately from CLAUDE.md. No merging needed.
 
-### Phase 7: Spec Verifier + Integration (MODIFIED)
+### Anti-Pattern 4: One Monolithic Convention Skill
 
-**Changes:** V-04 and V-27 reference schema instead of archetypes/topology. Other checks get terminology updates.
+**What:** A single `skills/all-conventions/SKILL.md` containing all conventions.
+**Why bad:** Violates the "individually researched, added as phases" requirement. Cannot use `paths` for targeting. Always loads entire convention set into context.
+**Instead:** One skill per convention domain. Lean, focused, independently targetable.
 
-### Phase 8: Consumer Updates (MINOR)
+### Anti-Pattern 5: Restructuring Existing Directories
 
-**Changes:** Same as original -- case-briefer reads specs/ first, falls back to phase dirs.
+**What:** Moving `skills/` to `src/skills/`, adding custom paths in plugin.json, reorganizing agents.
+**Why bad:** Breaks existing installations, adds config complexity for zero benefit. The current layout already matches plugin conventions.
+**Instead:** Add the manifest around the existing structure. The plugin system auto-discovers `skills/`, `agents/`, `hooks/` at the plugin root.
 
-### Dependency Graph (Universal)
+---
 
+## Patterns to Follow
+
+### Pattern 1: Guidance + Enforcement Separation
+
+**What:** Every enforced convention has two components: a skill (teaches the "why" and "how") and a hook (prevents violations). The skill makes Claude do it right. The hook catches mistakes.
+**When:** Conventions where violations are mechanically detectable (commit format, file naming, import patterns).
+**Example:**
 ```
-Phase 1: hash-sections.ts (DONE) ---+
-                                      |
-Phase 2: schema design + examples ---+--> Phase 3: spec-consolidator ---> Phase 5: orchestrator (1-3.7)
-                                                                               |
-                                      Phase 1 ----+                           |
-                                                   |                           v
-                                      Phase 3 ----+--> Phase 6: e2e-flows --> Phase 7: verifier + integration
-                                                                               ^
-                                      Phase 3 ---------> Phase 7 (verifier) --+
-
-Phase 4: /case updates (independent, can parallel with Phase 3 or 5)
-Phase 8: consumer updates (after Phase 7)
+skills/commit-conventions/SKILL.md   -- Teaches commit style
+hooks/hooks.json                     -- Blocks malformed commits
 ```
+
+### Pattern 2: Progressive Convention Loading
+
+**What:** Use `paths` frontmatter so conventions only load when Claude is working with relevant files. A test convention loads when editing test files. A coding convention loads when editing source files.
+**When:** Always. Keeps context budget lean.
+**Example:**
+```yaml
+---
+name: test-conventions
+paths: "**/*_test.*,**/*.test.*,**/*.spec.*,**/tests/**"
+user-invocable: false
+---
+```
+
+### Pattern 3: Self-Contained Convention Skills
+
+**What:** Each convention skill contains all its rules in the SKILL.md body. No external references to CLAUDE.md, no "see docs/CONVENTIONS.md" pointers. The skill IS the convention.
+**When:** Always. Skills must work when installed in arbitrary host projects that don't have cckit's docs/ directory.
+
+### Pattern 4: Technology-Neutral Convention Framing
+
+**What:** Convention content uses structural language, not technology-specific instructions. "Functions should do one thing" not "React components should have one responsibility." Host project's CLAUDE.md provides the technology context.
+**When:** Always. Per cckit's core constraint of project-type agnosticism.
 
 ---
 
 ## Open Questions
 
-### 1. Schema File Location
+### Q1: Plugin Marketplace vs Direct Installation
 
-`.planning/consolidation.schema.md` is the proposed location. Alternative: `.planning/specs/SCHEMA.md` (co-located with output). The `.planning/` root is recommended because the schema is an input (like PROJECT.md), not an output (like specs/).
+cckit could be distributed via:
+- **Official Anthropic marketplace** -- widest reach, requires submission approval
+- **Custom/team marketplace** -- self-hosted, immediate
+- **Git clone + `--plugin-dir`** -- simplest, no marketplace needed
+- **GitHub release + `--plugin-dir`** -- versioned, no marketplace needed
 
-### 2. Schema Evolution
+The marketplace question does not affect architecture (the plugin structure is the same regardless). It can be deferred to post-implementation.
 
-When the project adds a new unit mid-milestone, the developer updates the schema manually. Should the orchestrator detect schema changes between runs and warn? Probably not -- the schema is the source of truth, and the orchestrator should just use whatever is current.
+### Q2: Existing `.claude/hooks/validate-commit-scope.sh` Overlap
 
-### 3. Projects Without Operations
+cckit currently has a project-specific commit scope validator in `.claude/hooks/`. The new plugin hooks will include a convention commit validator in `hooks/hooks.json`. When running with `--plugin-dir .`, both fire. They should be compatible (project hook checks cckit-specific scopes; plugin hook checks general commit format). Verify during Phase 2.
 
-Some consolidation units may have context decisions but no behavioral operations (like the current Phase 1 infrastructure case). The schema's Cases Format section should support "no cases.md" as a valid configuration for units that are purely contextual.
+### Q3: Convention Skill Size Limits
 
-### 4. Naming Convention Flexibility
+Claude Code's skill description budget defaults to 8k chars (1% of context). With 10+ convention skills, descriptions alone approach this limit. Monitor during convention authoring. If needed, trim descriptions aggressively (250 char max per skill) or increase `SLASH_COMMAND_TOOL_CHAR_BUDGET`.
 
-The `operation-prefix` field (`{unit}.{operation}`) may need to support project-specific patterns. Some projects use `module::function`, others use just `OperationName` without a unit prefix. The orchestrator's unit-extraction logic (Step 1.2: "extract unit names from the prefix before the dot") needs to be configurable based on the schema's prefix pattern.
+### Q4: Existing `directives/` Directory Role
 
-### 5. E2E Flows for Non-Service Projects
+The `directives/` directory is currently empty. With conventions now implemented as skills, `directives/` may be unnecessary. Options:
+- **Remove it** -- conventions are skills, not a separate artifact type
+- **Keep as raw content** -- store convention research/source material here, compiled into skills
+- **Repurpose** -- use for non-skill content like `.claude/rules/*.md` files if ever needed
 
-The current E2E flow format (Step Table with From/To, Mermaid sequence diagrams) is inherently multi-component. For projects with cross-unit flows that are not service-to-service (e.g., CLI subcommand -> parser -> executor -> formatter), the format needs minor terminology adaptation but the structure works. The opt-in gate handles projects where E2E flows are irrelevant.
+Recommendation: Keep for now, decide after first conventions are authored.
 
 ---
 
 ## Sources
 
-- `/Users/syr/Developments/cckit/docs/IMPL-SPEC.md` -- current design document (HIGH confidence, analyzed in full)
-- `/Users/syr/Developments/cckit/skills/case/SKILL.md` -- working /case orchestrator (HIGH confidence)
-- `/Users/syr/Developments/cckit/skills/case/step-init.md` -- /case init step (HIGH confidence)
-- `/Users/syr/Developments/cckit/skills/case/step-discuss.md` -- /case discussion step (HIGH confidence)
-- `/Users/syr/Developments/cckit/skills/case/step-finalize.md` -- /case finalize step (HIGH confidence)
-- `/Users/syr/Developments/cckit/agents/case-briefer.md` -- case-briefer agent (HIGH confidence)
-- `/Users/syr/Developments/cckit/agents/case-validator.md` -- case-validator agent (HIGH confidence)
-- `/Users/syr/Developments/cckit/skills/consolidate/SKILL.md` -- v1 consolidate skill (HIGH confidence)
-- `/Users/syr/Developments/cckit/.planning/PROJECT.md` -- project context and neutrality constraints (HIGH confidence)
-- `/Users/syr/Developments/cckit/.planning/ROADMAP.md` -- current phase plan (HIGH confidence)
-- `/Users/syr/Developments/cckit/tools/hash-sections.ts` -- hash tool location confirmed (HIGH confidence)
+- [Claude Code Skills Documentation](https://code.claude.com/docs/en/skills) -- Skill format, frontmatter fields, `user-invocable`, `paths`, `disable-model-invocation`
+- [Claude Code Plugins Documentation](https://code.claude.com/docs/en/plugins) -- Plugin structure, manifest, distribution
+- [Claude Code Plugins Reference](https://code.claude.com/docs/en/plugins-reference) -- Complete manifest schema, directory layout, `bin/`, `hooks/hooks.json`, environment variables
+- [Claude Code Hooks Documentation](https://code.claude.com/docs/en/hooks) -- Hook lifecycle events, handler types, settings.json format
+- [Claude Code Subagents Documentation](https://code.claude.com/docs/en/sub-agents) -- Agent markdown format, frontmatter fields
+- [Claude Code Settings Documentation](https://code.claude.com/docs/en/settings) -- Settings hierarchy, scopes, `enabledPlugins`
+- [Deno Run Documentation](https://docs.deno.com/runtime/reference/cli/run/) -- URL execution pattern (evaluated and rejected in favor of native plugins)
+- cckit codebase analysis: skills/, agents/, tools/, .claude/, CLAUDE.md, docs/STACK.md, docs/MODEL.md

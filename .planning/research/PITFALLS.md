@@ -1,276 +1,296 @@
-# Domain Pitfalls: Universalizing a Domain-Specific Tool
+# Domain Pitfalls: Convention Distribution for Claude Code Toolkit
 
-**Domain:** Redesigning a service-oriented consolidation tool into a project-type-agnostic one
-**Researched:** 2026-03-31
-**Overall confidence:** HIGH (based on direct codebase analysis, not external sources)
+**Domain:** Installable convention distribution system for Claude Code
+**Researched:** 2026-04-03
+**Overall confidence:** HIGH (codebase analysis + Claude Code official docs + ecosystem research)
 
-This document catalogs pitfalls specific to the v2 universal redesign. It supersedes the v1 PITFALLS.md which covered implementation-level risks (AST serialization, parallel writes, SR renumbering). Those implementation pitfalls remain valid for execution phases but are not repeated here.
+This document catalogs pitfalls specific to the v0.2.0 Portable Conventions milestone. It supersedes the v0.1.0 PITFALLS.md which covered universalization of the consolidation tool. Those pitfalls remain relevant for the consolidation pipeline but are archived in `.planning/milestones/v0.1.0-phases/`.
 
 ---
 
 ## Critical Pitfalls
 
-Mistakes that cause rewrites or fundamental design failures. These block the redesign if not addressed.
+Mistakes that cause rewrites or fundamental design failures. These block the distribution system if not addressed.
 
-### Pitfall 1: The "Service" Is Baked Into the Data Model, Not Just the Language
+### Pitfall 1: Config File Hell -- Too Many Knobs, Too Few Defaults
 
-**What goes wrong:** You rename "service" to "component" or "unit" everywhere in user-facing text, but the underlying data model -- directory layout, file naming, agent dispatch granularity, INDEX.md structure -- still assumes a 1:1 mapping between "thing being consolidated" and "service with operations." A CLI tool project, a design system, or a documentation project has no natural "service" boundary, so the data model silently rejects them.
+**What goes wrong:** The config system offers fine-grained control over which conventions to install, how to customize each one, where to place files, and how to handle conflicts. The resulting config file is 50+ lines before the user has done anything useful. Every new convention package adds more config surface. The config becomes harder to understand than the conventions it manages.
 
-**Why it happens:** The v1 architecture is service-shaped at every level:
-- `specs/{service}/context.md` -- directory-per-service
-- `spec-consolidator` dispatched one-per-service in parallel
-- `{Service}.{OperationName}` naming convention hardcoded throughout
-- INDEX.md structured as a service table + operation index
-- Service classification algorithm (Step 1) assumes `## {Service}.{Op}` headings exist
+**Why it happens:** Convention systems feel incomplete without customization. "What if someone wants commit conventions but not test conventions?" leads to per-convention toggles. "What if someone wants a different commit prefix format?" leads to per-convention options. "What if two conventions conflict?" leads to priority/ordering config. Each decision is locally reasonable; collectively they produce a configuration language.
 
-Renaming "service" to "component" in prose changes nothing if the code path still requires `## ComponentName.OperationName` headings to extract anything.
+**Warning signs:**
+- The config file has more than 15 lines for a typical installation
+- There are nested options (convention-specific sub-configuration)
+- Users need documentation to understand what the config file means
+- The config schema needs its own validation tool
+- Config changes require re-running the installer
 
-**Consequences:** The "universal" tool works perfectly for projects that happen to look like services, and fails silently or produces empty/wrong output for everything else. Users of CLI tools, libraries, or non-code projects get no value.
+**Consequences:** Users avoid the tool because the setup cost exceeds the value. Teams argue about config settings instead of shipping code. Config files diverge across projects, defeating the purpose of standardized conventions.
 
-**Concrete examples in current codebase:**
-
-| Location | Service Assumption | What Breaks |
-|----------|-------------------|-------------|
-| IMPL-SPEC lines 510-518 | Service classification: scan for `## {Service}.{Op}` headings | CLI tool has no `{Service}.{Op}` headings -- classification yields zero, triggers error |
-| IMPL-SPEC lines 116-123 | Archetype from PROJECT.md "service topology table" | No service topology table in a CLI project's PROJECT.md |
-| IMPL-SPEC line 7 | "classifies decisions by service" | What is the "service" in a single-binary CLI? |
-| IMPL-SPEC line 132 | "Service Interface -- operations in `{Service}.{Op}` format" | A library exposes functions/methods, not `{Service}.{Op}` |
-| consolidate SKILL.md line 20 | "per-service spec files at `.planning/specs/{service}.md`" | File path assumes service-as-directory |
-| consolidate SKILL.md lines 66-69 | Hardcoded service name signals: "auth", "user", "catalog", "gateway" | A CLI project has none of these |
-| case-briefer.md line 33 | "Service topology -- which services exist, their roles" | No services in a library project |
-| case-briefer.md line 79 | "Scan CONTEXT.md for `{Service}.{OperationName}` patterns" | No such patterns in non-service projects |
+**Concrete risk for cckit:** The schema system already has `consolidation.schema.md` with Meta, Components, Sections, and Conditional Sections. Adding a conventions config file creates a second configuration surface. Users now maintain two config files in `.planning/` that interact in non-obvious ways (does the coding convention affect how consolidation sections are named?).
 
 **Prevention:**
-1. Define the "consolidation unit" abstractly FIRST (before touching any code). The unit is "a coherent grouping of operations that share context" -- could be a service, module, command group, or the entire project.
-2. Make the naming convention (`{Unit}.{Operation}`) configurable or discoverable from PROJECT.md, not hardcoded as `{Service}.{Op}`.
-3. Redesign the directory layout to use the unit name: `specs/{unit}/` where unit is developer-defined.
-4. The classification algorithm in Step 1 must support multiple discovery strategies, not just `## {Service}.{Op}` heading scan.
+1. **Convention over configuration, literally.** Install everything by default. Let users remove what they do not want, not opt into what they do. The config file should be a blocklist, not an allowlist.
+2. **Flat config, no nesting.** The config should be a list of convention names to exclude, not a tree of per-convention options. If a convention needs customization, it is not generic enough.
+3. **One config surface.** Do not create a new config format. Consider whether the existing `.claude/` structure (skills, agents, CLAUDE.md) can carry convention configuration without a separate file.
+4. **The 5-line test:** A typical project's config file should be 5 lines or fewer. If the default installation requires zero config, the system passes.
 
-**Detection:** Try the design on paper against three project types: (a) microservice backend, (b) single-binary CLI with subcommands, (c) React component library. If any of the three can't produce meaningful output, the model is still service-shaped.
+**Detection:** Create the config file for 5 different project types (Rust CLI, React app, Go API, Python library, documentation site). If any config exceeds 10 lines, the system is too complex.
 
-**Phase to address:** Phase 1 (Consolidation Model Redesign). This is foundational -- everything else builds on the unit definition.
+**Phase to address:** Infrastructure phase (config system design). This is foundational -- every convention phase builds on the config model.
 
 ---
 
-### Pitfall 2: Over-Abstraction -- Making It So Generic It Loses All Value
+### Pitfall 2: The Installer That Works on Your Machine
 
-**What goes wrong:** In the rush to remove service assumptions, you abstract away the structure that makes consolidation useful. The template becomes a blank page with no guidance. The agent prompt says "consolidate decisions into sections" without defining what sections are meaningful. The output is a formless dump that no downstream consumer (case-briefer, planner, executor) can reliably parse.
+**What goes wrong:** The Deno-based remote installer (`deno run https://...`) works on macOS with Deno 2.7+ installed, a standard shell, and expected directory permissions. It fails silently or crashes on: Deno not installed, Deno version too old, Windows path separators, read-only `.claude/` directory, existing files with conflicting content, missing `git` (if the installer checks repo state), CI environments where stdin is not a terminal, network interruptions mid-download, and corporate proxies that intercept HTTPS.
 
-**Why it happens:** The v1 templates (domain-service, gateway-bff, event-driven) are valuable precisely because they tell the consolidator "a domain service needs Domain Model, Adapter Contracts, Business Rules, Error Categories, Service Interface, Configuration, Cross-Service Dependencies." Remove the archetype, and there is no guidance about what sections to produce.
+**Why it happens:** Installer scripts are tested in the author's environment. Each edge case requires specific handling code. The "happy path" works in demos; the "real path" involves dozens of environment combinations the author never tested.
 
-**The spectrum:**
-```
-Too specific (v1)              Sweet spot               Too generic
-3 fixed archetypes  ->  User-defined section schemas  ->  "Write whatever"
-                        with sensible defaults
-```
+**Specific edge cases for cckit's `deno run https://...` approach:**
 
-**Consequences:**
-- Consolidator agent produces inconsistent output across runs (non-deterministic without structure)
-- case-briefer can't find operations reliably (no predictable section to scan)
-- Verifier has nothing to verify against (V-04 "archetype-appropriate sections" becomes meaningless)
-- The tool produces output but it's not useful -- a slower form of failure
+| Edge Case | What Breaks | How Common |
+|-----------|-------------|------------|
+| Deno not installed | Script cannot run at all | Very common -- Deno is not mainstream |
+| Deno < 2.7 | `npm:` specifiers or APIs may differ | Common -- users install once and forget |
+| `--allow-read --allow-write` not granted | Deno permission prompt blocks in CI | Common in automated setups |
+| `.claude/` directory does not exist | Write fails if installer assumes it exists | Common for new projects |
+| `.claude/skills/` has existing skills with same names | Overwrite destroys user customization | Moderate -- users who already use Claude Code skills |
+| Windows backslash paths | Path joins produce `\.claude\skills\` which Deno may handle differently | Moderate on Windows |
+| Running from wrong directory | Installs to wrong project | Common -- user forgets to `cd` first |
+| Network timeout mid-install | Partial installation state | Rare but catastrophic |
+| `.claude/` is gitignored | User runs installer, conventions vanish on next clone | Moderate -- many gitignore templates exclude dotfiles |
 
-**Concrete risk in current codebase:**
-- The 28-check verifier (IMPL-SPEC lines 747-795) has multiple checks that depend on archetype structure: V-04 (archetype-appropriate sections), V-11 (gateway routes resolve), V-27 (service topology match). Remove archetypes without replacing them with something equally structured, and half the verifier becomes dead code.
-- case-briefer Step 4.6 searches for `{Service}.{OperationName}` patterns. Without a convention for how operations are named in specs, the briefer's lookup becomes a fragile text search.
+**Consequences:** Users who hit edge cases get a broken or partial installation, lose trust in the tool, and revert manually. Worse, a partial installation (some files written, some not) leaves the project in an inconsistent state that is hard to diagnose.
 
 **Prevention:**
-1. Replace fixed archetypes with user-defined section schemas, NOT with no schemas. The default schema should cover 80% of projects without customization.
-2. Provide a "starter schema" that projects adopt and customize. The starter schema encodes the same structural wisdom as v1's domain-service template but uses neutral language.
-3. Keep the verifier checks but parameterize them against the active schema: "are the sections declared in the schema present in the output?"
-4. The operation naming convention must exist (even if configurable). Without it, cross-referencing between specs, INDEX.md, and briefer output falls apart.
+1. **Preflight checks.** Before writing any files, validate: Deno version, target directory exists and is writable, `.claude/` directory state, no name collisions. Report all issues at once (not fail-on-first).
+2. **Atomic installation.** Write to a temp directory first, then move atomically. If any step fails, nothing is partially installed. The project directory is either fully updated or unchanged.
+3. **Idempotent by design.** Running the installer twice produces the same result. Files that already match are skipped. Files that differ are reported (not silently overwritten).
+4. **No stdin dependency.** The installer must work non-interactively. Use flags for choices (`--exclude coding,test`) instead of interactive prompts. CI environments cannot answer questions.
+5. **Explicit CWD.** Accept an optional target directory argument. Default to CWD but warn if no `.git/` or `CLAUDE.md` is found at the target (suggests wrong directory).
 
-**Detection:** If you can't write a concrete example of what the consolidated output looks like for a CLI project, the abstraction is too thin.
+**Detection:** Create a test matrix: macOS + Deno 2.7, macOS + no Deno, Linux + Deno 2.8, Windows + Deno 2.7, CI (no TTY). Run the installer on each. Count failures.
 
-**Phase to address:** Phase 1 (Consolidation Model Redesign). The schema system design determines the template phase.
+**Phase to address:** Infrastructure phase (installer implementation). Test matrix should be defined before coding.
 
 ---
 
-### Pitfall 3: The "{Service}.{Op}" Convention Is Load-Bearing Infrastructure, Not Just a Label
+### Pitfall 3: Conventions That Assume a Tech Stack
 
-**What goes wrong:** You treat `{Service}.{OperationName}` as a cosmetic convention that can be swapped to `{Unit}.{Op}` and everything works. In reality, this naming convention is a machine-readable contract that multiple components parse programmatically.
+**What goes wrong:** Convention packages contain advice that only applies to specific technologies. The "coding conventions" package says "use ESLint" or "prefer `const` over `let`." The "test conventions" package assumes Jest or pytest. The "commit conventions" package assumes npm scripts for hooks. A Rust project, a Go project, or a documentation project gets conventions that do not apply and may conflict with their tooling.
 
-**Why it happens:** The naming convention appears in prose as a formatting guide, but it is actually a structural dependency used for:
+**Why it happens:** Convention authors think in terms of their own stack. JavaScript/TypeScript is the most common Claude Code context, so examples and rules naturally gravitate toward that ecosystem. The cckit CLAUDE.md explicitly warns about this (Technology Neutrality section), but convention content is where the bias actually manifests.
 
-1. **case-briefer operation discovery** (case-briefer.md line 79): grep for `{Service}.{OperationName}` patterns to cross-reference operations
-2. **Service classification** (IMPL-SPEC line 510-512): scan `## {Service}.{Op}` headings to extract unique service names
-3. **INDEX.md Operation Index** (IMPL-SPEC line 694): table columns assume `Operation | Service` decomposition
-4. **E2E flow Ref column** (IMPL-SPEC line 318): `auth/cases.md#Auth.RegisterBegin` -- encodes both service path and operation heading
-5. **Verifier V-03** (IMPL-SPEC line 779): regex check for `{Service}.{Op}` PascalCase format
-6. **SKILL.md formatting** (consolidate SKILL.md line 29): "Required for briefer grep discoverability"
+**This is cckit's #1 recurring problem.** The v0.1.0 milestone was dominated by technology neutrality issues. The existing PITFALLS.md (v0.1.0) documented 10 pitfalls, of which 6 were variations of "hidden service/technology assumptions." Conventions are even more susceptible because they directly prescribe behavior rather than organizing information.
 
-**Consequences:** Changing the naming convention without updating all six consumption points creates silent breakage. The briefer can't find operations. The verifier reports false positives. E2E flow references become dead links. Worse, because these are LLM-consumed prompts (not compiled code), the breakage manifests as degraded output quality, not error messages.
+**Concrete examples of bias that will creep in:**
+
+| Convention Area | Biased Version | Neutral Version |
+|----------------|----------------|-----------------|
+| Coding | "Use `const` by default, `let` when needed" | "Prefer immutable bindings where the language supports them" |
+| Testing | "Write unit tests with Jest" | "Write unit tests using the project's test framework" |
+| Commit | "Run `npm run lint` in pre-commit hook" | "Run the project's lint command before committing" |
+| Documentation | "Use JSDoc for function documentation" | "Document public interfaces using the project's documentation standard" |
+| Error handling | "Throw typed errors extending Error" | "Use the project's error propagation pattern" |
+| Project structure | "src/ for source, dist/ for build output" | "Follow the project's established directory layout" |
+
+**The spectrum of abstraction:**
+
+```
+Too specific                    Sweet spot                    Too abstract
+"Use ESLint with        "Enforce consistent style     "Write good code"
+ airbnb config"          using your project's linter"
+```
 
 **Prevention:**
-1. Map every location that parses or generates `{Service}.{Op}` patterns before changing anything. The list above is a starting point.
-2. Define the new naming convention explicitly and mechanically (e.g., `{Unit}.{Op}` or `{Module}.{Op}`).
-3. Update all six consumption points atomically. Partial migration = guaranteed breakage.
-4. Consider whether the new convention needs a configurable separator or format, and if so, where that configuration lives (PROJECT.md? skill argument?).
+1. **Apply the cckit universality test to every convention line.** "Could a Rust CLI, a Go API, a Python ML pipeline, a Swift iOS app, and a documentation site all follow this convention without modification?" If no, the convention is too specific.
+2. **Structural conventions, not tooling conventions.** Teach "what to do" (validate inputs, handle errors, test edge cases), not "which tool to use" (ESLint, pytest, cargo test).
+3. **One convention, one pass.** After writing each convention package, review every line and ask: "Does this assume a language, framework, runtime, or build tool?" Mark and rewrite any that do.
+4. **Convention review checklist per package** (see Detection below).
 
-**Detection:** Grep the entire codebase for `Service\.` and `{Service}` patterns. Every hit is a potential breakage point.
+**Detection:** For each convention package, apply this checklist:
 
-**Phase to address:** Phase 1 (model redesign defines the convention), then enforced across Phases 2-5 as each component is updated.
+- [ ] Contains no language-specific syntax examples
+- [ ] Contains no framework names (React, Django, Spring, etc.)
+- [ ] Contains no tool names (ESLint, prettier, Jest, cargo, etc.)
+- [ ] Contains no file extension assumptions (.js, .py, .rs, etc.)
+- [ ] Contains no package manager references (npm, pip, cargo, etc.)
+- [ ] Every recommendation can be followed by any project type
+- [ ] Examples use structural placeholders, not concrete code
+
+**Phase to address:** Every convention package phase. This must be checked per-convention, not just at design time. The infrastructure phase should define the review checklist; each convention phase applies it.
 
 ---
 
 ## Moderate Pitfalls
 
-Mistakes that cause significant rework or degraded quality but don't invalidate the architecture.
+Mistakes that cause significant rework or degraded quality but do not invalidate the architecture.
 
-### Pitfall 4: Under-Abstraction -- "Universal Language" Still Thinking in Services
+### Pitfall 4: Update Mechanism Creates Merge Conflicts
 
-**What goes wrong:** You rewrite all user-facing text to say "component" instead of "service," but the conceptual model embedded in the templates, prompts, and examples still assumes a service architecture. The section names, the example operations, the cross-reference patterns all encode service-oriented thinking.
+**What goes wrong:** User installs conventions v1.0. They customize some conventions (add project-specific rules to CLAUDE.md, modify a skill's behavior). cckit releases v1.1 with updated conventions. User runs the installer again. Their customizations are overwritten, or the installer refuses to update because files have diverged, or worse -- the installer partially updates, leaving a mix of v1.0 and v1.1 content.
 
-**Concrete examples of hidden service thinking in current codebase:**
+**Why it happens:** Convention files are not code with clear merge semantics. A CLAUDE.md section about commit conventions has no "diff boundary" -- you cannot merge two versions of prose the way you merge two versions of a function. Installers that copy files have two bad options: overwrite (lose customization) or skip (stay outdated).
 
-| Artifact | Surface Text (seems neutral) | Hidden Assumption |
-|----------|------------------------------|-------------------|
-| IMPL-SPEC domain-service template | "Adapter Contracts" (renamed from "Ports") | Assumes hexagonal architecture with adapters. A CLI tool has no adapters. |
-| IMPL-SPEC domain-service template | "Cross-Service Dependencies" | Assumes multiple services exist. A monolith or CLI has internal module dependencies, not "cross-service" ones. |
-| IMPL-SPEC gateway template | "Error Translation" (renamed from "Error Handling") | Assumes a gateway translating between protocols. |
-| IMPL-SPEC gateway template | "Identity Propagation" | Assumes distributed identity across service boundaries. |
-| IMPL-SPEC event-driven template | "Event Subscriptions" / "Event Publications" | Assumes pub/sub messaging between services. |
-| case-briefer.md | "Cross-service interaction patterns" | Assumes multiple services interact. |
-| step-discuss.md line 231 | "Downstream service timeout" | Assumes downstream services exist. |
-| step-discuss.md line 246 | "`PERMISSION_DENIED (InsufficientQuota)` -- gRPC" | gRPC-specific error example in supposedly neutral context. |
-| consolidate SKILL.md | "Service-centric. Classify by service, not by phase." (line 24) | Principle assumes services are the natural grouping. |
+**The ESLint shareable config lesson:** ESLint's ecosystem solved this by making configs composable (extend a base, override specific rules). But ESLint configs are structured JSON/JS with well-defined merge semantics. CLAUDE.md and SKILL.md are unstructured markdown where "merge" is undefined.
 
-**The test from CLAUDE.md:** "Could a team using Python/Django, Rust/Axum, Go/gRPC, or Node/Express install this and use it without editing the plugin?" This test only covers backend services. The real test is: could a team building a CLI tool, a Figma plugin, a documentation site, or an Ansible playbook use this?
+**Concrete risk for cckit:** The installer writes to `.claude/skills/` and potentially to `CLAUDE.md`. If a user has modified a cckit-installed skill's SKILL.md (changed a description, added a project-specific instruction), the next update either destroys that change or cannot proceed.
 
 **Prevention:**
-1. For each template section, ask: "What is the ROLE this section serves, independent of architecture?" E.g., "Adapter Contracts" -> "Integration Points" (things this component connects to). "Cross-Service Dependencies" -> "External Dependencies" (things this component requires from outside itself).
-2. For examples in prompts, use diverse project types. Don't show only `Auth.RegisterBegin` -- also show `cli.ParseArgs`, `Button.Render`, `deploy.Validate`.
-3. For the error format examples in step-discuss.md, show non-HTTP/non-gRPC examples first (domain error, CLI exit code), then protocol-specific ones.
+1. **Separate managed from user content.** cckit-managed files should be clearly identified (e.g., a comment header `<!-- managed by cckit v1.0 -- do not edit -->`). User customizations go in separate files that cckit never touches.
+2. **Override, do not modify.** cckit installs base convention files. Users create override files (e.g., `.claude/skills/my-overrides/SKILL.md`) that cckit never writes to. The skill system's precedence rules handle composition.
+3. **Hash-based staleness detection.** Store a hash of the installed content. On update, compare the current file hash against the installed hash. If they match, safe to update. If they differ, the user has customized -- warn and offer options (skip, backup + overwrite, show diff).
+4. **Version manifest.** Maintain a small manifest (`.claude/.cckit-manifest.json`) tracking which files were installed, their versions, and content hashes. This is the installer's memory of what it put there.
 
-**Detection:** Read each template section name and ask: "Does this section make sense for a CLI tool? A React component library? A Terraform module?" If the answer is no for any of these, the section name is service-biased.
+**Detection:** Simulate: install v1.0, modify one file, run v1.1 installer. Does it handle the conflict gracefully? Does it report what happened?
 
-**Phase to address:** Phase 2 (Template/Schema System). But the conceptual work happens in Phase 1 when defining what sections mean.
+**Phase to address:** Infrastructure phase (update mechanism design). Must be designed before the first convention is shipped, because the update mechanism constrains how conventions are structured.
 
 ---
 
-### Pitfall 5: Archetype Removal Without a Replacement Discovery Mechanism
+### Pitfall 5: Convention Versioning Without Semver Discipline
 
-**What goes wrong:** V1 uses PROJECT.md's service topology table to determine which archetype template to apply. V2 removes archetypes. But nothing replaces the discovery mechanism. The orchestrator doesn't know what section schema to apply because there is no source of truth for "what kind of thing is this consolidation unit?"
+**What goes wrong:** Convention v1.0 says "always include a test plan in PR descriptions." Convention v1.1 changes this to "include a test plan for non-trivial PRs." A user on v1.0 has trained their team around the strict rule. Updating to v1.1 silently relaxes the convention. There was no major version bump to signal this behavioral change. The user does not notice the shift until PR quality degrades.
 
-**Why it happens:** Removing fixed archetypes feels like simplification -- fewer moving parts. But the archetype served two roles: (a) a template for what sections to produce, and (b) a classification mechanism for knowing which template to apply. Removing (a) without replacing (b) leaves the system with no way to make decisions.
+**Why it happens:** Convention changes are behavioral, not syntactic. A changed convention does not produce a compilation error or test failure. The impact is subtle and delayed. Authors treat convention updates as "improvements" (minor version) when they are actually "behavioral changes" (major version).
 
-**Current dependency chain:**
-```
-PROJECT.md topology table -> archetype classification -> template selection -> agent dispatch with template
-```
-
-Remove the archetype, and either:
-- The developer must explicitly declare the schema for each unit (high friction)
-- The tool must infer it somehow (fragile)
-- A default schema is always used (loses the specificity that made archetypes useful)
+**The core problem:** What constitutes a "breaking change" for a convention? In code, breaking = API change. In conventions, breaking = behavioral expectation change. But convention authors do not have this vocabulary.
 
 **Prevention:**
-1. Replace the topology table with a more general "consolidation units" declaration in PROJECT.md. Each unit has a name and optionally a schema reference.
-2. Provide a default schema that works for most units. Schema customization is opt-in, not required.
-3. If a unit has no declared schema, apply the default. If a unit has a custom schema, use that.
-4. The discovery mechanism becomes: read PROJECT.md -> find declared units -> look up their schemas -> dispatch accordingly.
+1. **Define "breaking" for conventions.** A convention change is breaking if: a project following the old convention would need to change its behavior to follow the new one. Adding a new convention is minor. Rewording for clarity is patch. Changing expected behavior is major.
+2. **Changelog per convention package.** Each convention package has a CHANGELOG section documenting what changed and why. This is the signal users need to evaluate updates.
+3. **Pin by default, update explicitly.** The manifest records the installed version. `deno run https://... update` shows what would change before applying. Users opt into updates after reviewing the diff.
+4. **Convention diffing.** The update command should show a human-readable diff of what changed in convention text, not just file diffs. "Commit conventions: CHANGED -- test plan requirement relaxed from 'always' to 'non-trivial PRs only'."
 
-**Phase to address:** Phase 1 (model redesign must define how units and schemas are declared).
+**Detection:** Write a CHANGELOG entry for every convention change. If you cannot clearly articulate what behavior changed, the change is insufficiently understood.
+
+**Phase to address:** Infrastructure phase (versioning scheme). Convention phases apply the scheme.
 
 ---
 
-### Pitfall 6: Template Extensibility Anti-Patterns
+### Pitfall 6: Self-Referential Complexity -- cckit Applying Conventions to Itself
 
-**What goes wrong:** The template/schema system is designed to be extensible, but the extensibility mechanism itself has common failure modes.
+**What goes wrong:** cckit's v0.2.0 goal is "self-applicable to cckit." This means the convention distribution system must be able to install conventions into the cckit project itself. But cckit's CLAUDE.md already has extensive conventions (commit format, technology neutrality, GSD workflow, content authoring rules). Installing cckit's own conventions into cckit either duplicates existing content, conflicts with it, or creates a circular dependency where the tool's behavior depends on its own output.
 
-**Anti-pattern 6a: Extension by modification.** Users must fork and edit the default template to customize. This creates drift -- when the plugin updates the default template, user customizations are lost or conflict.
+**Why it happens:** Dogfooding is desirable ("eat your own dog food"), but self-application of a convention tool is structurally different from using it on other projects. cckit already IS the convention source. Installing conventions from cckit into cckit is like copying a book into itself.
 
-**Anti-pattern 6b: Extension by configuration explosion.** The schema has so many optional fields and conditional sections that the configuration itself becomes harder to understand than just writing the output manually.
+**Concrete conflicts:**
 
-**Anti-pattern 6c: Extension by inheritance.** A schema "extends" a base schema, and changes in the base silently change the derived schema in unexpected ways. Especially dangerous with LLM-consumed templates where a section rename in the base changes what the agent produces.
-
-**Anti-pattern 6d: Extension by interception.** Users can add "hooks" or "plugins" to the consolidation pipeline. But hooks in an LLM-agent pipeline are fundamentally different from hooks in deterministic code -- the agent may or may not honor them, and there is no way to test hook behavior reliably.
+| Existing cckit Convention | Convention Package Equivalent | Conflict |
+|--------------------------|-------------------------------|----------|
+| CLAUDE.md "Commit Conventions" section | Commit conventions package | Duplicate. Which is authoritative? |
+| CLAUDE.md "Content Authoring Rules" | Coding conventions package (partial overlap) | Partial overlap. Some rules match, some are cckit-specific. |
+| CLAUDE.md "GSD Workflow Enforcement" | Workflow conventions package | cckit has GSD-specific workflow rules that do not generalize. |
+| `.claude/skills/` already has /case, /consolidate | Convention packages are also skills | Namespace collision risk if convention skills share names. |
 
 **Prevention:**
-1. **Prefer composition over inheritance.** A schema lists its sections explicitly. "Extending" means adding sections to the list, not inheriting from a base.
-2. **Keep the extension surface small.** For v2, the only extension point should be: "declare additional sections in your schema." Not: hooks, plugins, conditional logic, or pipeline modifications.
-3. **Schema is data, not code.** The schema is a markdown structure definition (section names + descriptions), not executable logic. The agent interprets it; the user only declares structure.
-4. **Default schema is a recommendation, not a base class.** If a user defines a custom schema, it completely replaces the default for that unit. No merging, no inheritance.
+1. **Layered precedence, not merging.** cckit's own CLAUDE.md conventions take precedence. Installed convention packages provide defaults that cckit's existing rules override. No merging of duplicate content.
+2. **Self-application test as a gate.** Before shipping any convention package, install it into cckit itself. If it produces duplicates, conflicts, or nonsensical instructions, the package is not generic enough.
+3. **Project-specific exclusions are normal.** cckit excluding some conventions from self-installation is not a failure -- it proves the config system works. The cckit config file should naturally exclude conventions that overlap with its existing CLAUDE.md.
+4. **Avoid circular reads.** The installer must not read CLAUDE.md to decide what to install. It reads only the config file (or uses defaults). CLAUDE.md is an output target, not an input source.
 
-**Phase to address:** Phase 2 (Template/Schema System design).
+**Detection:** Run the full installation on the cckit project. Count duplicates, conflicts, and nonsensical instructions. Target: zero of each.
+
+**Phase to address:** Config system phase AND each convention package phase (self-application test).
 
 ---
 
-### Pitfall 7: The Verifier's 28 Checks Assume Service Architecture
+### Pitfall 7: Convention Packages That Are Actually Style Guides
 
-**What goes wrong:** The verifier (spec-verifier agent) has 28 checks, many of which are service-specific. Universalizing the consolidation model without updating the verifier leaves it checking for things that don't exist in non-service projects, generating false positives that erode trust.
+**What goes wrong:** A "convention package" is supposed to be instructions Claude follows during development. Instead, it becomes a long-form document explaining why certain practices are good, with examples, rationale, and philosophical justification. Claude does not need persuasion -- it needs instructions. The 2000-line style guide gets loaded into context, consuming tokens without improving behavior.
 
-**Service-specific checks that need rethinking:**
+**Why it happens:** Convention authors are often writing for humans (team members who need to understand and agree with the conventions). Claude does not need to agree -- it needs actionable rules. The habit of writing for human audiences produces conventions that are informative but not directive.
 
-| Check | What It Assumes | Problem for Non-Services |
-|-------|-----------------|--------------------------|
-| V-04 | "Archetype-appropriate sections present" | No archetypes in v2 |
-| V-10 | "Cross-service operation references resolve" | No cross-service refs in a CLI tool |
-| V-11 | "Gateway routes resolve" | No gateway |
-| V-15 | "Error categories consistent across services" | May only have one unit |
-| V-27 | "specs/ service list matches PROJECT.md service topology" | No service topology in non-service projects |
-| V-29 | "E2E Spec References validity" | No E2E flows for a library |
+**The SKILL.md lesson from Claude Code docs:** Skills should be "under 500 lines" with "reference material in separate files." Conventions that balloon into style guides violate this principle and degrade Claude's performance by consuming context window budget.
+
+**Warning signs:**
+- Convention file exceeds 200 lines
+- More than 30% of content is rationale ("because...", "this matters because...")
+- Examples outnumber rules
+- Convention reads like a blog post, not a checklist
+- Convention includes "when to break this rule" discussions
 
 **Prevention:**
-1. Re-derive the verification checks from the universal model. Some checks generalize (V-04 becomes "schema-declared sections present"). Some become conditional (V-11 only runs if a gateway/routing unit exists). Some are removed.
-2. The verifier reads the active schema to know what to check -- it doesn't hardcode archetype expectations.
-3. E2E-related checks become conditional: only run when E2E flows are configured.
+1. **Rule: every convention line must be a directive, not an explanation.** "Always X" or "Never Y" or "When Z, do W." Remove all rationale from the installed content. Rationale belongs in docs/, not in installed conventions.
+2. **200-line budget per convention package.** If a convention exceeds 200 lines after removing rationale, it is trying to cover too much. Split it.
+3. **The Claude test:** Give Claude a 50-line convention and a 500-line convention covering the same topic. Compare output quality. If there is no difference, the 450 extra lines are waste.
+4. **Separate reference from directive.** Convention packages install directives (short, actionable). Reference material (examples, rationale, edge case discussions) lives in `docs/` and is not installed.
 
-**Phase to address:** Phase 5 (Verifier Agent) -- but the check redesign should be sketched during Phase 1 so the model accounts for verification needs.
+**Detection:** For each convention package, count directive lines vs. explanatory lines. Ratio should be at least 3:1 directive to explanation.
+
+**Phase to address:** Every convention package phase. Enforce as a review criterion.
 
 ---
 
-### Pitfall 8: E2E Flows Are Inherently Multi-Service -- What Replaces Them?
+### Pitfall 8: Plugin System Mismatch -- Conventions as Skills vs. CLAUDE.md Content
 
-**What goes wrong:** E2E flow documentation (`specs/e2e/{flow}.md`) traces a user action across multiple services. For a single-unit project (CLI tool, library), E2E flows have no meaning. For a multi-module project that isn't service-based, the E2E concept needs reinterpretation.
+**What goes wrong:** Some conventions are best expressed as CLAUDE.md content (always-active behavioral instructions). Others are best expressed as skills (invocable workflows). Others might be agents (specialized subagent behaviors). The distribution system treats them all the same way, installing everything as one type. This either puts workflow-specific content into always-active CLAUDE.md (wasting context on irrelevant instructions) or puts always-active conventions into skills (where Claude may not load them).
 
-**Risk:** Either E2E flows are kept as-is (only useful for service projects, breaking universality) or they are removed entirely (losing a genuinely valuable feature for projects that do have multiple interacting units).
+**Why it happens:** The Claude Code plugin system has distinct mechanisms for different purposes. From the official docs:
+
+| Mechanism | When Claude Sees It | Best For |
+|-----------|-------------------|----------|
+| CLAUDE.md | Always in context | Conventions that should always apply (commit format, naming) |
+| Skills (auto-invokable) | Description always in context; full content when invoked | Conventions tied to specific actions (review checklist, deploy procedure) |
+| Skills (`disable-model-invocation`) | Only when user invokes | Workflows the user controls |
+| Skills (`user-invocable: false`) | When Claude decides | Background knowledge Claude applies selectively |
+
+Choosing wrong means either: context waste (everything in CLAUDE.md, most of it irrelevant to the current task) or context absence (important conventions in skills that Claude does not invoke for the current task).
+
+**Concrete example:** "Always use conventional commits" belongs in CLAUDE.md -- it applies to every commit. "Run security audit checklist" belongs in a skill -- it applies only during security reviews. If both are installed as CLAUDE.md content, every interaction pays the token cost of the security checklist.
 
 **Prevention:**
-1. Make E2E flow generation conditional: only triggered when multiple consolidation units exist and cross-unit dependencies are declared.
-2. Rename from "E2E flows" to "cross-unit flows" or "interaction flows" -- the concept generalizes.
-3. For single-unit projects, the E2E agent is simply not dispatched. The orchestrator checks the unit count and skips.
+1. **Categorize each convention at authoring time.** Convention package metadata declares the delivery mechanism: `delivery: claude-md`, `delivery: skill`, `delivery: agent`. The installer routes content accordingly.
+2. **Default to CLAUDE.md for simple conventions.** Most conventions ("use conventional commits", "write tests for public APIs") are short, always-active rules. They belong in CLAUDE.md.
+3. **Use skills only for procedural conventions.** Multi-step processes (code review workflow, release checklist) that Claude should follow step-by-step when invoked belong in skills.
+4. **Budget awareness.** Track total installed CLAUDE.md content size. Warn if conventions would push CLAUDE.md past a reasonable threshold (suggest moving some to skills).
 
-**Phase to address:** Phase 4 (E2E Flows Agent) -- but the conditional dispatch logic should be designed in Phase 1.
+**Detection:** After installing all conventions, measure total CLAUDE.md size. If it exceeds 500 lines, audit which conventions could be skills instead.
+
+**Phase to address:** Infrastructure phase (delivery mechanism design) AND each convention package phase (categorization).
 
 ---
 
 ## Minor Pitfalls
 
-### Pitfall 9: "Operation" May Not Be the Right Universal Term
+### Pitfall 9: The .gitignore Problem
 
-**What goes wrong:** The term "operation" works for services (gRPC operations, REST endpoints) and CLIs (subcommands), but is awkward for other project types. A React component library's "operations" might be "render scenarios" or "user interactions." A Terraform module's "operations" might be "resource lifecycle actions."
+**What goes wrong:** Many `.gitignore` templates exclude `.claude/` or dotfiles broadly. User installs conventions, they work locally, but they are not committed to git. Teammate clones the repo and has no conventions. Worse, the user does not realize the conventions are gitignored until they notice inconsistent behavior across machines.
 
-**Prevention:** Keep "operation" as the default term but document that it means "a discrete unit of behavior that can be specified with success/failure/edge cases." Users will naturally adapt. Don't over-rotate on terminology -- the structure (S/F/E tables) is what matters, not the label.
+**Prevention:**
+1. Post-installation check: verify `.claude/` is not gitignored. If it is, warn the user with specific instructions to un-ignore it.
+2. Include a `.gitignore` entry in the installation documentation: "Add `!.claude/` to your `.gitignore` if your template excludes dotfiles."
+3. Consider whether convention content should live outside `.claude/` (e.g., in a `conventions/` directory) to avoid gitignore conflicts. However, this breaks Claude Code's native discovery -- `.claude/` is the standard location.
 
-**Phase to address:** Minor. Mention in documentation. No code change needed unless the term causes confusion during real usage.
+**Phase to address:** Installer phase (post-installation validation).
 
 ---
 
-### Pitfall 10: /case Skill Has Less Service Bias Than Expected, but Some Exists
+### Pitfall 10: Convention Interaction Effects
 
-**What goes wrong:** The /case skill is already largely technology-neutral (it talks about "operations," "callers," "expected outcomes"), but it has a few service-biased spots that would confuse users of non-service projects.
+**What goes wrong:** Individual conventions are well-designed, but combinations produce unexpected behavior. The "coding conventions" say "keep functions under 20 lines." The "test conventions" say "write comprehensive test cases for every branch." Claude follows both, producing 15-line functions with 200-line test files. Or: "documentation conventions" say "document every public function." "Coding conventions" say "prefer small, focused functions." Together they produce excessive documentation for trivial helper functions.
 
-**Specific locations:**
+**Prevention:**
+1. **Test convention combinations, not just individual conventions.** Define 3-4 standard convention bundles (e.g., "all conventions", "code + test", "code + docs") and test them together.
+2. **Include interaction notes.** If a convention interacts with another, document the expected behavior: "When combined with test conventions, the 20-line function limit applies to production code, not test code."
+3. **Priority/scope annotations.** Conventions can declare scope ("production code only", "test code only", "documentation only") to reduce cross-contamination.
 
-| File | Line | Issue |
-|------|------|-------|
-| step-init.md | 62 | "architecture reference (service topology, patterns)" -- assumes PROJECT.md has service topology |
-| step-discuss.md | 61 | "all services, all phases" -- language for SR-candidate discovery assumes services |
-| step-discuss.md | 231 | "Downstream service timeout" -- infrastructure probe assumes downstream services |
-| step-discuss.md | 246 | "`PERMISSION_DENIED (InsufficientQuota)` -- gRPC" -- protocol-specific example |
-| case-briefer.md | 33 | "Service topology -- which services exist" -- extraction step assumes services |
-| case-briefer.md | 79 | `{Service}.{OperationName}` pattern scan -- hardcoded naming format |
-| case-briefer.md | 165 | "Service topology: [summary]" -- output template assumes services |
+**Phase to address:** Late-stage integration testing after multiple convention packages are shipped. Not addressable until at least 3 conventions exist.
 
-**Prevention:** Fix these individually. Most are one-line changes:
-- "service topology" -> "project structure" or "component structure"
-- "all services, all phases" -> "project-wide, all phases"
-- "Downstream service timeout" -> "External dependency timeout"
-- Add non-gRPC error examples alongside the gRPC one (already partially done -- line 244 shows domain-level and HTTP examples)
+---
 
-**Phase to address:** The /case review phase. Low effort, mostly find-and-replace with judgment.
+### Pitfall 11: Remote Script Trust and Caching
+
+**What goes wrong:** `deno run https://raw.githubusercontent.com/.../install.ts` fetches and executes code from the network. Deno caches the script after first fetch, so subsequent runs use the cached version -- even if the remote has been updated. Users expect "always get latest" but get "whatever was cached." Alternatively, users expect "stable, reproducible" but get "whatever the remote serves today" on first run.
+
+**Prevention:**
+1. **Version-pinned URLs.** Use tagged release URLs (`https://...@v0.2.0/install.ts`), not branch URLs. Users can pin to a specific version.
+2. **`--reload` flag in install instructions.** Document that `deno run --reload https://...` forces a fresh fetch. Consider making this the default in install instructions.
+3. **Hash verification.** After download, the script can verify its own integrity against a published hash. This is defense-in-depth against CDN/proxy tampering.
+4. **Fallback for no-network.** The installer should work from a local clone too: `deno run tools/install.ts`. Remote URL is convenience, not the only path.
+
+**Phase to address:** Installer phase (URL strategy and caching documentation).
 
 ---
 
@@ -278,39 +298,47 @@ Remove the archetype, and either:
 
 | Phase Topic | Likely Pitfall | Mitigation |
 |-------------|---------------|------------|
-| Phase 1: Model Redesign | Pitfall 1 (service data model), Pitfall 2 (over-abstraction), Pitfall 3 (naming convention) | Define the universal unit, default schema, and naming convention together. Test against 3 project types on paper before coding. |
-| Phase 2: Template/Schema | Pitfall 6 (extensibility anti-patterns), Pitfall 4 (under-abstraction in section names) | Composition over inheritance. Schema is data, not code. Neutral section names. |
-| Phase 3: Consolidator Agent | Pitfall 1 (dispatch still per-service), Pitfall 3 (naming convention consumed by agent) | Agent dispatch uses unit names from Phase 1 model. Operation naming follows Phase 1 convention. |
-| Phase 4: E2E / Cross-Unit | Pitfall 8 (E2E assumes multi-service) | Conditional dispatch. Skip for single-unit projects. |
-| Phase 5: Verifier Agent | Pitfall 7 (checks assume services) | Re-derive checks from universal model. Parameterize against active schema. |
-| /case Review | Pitfall 10 (minor service language) | One-line fixes in step files and briefer. |
+| Infrastructure: Config System | Pitfall 1 (config hell), Pitfall 4 (update conflicts) | Flat blocklist config. Hash-based staleness. Version manifest. |
+| Infrastructure: Installer | Pitfall 2 (edge cases), Pitfall 11 (caching) | Preflight checks. Atomic installation. Idempotent. Version-pinned URLs. |
+| Infrastructure: Delivery Mechanism | Pitfall 8 (skill vs CLAUDE.md) | Categorize each convention. Budget awareness. |
+| Every Convention Package | Pitfall 3 (tech bias), Pitfall 7 (style guide bloat) | Universality checklist per line. 200-line budget. Directive-not-explanation. |
+| Convention: Commit | Pitfall 3 (assumes npm scripts for hooks) | Structural convention: "use pre-commit validation" not "use husky." |
+| Convention: Testing | Pitfall 3 (assumes specific test framework) | "Write tests for public interfaces" not "write Jest tests." |
+| Convention: Coding | Pitfall 10 (interacts with test + docs conventions) | Scope annotations: "production code" qualifier. |
+| Self-Application to cckit | Pitfall 6 (circular complexity) | Layered precedence. Exclusion list is expected. |
+| Update/Versioning | Pitfall 5 (behavioral semver) | Define "breaking" for conventions. Changelog per package. |
+| Late Integration | Pitfall 10 (convention interactions) | Bundle testing after 3+ conventions exist. |
 
-## Artifacts Most Likely to Have Hidden Service Assumptions
+## Integration-Specific Pitfalls (Existing cckit + New Distribution)
 
-Ranked by density of service-specific logic, highest risk first:
+The distribution system is being added to an existing codebase with existing tools (hash-sections.ts, schema-parser.ts, schema-bootstrap.ts, /case, /consolidate). These integration-specific risks do not exist for greenfield projects.
 
-| Rank | Artifact | Risk Level | Service Assumption Density | Notes |
-|------|----------|------------|---------------------------|-------|
-| 1 | `docs/IMPL-SPEC.md` | CRITICAL | Very High | Entire document built around service topology, archetypes, `{Service}.{Op}` convention. Needs full rewrite, not patching. |
-| 2 | `skills/consolidate/SKILL.md` | CRITICAL | High | Per-service file layout, hardcoded service signals (auth/user/catalog/gateway), service-centric principles. Full rewrite. |
-| 3 | `agents/case-briefer.md` | MODERATE | Medium | Step 1 extracts "service topology," Step 4.6 scans for `{Service}.{Op}` patterns. Fixable with targeted edits. |
-| 4 | Template files (Phase 2 not yet written) | MODERATE | High (by design) | v1 templates are archetype-specific. v2 templates are the replacement -- no legacy to fix, but risk of recreating the same bias. |
-| 5 | `skills/case/SKILL.md` | LOW | Low | Mostly technology-neutral. Uses "operation" throughout. `{Service}.{Op}` format appears only in formatting examples. |
-| 6 | `skills/case/step-discuss.md` | LOW | Low | A few service-specific examples (gRPC, downstream service). Easy fixes. |
-| 7 | `skills/case/step-init.md` | LOW | Very Low | One reference to "service topology." |
-| 8 | `agents/case-validator.md` | LOW | Very Low | Validates against planning artifacts, not services. No service-specific logic. |
-| 9 | `skills/consolidate/hash-sections.ts` | NONE | None | Pure markdown AST tool. Already universal. |
+### Integration Risk 1: Installer Conflicts with Existing Plugin Structure
+
+cckit is already structured as a Claude Code plugin (skills/, agents/ at root). The installer must not assume it is installing into an empty `.claude/` directory. The target project may already have cckit's /case and /consolidate installed via a different mechanism (manual copy, git submodule, `--plugin-dir`).
+
+**Mitigation:** Installer detects existing cckit artifacts and offers: skip (keep existing), update (replace with current version), or coexist (install conventions alongside existing skills without touching them).
+
+### Integration Risk 2: Schema Parser Dependency for Convention Validation
+
+The schema-parser.ts and schema-bootstrap.ts tools already exist and parse consolidation schemas. Convention packages may want to validate their own schemas or config. Reusing the existing parser is tempting but creates coupling -- convention config is structurally different from consolidation schemas.
+
+**Mitigation:** Keep convention config independent of consolidation schema tooling. If both need markdown parsing, share the unified/remark dependency but not the parsing logic.
+
+### Integration Risk 3: Deno Dependency Becomes User-Facing
+
+Currently, Deno is an internal runtime dependency (hash-sections.ts runs on Deno but users interact through Claude Code skills). With `deno run https://...` as the installer, Deno becomes a user-facing dependency. Users must have Deno installed to use cckit conventions, even if they never use consolidation or case discovery.
+
+**Mitigation:** Consider providing a non-Deno installation path (curl + shell script, or a pre-built binary) for users who only want conventions. Alternatively, accept the Deno requirement but document it prominently and provide clear installation instructions for Deno itself.
 
 ## Sources
 
-All findings derived from direct codebase analysis:
-- `docs/IMPL-SPEC.md` -- full read, 891 lines
-- `skills/consolidate/SKILL.md` -- full read, 203 lines
-- `skills/case/SKILL.md` -- full read, 231 lines
-- `skills/case/step-init.md` -- full read, 126 lines
-- `skills/case/step-discuss.md` -- full read, 322 lines
-- `skills/case/step-finalize.md` -- full read, 326 lines
-- `agents/case-briefer.md` -- full read, 299 lines
-- `agents/case-validator.md` -- full read, 257 lines
-- `.planning/PROJECT.md` -- full read, 103 lines
-- `CLAUDE.md` -- full read, Technology Neutrality section
+- Direct codebase analysis: `tools/schema-parser.ts`, `tools/schema-bootstrap.ts`, `skills/consolidate/SKILL.md`, `CLAUDE.md`
+- `.planning/PROJECT.md` -- v0.2.0 milestone context and constraints
+- `.planning/research/STACK.md` (v0.1.0) -- existing stack decisions
+- `.planning/research/ARCHITECTURE.md` (v0.1.0) -- existing architecture patterns
+- [Claude Code Skills Docs](https://code.claude.com/docs/en/skills) -- skill installation paths, discovery, SKILL.md format, context loading behavior, supporting files pattern
+- [Claude Code Plugins Docs](https://code.claude.com/docs/en/plugins) -- plugin structure, manifest, namespace collision, `--plugin-dir`, update mechanism, migration patterns
+- [Deno run reference](https://docs.deno.com/runtime/reference/cli/run/) -- remote URL execution, caching, permission model
+- [ESLint Shareable Configs](https://eslint.org/docs/latest/extend/shareable-configs) -- lessons from config distribution (dependency management, resolution, breaking changes)
+- [AWS Well-Architected: Anti-patterns for Everything as Code](https://docs.aws.amazon.com/wellarchitected/latest/devops-guidance/anti-patterns-for-everything-as-code.html) -- configuration drift, snowflakes-as-code

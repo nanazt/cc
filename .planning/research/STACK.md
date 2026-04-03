@@ -1,336 +1,267 @@
-# Technology Stack: v2.0 Universal Consolidation Model
+# Technology Stack: v0.2.0 Portable Conventions
 
 **Project:** cckit (Claude Code Toolkit)
-**Milestone:** v2.0 Universal Consolidation
-**Researched:** 2026-03-31
-**Scope:** Stack additions/changes for universal model. Excludes already-validated v1.0 stack (Deno, unified, remark-parse, hash-sections.ts).
+**Milestone:** v0.2.0 Portable Conventions
+**Researched:** 2026-04-03
+**Scope:** Stack additions for installation infrastructure and convention distribution. Excludes already-validated stack (Deno runtime, unified, remark-parse, hash-sections, schema system, consolidation pipeline).
 
 ## Executive Summary
 
-The universal consolidation model needs **zero new runtime dependencies**. Every change is in the prompt-engineering layer -- skills, agents, and templates -- which are Markdown files consumed by Claude Code. The core design shift: replace 3 hardcoded archetype templates with a single generic template plus a host-project-level override mechanism using the conventions Claude Code already supports.
+The convention distribution system needs **four standard library additions** and **zero third-party dependencies**. The installer is a single Deno script that reads a JSONC config file, resolves which convention packages to install, and copies files into the host project's `.claude/` directory. Everything required is available in the Deno standard library (`@std/jsonc`, `@std/fs`, `@std/path`, `@std/cli`) plus Deno's built-in file system APIs.
 
-**Key insight:** The v1.0 IMPL-SPEC's biggest technology-specific assumption is not in the tooling -- it is in the vocabulary. "Service", "archetype", "gRPC interface", "gateway" are all baked into the template schemas and agent prompts. Making this universal is a vocabulary and schema design problem, not a technology problem.
+The critical design choice is **JSONC for the config format** -- it is Deno's own config format (`deno.json`/`deno.jsonc`), supports comments for self-documenting convention selections, and has a stable stdlib parser. No TOML, no YAML, no custom format.
 
-## What Carries Over Unchanged
+## Recommended Stack Additions
 
-These are validated in v1.0 and require no changes for universality. Listed for completeness; no re-research performed.
+### Config Format: JSONC via @std/jsonc
 
-| Layer | Technology | v2.0 Status |
-|-------|-----------|-------------|
-| Runtime | Deno >= 2.7 | Unchanged. hash-sections.ts is project-type-agnostic (operates on markdown structure, not content semantics). |
-| Markdown AST | unified 11.0.5 + remark-parse 11.0.0 + remark-stringify 11.0.0 | Unchanged. |
-| Crypto | Web Crypto API (Deno built-in) | Unchanged. |
-| Plugin format | SKILL.md + Agent .md (YAML frontmatter + Markdown) | Unchanged format. Content rewrites needed. |
-| Testing | Deno test (built-in) | Unchanged for hash tool. New fixture patterns for universal model (see below). |
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| `jsr:@std/jsonc` | `^1.0.2` | Parse `.cckit.jsonc` config files | Deno's own config format. Users already know it from `deno.json`. Comments allow self-documenting convention choices. Official stdlib parser -- stable, maintained, tiny. |
 
-## What Changes
+**Why JSONC over alternatives:**
 
-### 1. Consolidation Unit: "Component" Replaces "Service"
+| Format | Verdict | Reason |
+|--------|---------|--------|
+| JSONC | **Use this** | Deno's own format. Users know it from `deno.json`. `@std/jsonc` is stdlib -- zero third-party deps. Comments enable self-documenting config. |
+| TOML | Rejected | Better type system but foreign to the Deno ecosystem. Would require `@std/toml` (extra dep) and introduce a format users don't use in this context. Deno chose JSONC for its own config, not TOML. |
+| YAML | Rejected | Indentation-sensitive, implicit type coercion footguns (`norway: false` problem). Not aligned with Deno conventions. |
+| Plain JSON | Rejected | No comments. Config files need comments to explain convention choices ("why did we enable this?"). |
 
-**Problem:** The v1.0 model assumes `specs/{service}/` -- every consolidation target is a "service" in a service-oriented architecture. This fails for CLI tools, libraries, documentation projects, system software.
+**Config file name:** `.cckit.jsonc` -- dotfile convention for project-level config, `.jsonc` extension signals comment support. Consistent with `.eslintrc.json`, `.prettierrc.json` patterns.
 
-**Recommendation:** Use "component" as the universal consolidation unit.
+### File System Operations: Deno Built-ins + @std/fs + @std/path
 
-| Project Type | Component Maps To | Example |
-|-------------|-------------------|---------|
-| Microservices | Service | `auth`, `gateway`, `user` |
-| Monolith | Module/Package | `billing`, `notifications`, `admin` |
-| CLI tool | Subcommand group | `init`, `build`, `deploy` |
-| Library | Public API surface | `parser`, `formatter`, `config` |
-| Documentation | Section/Chapter | `getting-started`, `api-reference` |
-| System software | Subsystem | `scheduler`, `memory-manager`, `fs` |
-| Desktop/Mobile app | Feature area | `editor`, `sync`, `settings` |
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| `Deno.readTextFile` | (built-in) | Read config files, convention source files | Stable API, async, `--allow-read`. Already used in existing tools. |
+| `Deno.writeTextFile` | (built-in) | Write installed convention files | Stable API, async, `--allow-write`. Already used in schema-bootstrap.ts. |
+| `Deno.mkdir` | (built-in) | Create `.claude/` subdirectories | Stable API. `{ recursive: true }` handles nested creation like `mkdir -p`. |
+| `Deno.readDir` | (built-in) | Enumerate convention package contents | Stable API, returns async iterator of `Deno.DirEntry`. |
+| `Deno.stat` / `Deno.lstat` | (built-in) | Check file existence, detect symlinks | Stable API. Use `lstat` to distinguish symlinks from regular files when checking for conflicts. |
+| `Deno.copyFile` | (built-in) | Copy individual convention files to target | Stable API. Copies contents + permissions. |
+| `jsr:@std/fs` | `^1.0.23` | `ensureDir`, `exists`, `walk` higher-level utilities | `ensureDir` is idempotent mkdir (no error if exists). `walk` handles recursive convention directory traversal. `exists` for pre-flight checks. |
+| `jsr:@std/path` | `^1.1.4` | `join`, `resolve`, `relative`, `dirname`, `basename` | Cross-platform path manipulation. Required for computing relative paths between cckit source and host project target. |
 
-**Why "component":**
-- Deliberately abstract -- no architectural assumption
-- Maps naturally to any organizational boundary a project uses
-- The host project's PROJECT.md already declares its topology (whatever the project calls its units)
-- Developers understand "what are the major parts of your system?" regardless of project type
+**Why per-file `Deno.copyFile` instead of `@std/fs` directory `copy`:**
 
-**Output directory stays `specs/{component}/`** -- the path structure does not change, only the vocabulary in prompts and templates.
+The `@std/fs` `copy` function copies directory **contents** in bulk. The installer needs per-file control because:
+- Config may select only some convention packages (selective install)
+- Each file copy should be logged (dry-run mode, user feedback)
+- Conflict detection needs per-file decisions (skip vs overwrite)
+- Some files need merge behavior (CLAUDE.md sections), not raw copy
 
-**Confidence:** HIGH. This is a naming decision, not a technology decision. The underlying mechanics (file-per-unit, section-based hashing, merge rules) are all unit-name-agnostic.
+Explicit file-by-file operations with `Deno.copyFile` + `walk` give full control over all of these.
 
-### 2. Template System: Generic Default + Host Overrides
+### CLI Argument Parsing: @std/cli
 
-**Problem:** v1.0 defines 3 archetype templates (`domain-service.md`, `gateway-bff.md`, `event-driven.md`) with archetype detection logic. Adding a new project type means editing the plugin. This violates the technology neutrality principle.
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| `jsr:@std/cli` | `^1.0.0` | `parseArgs` for installer CLI flags | Parses `--dry-run`, `--force`, `--config <path>` flags. Stdlib, handles boolean flags, string args, aliases. The installer has 3-4 flags total -- does not need a framework. |
 
-**Recommendation:** Two-layer template system.
+### Remote Execution: Deno Built-in (No Library)
 
-#### Layer 1: Generic Default Template (ships with plugin)
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| `deno run <URL>` | (built-in) | Execute installer from remote URL | Core Deno capability since 1.0. The script URL is fetched, cached in `~/.cache/deno`, and executed. Arguments after the URL pass to `Deno.args`. No library needed. |
 
-A single `templates/default.md` replacing all 3 archetype templates. Contains the minimum sections that apply to ANY component in ANY project type:
+Remote execution is a first-class Deno feature. The pattern:
 
-```
-# {Component} Spec
-
-Last consolidated: Phase {id} (YYYY-MM-DD)
-
-## Purpose
-
-What this component does and why it exists.
-
-## Interface
-
-Operations, endpoints, commands, or public API this component exposes.
-Use `{Component}.{Operation}` format for each operation.
-
-## Rules
-
-Business rules, constraints, invariants governing this component's behavior.
-
-## Dependencies
-
-What this component requires from other components or external systems.
-
-## Configuration
-
-Environment variables, feature flags, tunable parameters.
+```bash
+deno run --allow-read=. --allow-write=.claude/,./CLAUDE.md \
+  https://raw.githubusercontent.com/nanazt/cc/master/tools/install.ts
 ```
 
-**Why these 5 sections:** They pass the universality test. Every component in every project type has a purpose, exposes some interface, follows rules, may depend on other things, and may have configuration. They are also the minimum the consolidator agent needs to produce useful output, and the minimum the case-briefer needs to consume.
-
-**Conditional sections** (included only when the component warrants them):
-
-```
-## State Management
-
-(Include when: component manages stateful entities with lifecycle transitions)
-
-## Error Categories
-
-(Include when: component defines its own error taxonomy)
-
-## Event Contracts
-
-(Include when: component produces or consumes events/messages)
-```
-
-**What about the detailed v1.0 archetype sections?** They become examples in the host override layer (see Layer 2) or in reference documentation. The generic template intentionally under-specifies. The agent fills in what the phase documents warrant.
-
-#### Layer 2: Host Project Overrides (optional, in host project)
-
-The host project can place custom templates in `.planning/specs/_templates/{name}.md`. The consolidator checks for overrides before falling back to the plugin's default.
-
-**Lookup order (consolidator agent prompt instruction):**
-
-1. `.planning/specs/_templates/{component-name}.md` -- component-specific override
-2. `.planning/specs/_templates/default.md` -- project-wide override
-3. `${CLAUDE_SKILL_DIR}/templates/default.md` -- plugin default (always present)
-
-**Why `_templates/` with underscore prefix:** Distinguishes the template directory from component spec directories. `specs/auth/` is a component; `specs/_templates/` is configuration. The underscore is a common convention for meta/config directories.
-
-**Why not YAML/JSON schema files:** Markdown templates are self-documenting. The agent reads the template as instructions, not as a schema to parse. Section headings ARE the schema. Guide text below each heading tells the agent what to write there. This is consistent with the entire cckit approach -- everything is prompt content, not data.
-
-**Why not a `consolidate.yaml` config file:** Adding a new config format means adding config validation logic, documentation for the config format, migration handling when the format evolves, and cognitive overhead for users. The template IS the config. Reading a Markdown file with section headings is something Claude already does well.
-
-**Confidence:** HIGH for the approach. `${CLAUDE_SKILL_DIR}` is confirmed available in Claude Code skills (verified via official docs, March 2026). The template lookup is prompt-instructed behavior, not code -- the orchestrator tells the consolidator agent "check for overrides in this order."
-
-### 3. Component Classification: Topology-Driven, Not Detection-Based
-
-**Problem:** v1.0 uses a 2-step detection algorithm: (1) scan CASES.md for `{Service}.{Op}` headings, (2) match against PROJECT.md service topology table. The "archetype determination" from the topology table is hardcoded to 3 types.
-
-**Recommendation:** Drop archetype detection entirely. The consolidator does not need to know the archetype -- it needs to know the template.
-
-**New classification algorithm:**
-
-1. **Operation headings:** Scan CASES.md for `## {Component}.{Op}` headings. Extract unique component names. (Unchanged from v1.0.)
-2. **CONTEXT.md component names:** If step 1 yields zero results, scan CONTEXT.md for component names matching PROJECT.md topology. (Unchanged from v1.0.)
-3. **Template resolution:** For each component, resolve the template using the 3-level lookup order above. No archetype mapping needed.
-4. **On miss:** If both steps yield zero components, ask the developer. (Unchanged from v1.0.)
-
-**What disappears:** The `<template_type>` dispatch tag in the consolidator input contract. Replaced by `<template_path>` pointing to the resolved template file. The consolidator reads the template and follows its section structure.
-
-**What stays:** The `{Component}.{Operation}` naming convention is universal. It works for `Auth.Login`, `CLI.Init`, `Parser.Tokenize`, `GettingStarted.QuickStart` (docs), `Scheduler.DispatchJob` (system software). No change needed.
-
-**Confidence:** HIGH. The naming convention was already universal in v1.0 by accident -- it just used service-centric vocabulary to describe it.
-
-### 4. Merge Rules: What Changes, What Stays
-
-| Rule | v1.0 | v2.0 | Change |
-|------|------|------|--------|
-| Operation-level replacement | Per-service | Per-component | Vocabulary only |
-| PR-to-SR promotion | SR = Service Rule | SR = Spec Rule (or keep Service Rule -- see below) | Potentially rename |
-| TR exclusion | Unchanged | Unchanged | None |
-| R-to-OR transformation | Unchanged | Unchanged | None |
-| GR reference-only | GR = Global Rule (from PROJECT.md) | Unchanged | None |
-| Superseded operations | Unchanged | Unchanged | None |
-| Superseded rules | Unchanged | Unchanged | None |
-| Section-level rewrite | Per archetype sections | Per template sections | Template-driven |
-| Provenance tagging | Unchanged | Unchanged | None |
-| Forward Concerns exclusion | Unchanged | Unchanged | None |
-| Phase-contextual exclusion | Unchanged | Unchanged | None |
-
-**The SR naming question:** "Service Rule" becomes awkward for a CLI tool or library. Options:
-
-| Option | Pros | Cons |
-|--------|------|------|
-| Keep SR = Service Rule | No migration, all docs/examples stay valid | Misleading for non-service projects |
-| Rename SR = Spec Rule | Accurate for all project types, S still works | Migration in all docs, existing projects |
-| Rename SR = Scoped Rule | Describes the actual semantics (component-scoped) | "Scoped" is less intuitive than "Spec" |
-
-**Recommendation:** Rename to "Spec Rule" (SR stays SR). The abbreviation does not change, so existing CASES.md files, agent prompts, and verifier checks all continue to work. Only the expanded name changes in documentation and guide text. Zero migration cost.
-
-**Confidence:** HIGH. The abbreviation does not change, and the rename happens only in prose.
-
-### 5. Verification Checks: Universality Audit
-
-The v1.0 IMPL-SPEC defines 28 verification checks. Most are already universal. The archetype-specific ones need changes:
-
-| Check | v1.0 | v2.0 Change |
-|-------|------|-------------|
-| V-04 | "Archetype-appropriate sections present" | "Template-appropriate sections present" -- compare against resolved template |
-| V-11 | "Gateway routes resolve" | Drop or generalize to "Interface references resolve" -- not all components have routes |
-| V-27 | "specs/ service list matches PROJECT.md service topology" | "specs/ component list matches PROJECT.md topology" -- vocabulary only |
-
-All other checks (V-01 through V-29 excluding V-04, V-11, V-27) are already universal -- they operate on structural patterns (provenance tags, section emptiness, operation naming, rule formatting) that are project-type-agnostic.
-
-**V-11 specifically:** This check assumed a gateway with route-to-backend-operation mappings. In the universal model, this becomes: "Interface cross-references resolve -- operations referenced in one component's spec exist in the referenced component's spec." Same semantic check, broader applicability.
-
-**Confidence:** HIGH. The verification framework is structurally sound; only vocabulary and a few check definitions need updating.
-
-### 6. E2E Flows: Optional, Not Assumed
-
-**Problem:** v1.0 treats E2E flows as a standard pipeline step (Step 3.5, Step 4). But E2E cross-component flows only make sense when components interact (multi-service systems, multi-module monoliths with inter-module calls). For a CLI tool, a library, or a documentation project, there are no "cross-component flows."
-
-**Recommendation:** Make E2E flow generation explicitly conditional.
-
-**Trigger condition:** E2E flows are generated ONLY when the project topology in PROJECT.md declares inter-component communication. The orchestrator checks for this before Step 3.5.
-
-**Detection heuristic (prompt-instructed, not code):** "Does PROJECT.md describe communication between components (API calls, event subscriptions, shared state, message passing)? If yes, E2E flows apply. If the project is a standalone tool, library, or documentation project with no inter-component communication, skip E2E flows entirely."
-
-**Impact on pipeline:** Step 3.5 and Step 4 become conditional. The orchestrator skips them with a log message: "No inter-component flows detected. Skipping E2E generation." This is already the v1.0 behavior for the "no cross-service dependencies" case -- it just needs to be the expected default, not the exception.
-
-**Confidence:** HIGH. This is a prompt-level change in the orchestrator SKILL.md. No tooling changes.
-
-### 7. Agent Model Assignments: Unchanged
-
-| Agent | Model | v2.0 Status |
-|-------|-------|-------------|
-| spec-consolidator | sonnet | Unchanged. Template-following consolidation is well within sonnet capability. |
-| e2e-flows | sonnet | Unchanged (when E2E applies). |
-| spec-verifier | opus | Unchanged. Verification reasoning depth hasn't changed. Still a downgrade candidate after usage data. |
-
-No model changes. The universal model does not increase reasoning difficulty -- it reduces template complexity (fewer sections to match) and removes archetype classification (less branching logic for agents).
+Deno caches the script on first run. Subsequent runs use the cached version unless `--reload` is passed.
 
 ## What NOT to Add
 
-These were considered and explicitly rejected for v2.0.
+| Technology | Why Not |
+|------------|---------|
+| `npm:commander` / `npm:yargs` | Heavyweight CLI frameworks. 3-4 flags do not warrant a framework. `@std/cli/parseArgs` is sufficient. |
+| `npm:inquirer` / `npm:prompts` | Interactive prompts add complexity and break CI usage. Config file declares intent; installer executes it. Non-interactive by design. |
+| `npm:glob` / `npm:fast-glob` | Deno's `@std/fs/walk` handles recursive file discovery natively. |
+| `npm:chalk` / `npm:picocolors` | Console coloring is unnecessary for an installer that runs once. Use plain text output. Deno's `%c` CSS-style console formatting is available if needed later. |
+| `npm:fs-extra` | Node.js utility. Everything it provides is available through Deno built-ins + `@std/fs`. |
+| `npm:zod` / schema validators | Config has approximately 5 fields. TypeScript interfaces + manual validation with clear error messages is sufficient. Zod adds an npm dependency for trivial gain. |
+| `@std/toml` | Not needed. Config format is JSONC. |
+| `@std/yaml` | Not needed. Config format is JSONC. Frontmatter in skills/agents is consumed by Claude Code, not by installer code. |
+| Any HTTP server framework | The installer is not a server. Pure file operations. |
+| Any bundler (esbuild, etc.) | Deno runs TypeScript directly. Remote `deno run` fetches and caches. No build step. |
+| `npm:semver` | Convention packages do not have semver dependencies between them. Version tracking is cckit's concern, not the installer's. |
+| Template engines (Handlebars, etc.) | CLAUDE.md section merging is string manipulation (find section marker, append/replace). Does not warrant a template engine. |
 
-### Do Not Add: Schema Definition Language
+## Permissions Model
 
-**Temptation:** Define a formal schema language (YAML, JSON Schema, custom DSL) for specifying template section structures, required vs optional sections, validation rules, and conditional inclusion logic.
+The installer needs exactly two Deno permissions:
 
-**Why not:** The template Markdown file IS the schema. Adding a separate schema definition language means: (1) maintaining two representations of the same information, (2) building a parser/validator for the schema format, (3) documenting the schema language, (4) debugging schema-vs-template mismatches. The agent reads the template headings and guide text directly. Markdown is the schema language.
+| Permission | Scope | Why |
+|------------|-------|-----|
+| `--allow-read` | Project directory, cckit convention source dir | Read config, read convention source files, check existing files for conflicts |
+| `--allow-write` | Project `.claude/` directory, project root (for CLAUDE.md) | Write convention files, create directories, update CLAUDE.md |
 
-### Do Not Add: Project Type Detection
+**What is NOT needed:**
 
-**Temptation:** Build a classifier that reads the host project's files (package.json, Cargo.toml, go.mod, Makefile) and determines the project type, then selects an appropriate template.
+| Permission | Why Not Needed |
+|------------|----------------|
+| `--allow-net` | Not needed for local runs. For remote `deno run`, Deno auto-grants net for fetching the script itself. The script does no further network access -- convention files ship in the repo. |
+| `--allow-env` | Installer does not read environment variables. |
+| `--allow-run` | Installer does not spawn subprocesses. |
+| `--allow-sys` | Installer does not read system info. |
 
-**Why not:** This is the archetype detection problem from v1.0 at a larger scale. The host project tells us its topology in PROJECT.md. If PROJECT.md does not declare a topology, the developer provides one. The plugin never needs to guess. Detection logic is fragile, incomplete, and creates a maintenance burden of supporting every project type.
+**Scoped permissions for production use:**
 
-### Do Not Add: Template Inheritance / Composition
+```bash
+# Remote execution (narrow scope)
+deno run --allow-read=. --allow-write=.claude/,./CLAUDE.md \
+  https://raw.githubusercontent.com/nanazt/cc/master/tools/install.ts
 
-**Temptation:** Let templates extend or compose other templates (`extends: default`, `includes: [error-categories, state-management]`).
+# Local development / self-application (broader for convenience)
+deno run --allow-read --allow-write tools/install.ts
+```
 
-**Why not:** This adds a template processing engine. The problem is small enough to solve with flat files. A project override template is a complete replacement, not a delta. If a project wants 3 sections from the default and 2 custom ones, they write a 5-section template. Copy-paste is simpler than inheritance for files this small (10-30 lines).
+## Import Strategy: Inline jsr: Specifiers
 
-### Do Not Add: YAML Configuration File for Consolidation
+Use inline `jsr:` specifiers in source files, consistent with the existing `npm:` specifier pattern used by hash-sections.ts, schema-parser.ts, and schema-bootstrap.ts.
 
-**Temptation:** Create a `.planning/consolidate.yaml` or `specs/config.yaml` that configures the consolidation pipeline (component mappings, template assignments, rule tier settings, E2E flow preferences).
+```typescript
+// Convention: inline specifiers, matching existing codebase pattern
+import { parse as parseJsonc } from "jsr:@std/jsonc@^1.0.2";
+import { ensureDir, exists, walk } from "jsr:@std/fs@^1.0.23";
+import { join, resolve, relative } from "jsr:@std/path@^1.1.4";
+import { parseArgs } from "jsr:@std/cli@^1.0.0/parse-args";
+```
 
-**Why not:** Configuration accumulates. Every config key needs documentation, default values, migration when the schema changes, and validation. For v2.0, the template files + PROJECT.md topology provide all configuration needed. If configuration complexity grows in the future, evaluate then -- but do not pre-build infrastructure for imagined future needs.
+**Why not use `deno.json` imports / import map:**
 
-### Do Not Add: Runtime Schema Validation Tool
+The project currently has no `deno.json`. All existing tools use direct specifiers (`npm:unified@^11.0.0`, `npm:remark-parse@^11.0.0`). Adding `deno.json` solely for import mapping introduces a new convention without corresponding benefit. Inline specifiers are self-documenting -- you see the package and version at the import site.
 
-**Temptation:** Build a Deno tool (like hash-sections.ts) that validates spec files against their template schema.
+**When to add `deno.json`:** If the project accumulates 5+ files importing the same packages, centralizing versions in `deno.json` imports becomes worthwhile. For now, 1-2 new files (install.ts, possibly a config.ts) do not justify it.
 
-**Why not:** The spec-verifier agent already does this (V-04 check: template-appropriate sections present). Adding a Deno validation tool duplicates the verifier's job in a different format. The verifier is better at this because it can reason about "close enough" and "technically missing but covered by another section" -- a structural validator cannot.
+## Config File Design (`.cckit.jsonc`)
 
-### Do Not Add: Multiple Template Formats
+```jsonc
+{
+  // Which convention packages to install
+  // Each name maps to a directory in cckit's conventions/ folder
+  "conventions": [
+    "commit",       // Conventional Commits rules
+    "workflow",     // GSD workflow integration
+    "coding"        // Code style conventions
+  ],
 
-**Temptation:** Support YAML templates alongside Markdown templates, or support both inline template definitions (in SKILL.md) and file-based templates.
+  // Where to install (relative to project root)
+  // Default: ".claude/"
+  "target": ".claude/",
 
-**Why not:** One format. Markdown. Agents read Markdown. Templates are Markdown. Specs are Markdown. Adding a second format doubles the surface area for bugs and documentation.
+  // What to do when a file already exists at the target
+  // "skip" = keep existing (safe default)
+  // "overwrite" = replace with convention version
+  // "merge" = append convention sections (for CLAUDE.md only)
+  "onConflict": "skip"
+}
+```
 
-## File Inventory Changes (v1.0 to v2.0)
+**Design principles:**
+- Flat structure. No nesting beyond the `conventions` array.
+- String array for `conventions` -- each maps to a convention package directory.
+- Sensible defaults: `target` is `.claude/`, `onConflict` is `"skip"` (never destroy user content without explicit opt-in).
+- Comments explain each field in place (JSONC advantage over JSON).
+- Extensible: new fields can be added later without breaking existing configs.
 
-| v1.0 File | v2.0 Replacement | Change Type |
-|-----------|-------------------|-------------|
-| `templates/domain-service.md` | `templates/default.md` | Replace (3 files -> 1) |
-| `templates/gateway-bff.md` | (removed) | Covered by default + host overrides |
-| `templates/event-driven.md` | (removed) | Covered by default + host overrides |
-| `agents/spec-consolidator.md` | `agents/spec-consolidator.md` | Rewrite (remove archetype references) |
-| `agents/e2e-flows.md` | `agents/e2e-flows.md` | Minor rewrite (vocabulary only) |
-| `agents/spec-verifier.md` | `agents/spec-verifier.md` | Minor rewrite (V-04, V-11, V-27 updates) |
-| `skills/consolidate/SKILL.md` | `skills/consolidate/SKILL.md` | Rewrite (remove archetype detection, add template lookup, conditional E2E) |
-| (new) | `templates/examples/` | New directory with example host-override templates for common project types |
-| `hash-sections.ts` | `hash-sections.ts` | Unchanged |
-| `hash-sections_test.ts` | `hash-sections_test.ts` | Unchanged |
+## Stack Architecture: How It Fits Together
 
-## Template Examples Directory
+```
+User invokes (remote):
+  deno run --allow-read --allow-write https://raw.githubusercontent.com/.../install.ts
 
-**Not part of the runtime.** A `templates/examples/` directory ships with the plugin containing non-functional example templates that developers can copy into their host project's `specs/_templates/`:
+User invokes (local / self-application):
+  deno run --allow-read --allow-write tools/install.ts
 
-| Example | For Project Types Like | Key Sections |
-|---------|----------------------|--------------|
-| `microservice.md` | Backend services, APIs | Domain Model, Adapter Contracts, Service Interface, Error Categories |
-| `cli-tool.md` | CLI applications | Command Interface, Argument Parsing, Output Formats |
-| `library.md` | Reusable libraries, SDKs | Public API, Type Contracts, Error Handling |
-| `documentation.md` | Doc sites, knowledge bases | Content Structure, Cross-References, Audience |
+install.ts execution flow:
+  1. parseArgs(Deno.args)        <- @std/cli     : --dry-run, --force, --config
+  2. Deno.readTextFile(config)   <- built-in     : read .cckit.jsonc
+  3. parseJsonc(configText)      <- @std/jsonc   : parse JSONC to object
+  4. validate(config)            <- manual TS    : check required fields, types
+  5. for each convention:
+     a. resolve source paths     <- @std/path    : join(cckit, 'conventions', name)
+     b. walk(source)             <- @std/fs      : enumerate convention files
+     c. for each file:
+        - resolve target path    <- @std/path    : join(projectRoot, target, ...)
+        - ensureDir(parent)      <- @std/fs      : create target directories
+        - check exists(target)   <- @std/fs      : conflict detection
+        - apply onConflict       <- manual TS    : skip / overwrite / merge
+        - Deno.copyFile / merge  <- built-in     : write to target
+        - log action             <- console      : "installed: .claude/skills/..."
+  6. summary report              <- console      : "3 conventions, 12 files installed"
+```
 
-These are reference material, not active templates. The skill never reads from `examples/`. Their purpose is reducing the "blank page" problem for users creating host overrides.
+## Existing Stack (Unchanged)
 
-**Confidence:** MEDIUM. The specific example categories and sections are speculative -- they should be refined based on real usage. The mechanism (reference examples, not functional templates) is HIGH confidence.
+Listed for completeness. No changes needed for v0.2.0.
 
-## Integration with Existing Hash Tool
+| Technology | Version | Purpose | Status |
+|------------|---------|---------|--------|
+| Deno | `>=2.7` (latest: 2.7.x, March 2026) | Runtime | Unchanged |
+| `npm:unified` | `^11.0.0` | Pipeline processor | Unchanged |
+| `npm:remark-parse` | `^11.0.0` | Markdown-to-AST | Unchanged |
+| `npm:mdast-util-to-string` | `^4.0.0` | AST text extraction | Unchanged |
+| `npm:remark-gfm` | `^4.0.0` | GFM table parsing | Unchanged |
+| `npm:@types/mdast` | `^4.0.0` | TypeScript AST types | Unchanged |
+| `crypto.subtle.digest` | (built-in) | SHA-256 hashing | Unchanged |
+| `deno test` | (built-in) | Test runner | Unchanged |
 
-The hash tool (`hash-sections.ts`) operates on H2 section headings. It does not know or care what those headings say. A spec with `## Domain Model` and a spec with `## Command Interface` are processed identically.
+## Dependency Count
 
-**No changes needed.** The hash tool is already universal.
+**Before v0.2.0:** 5 npm packages (unified, remark-parse, mdast-util-to-string, remark-gfm, @types/mdast), 0 jsr packages.
 
-The only interaction point: the E2E flows agent uses hashes from the hash tool to detect spec changes. If a component's spec sections change (regardless of what those sections are called), the hash changes, and the E2E flow referencing that spec is flagged for regeneration. This mechanism is heading-name-agnostic.
+**After v0.2.0:** Same 5 npm packages + 4 jsr standard library packages (@std/jsonc, @std/fs, @std/path, @std/cli).
 
-## Testing Impact
+All additions are official Deno standard library. No third-party dependencies added.
 
-### Hash Tool Tests: No Change
+## Alternatives Considered
 
-The 10 existing test cases in `hash-sections_test.ts` are structure-based (H2 extraction, code block handling, normalization). They do not reference service-specific content. Already universal.
+| Category | Recommended | Alternative | Why Not |
+|----------|-------------|-------------|---------|
+| Config format | JSONC (`@std/jsonc`) | TOML (`@std/toml`) | Foreign to Deno ecosystem. Extra cognitive load. |
+| Config format | JSONC (`@std/jsonc`) | YAML (`@std/yaml`) | Indentation-sensitive, implicit type coercion, not Deno-idiomatic. |
+| Config format | JSONC (`@std/jsonc`) | Plain JSON | No comments. Config needs self-documentation. |
+| CLI parsing | `@std/cli/parseArgs` | `npm:commander` | 3-4 flags. Stdlib is sufficient. No npm dep. |
+| File copy | `Deno.copyFile` per file | `@std/fs/copy` directory | Need per-file control for selective install, conflict detection, dry-run, logging. |
+| Path handling | `@std/path` | Manual string concat | Cross-platform correctness (Windows separators, edge cases). |
+| Config validation | TypeScript interfaces + manual | `npm:zod` | Config has ~5 fields. Zod is overkill, adds npm dep. |
+| Import style | Inline `jsr:` specifiers | `deno.json` import map | Matches existing `npm:` pattern. No config file ceremony. |
+| Remote hosting | raw.githubusercontent.com | deno.land/x or JSR | cckit is a personal toolkit on GitHub. No need for a registry. raw.githubusercontent.com is sufficient and free. |
 
-### Skill/Agent Test Fixtures: New
+## Confidence Assessment
 
-For v2.0, test fixtures should cover:
-
-| Fixture Category | Purpose |
-|-----------------|---------|
-| Generic component (minimal template) | Validates basic consolidation with default template |
-| Component with host override template | Validates template lookup order |
-| Non-service project (CLI tool) | Validates vocabulary neutrality |
-| Multi-component project without E2E | Validates E2E skip path |
-
-These are prompt-based (fixture input -> expected output assertions). No new tooling needed.
-
-**Confidence:** MEDIUM. Fixture design depends on final template format decisions during implementation.
-
-## Recommended Stack Summary
-
-| Layer | Technology | Change from v1.0 |
-|-------|-----------|------------------|
-| Runtime | Deno >= 2.7 | None |
-| Markdown AST | unified + remark-parse + remark-stringify | None |
-| Crypto | Web Crypto API | None |
-| Plugin format | SKILL.md + Agent .md | None (format unchanged, content rewritten) |
-| Templates | Single `default.md` + host override lookup | Replace 3 archetypes with 1 default + override mechanism |
-| Agent models | sonnet (consolidator, e2e) + opus (verifier) | None |
-| Schema format | Markdown (template headings = schema) | Explicit decision: no YAML/JSON schema |
-| Config | PROJECT.md topology + template files | Explicit decision: no separate config file |
-| Testing | Deno test + prompt-based fixtures | New fixtures for universal scenarios |
+| Area | Confidence | Reason |
+|------|------------|--------|
+| JSONC as config format | HIGH | Deno's own format. `@std/jsonc` v1.0.2 verified on JSR. |
+| Deno built-in FS APIs | HIGH | Well-documented stable APIs. Already used by existing tools in this codebase. |
+| `@std/fs` utilities | HIGH | v1.0.23, stable 1.0.x series. Verified on JSR. |
+| `@std/cli/parseArgs` | HIGH | Stdlib, verified on JSR, documented in official Deno examples. |
+| `@std/path` utilities | HIGH | v1.1.4, verified on JSR. |
+| Remote `deno run` pattern | HIGH | Core Deno feature since 1.0. Verified with real-world examples, official docs. |
+| Permission scoping | HIGH | Verified in official Deno security docs. Scoped `--allow-read` and `--allow-write` are stable. |
+| No `deno.json` needed | MEDIUM | Correct for current scale (1-2 new files). May want to revisit if convention count grows significantly. |
 
 ## Sources
 
-- [Claude Code Skills Docs](https://code.claude.com/docs/en/skills) -- `${CLAUDE_SKILL_DIR}` reference, supporting files pattern, template conventions (verified March 2026)
-- [Claude Code Subagents Docs](https://code.claude.com/docs/en/sub-agents) -- Agent .md frontmatter, model options (verified March 2026)
-- [Skill Authoring Best Practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices) -- Keeping SKILL.md focused, reference file patterns
-- [Agent Skills Standard](https://agentskills.io) -- Open standard for skill format
-- v1.0 research: `.planning/research/STACK.md` (2026-03-30) -- Deno, unified, remark-parse validation
-- v1.0 IMPL-SPEC: `docs/IMPL-SPEC.md` -- Current design being replaced
+- [Deno Standard Library](https://docs.deno.com/runtime/fundamentals/standard_library/) -- JSR-hosted stdlib overview
+- [@std/jsonc on JSR](https://jsr.io/@std/jsonc) -- v1.0.2, JSONC parser
+- [@std/jsonc versions](https://jsr.io/@std/jsonc/versions) -- version history
+- [@std/fs on JSR](https://jsr.io/@std/fs) -- v1.0.23, filesystem utilities (ensureDir, exists, walk)
+- [@std/path on JSR](https://jsr.io/@std/path) -- v1.1.4, path utilities
+- [@std/cli/parseArgs on JSR](https://jsr.io/@std/cli/doc/parse-args) -- CLI argument parsing
+- [Deno File System APIs](https://docs.deno.com/api/deno/file-system) -- Deno.copyFile, Deno.mkdir, Deno.readDir, Deno.stat
+- [Deno.copyFile API](https://docs.deno.com/api/deno/~/Deno.copyFile) -- copyFile signature
+- [Deno Security and Permissions](https://docs.deno.com/runtime/fundamentals/security/) -- permission model, scoped flags
+- [Deno CLI: deno run](https://docs.deno.com/runtime/reference/cli/run/) -- remote URL execution, argument ordering
+- [Building Scripts and CLIs with Deno](https://deno.com/learn/scripts-clis) -- remote script patterns
+- [Deno 2.7 Release](https://deno.com/blog/v2.7) -- latest stable release (February 2026)
+- [Deno 2.5: Permissions in config file](https://deno.com/blog/v2.5) -- permission sets feature
+- [Deno Releases (GitHub)](https://github.com/denoland/deno/releases) -- version history
+- [JSON vs YAML vs TOML in 2026](https://dev.to/jsontoall_tools/json-vs-yaml-vs-toml-which-configuration-format-should-you-use-in-2026-1hlb) -- format comparison
+- [Parsing and serializing YAML (Deno)](https://docs.deno.com/examples/parsing_serializing_yaml/) -- @std/yaml reference (considered, rejected)
+- [Parsing and serializing TOML (Deno)](https://docs.deno.com/examples/parsing_serializing_toml/) -- @std/toml reference (considered, rejected)
