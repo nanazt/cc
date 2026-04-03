@@ -38,7 +38,7 @@ Full details: [milestones/v0.1.0-ROADMAP.md](milestones/v0.1.0-ROADMAP.md)
 
 **Milestone Goal:** Research-driven, high-quality conventions packaged as installable artifacts with selective project installation. Open milestone -- convention phases can be added later.
 
-- [ ] **Phase 17: Convention Architecture** — Define layered convention file structure (base + tech pack) and authoring principles
+- [ ] **Phase 17: Convention Architecture** — Define layered convention file structure (base + language-specific) and authoring principles
 - [ ] **Phase 18: /convention Skill** — Build the research-driven convention authoring tool
 - [ ] **Phase 19: First Convention — Commit** — Validate skill + architecture end-to-end with commit conventions
 - [ ] **Phase 20: Installation Infrastructure** — Plugin manifest and convention distribution mechanism
@@ -53,11 +53,14 @@ Full details: [milestones/v0.1.0-ROADMAP.md](milestones/v0.1.0-ROADMAP.md)
 **Depends on**: Nothing (first phase of v0.2.0)
 **Requirements**: ARCH-01, ARCH-02, ARCH-03, ARCH-04
 **Success Criteria** (what must be TRUE):
-  1. A convention architecture document exists that specifies base (tech-neutral) and tech pack (tech-specific) file locations, naming, and frontmatter format
-  2. The architecture defines how tech packs are organized per-technology and opt-in via config, with clear discoverability rules
+  1. A convention architecture document exists that specifies base (tech-neutral, optional) and language-specific file locations, naming, and frontmatter format
+  2. The architecture defines how language-specific conventions are organized per-language and opt-in via installer selection, with clear discoverability rules
   3. The architecture includes a "delta test" -- conventions only teach what the LLM does not already know or where user style diverges from defaults
-  4. A base convention template exists that demonstrates standalone value without any tech pack
-**Plans**: TBD
+  4. A base convention template exists that demonstrates standalone value without any language-specific convention
+**Plans**: 1 plan
+
+Plans:
+- [ ] 17-01-PLAN.md — Convention architecture document and requirements update
 
 ### Phase 18: /convention Skill
 **Goal**: A `/convention` skill exists that can research, author, and validate convention files following the architecture from Phase 17
@@ -162,7 +165,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22 -> 23
 | 14. Cross-Unit Flows | v0.1.0 | 2/2 | Complete | 2026-04-02 |
 | 15. Fix Artifact Paths and Remove Stale Doc | v0.1.0 | 1/1 | Complete | 2026-04-02 |
 | 16. Align E2E Flows Dispatch Contract | v0.1.0 | 1/1 | Complete | 2026-04-02 |
-| 17. Convention Architecture | v0.2.0 | 0/? | Not started | - |
+| 17. Convention Architecture | v0.2.0 | 0/1 | Planning | - |
 | 18. /convention Skill | v0.2.0 | 0/? | Not started | - |
 | 19. First Convention — Commit | v0.2.0 | 0/? | Not started | - |
 | 20. Installation Infrastructure | v0.2.0 | 0/? | Not started | - |
