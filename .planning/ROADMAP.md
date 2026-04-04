@@ -102,7 +102,7 @@ Plans:
   1. GSD commit command output reflects the host project's commit conventions
   2. Self-application verified on cckit itself
   3. Projects without conventions keep GSD default behavior
-**Plans:** 1/1 plans complete
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 19.1 to break down)
@@ -172,7 +172,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22 -> 23
 | 15. Fix Artifact Paths and Remove Stale Doc | v0.1.0 | 1/1 | Complete | 2026-04-02 |
 | 16. Align E2E Flows Dispatch Contract | v0.1.0 | 1/1 | Complete | 2026-04-02 |
 | 17. Convention Architecture | v0.2.0 | 1/1 | Complete    | 2026-04-03 |
-| 18. /convention Skill | v0.2.0 | 3/3 | Complete | 2026-04-04 |
+| 18. /convention Skill | v0.2.0 | 3/3 | Complete    | 2026-04-04 |
 | 19. First Convention — Commit | v0.2.0 | 0/? | Not started | - |
 | 20. Installation Infrastructure | v0.2.0 | 0/? | Not started | - |
 | 21. Code Convention + Rust Code Tech Pack | v0.2.0 | 0/? | Not started | - |
