@@ -43,6 +43,8 @@ Read `<convention_area>`, `<target_language>`, and `<host_project_context>`. Und
 - What the host project already has (existing conventions, stack, patterns) so research stays relevant
 - If `<existing_convention>` is present, what rules already exist and where the gaps are
 
+Read `docs/CONVENTIONS.md` for orientation on what a convention file contains and what the delta test is. This ensures your findings are framed in terms the downstream generator can use directly.
+
 ### Step 2: Research Best Practices
 
 Use WebSearch and WebFetch to find authoritative sources. Search for:
