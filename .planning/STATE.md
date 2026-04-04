@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.2.0
 milestone_name: Portable Conventions
 status: verifying
-stopped_at: Phase 18 context gathered
-last_updated: "2026-04-03T15:13:11.818Z"
-last_activity: 2026-04-03
+stopped_at: "Completed 18-convention-skill plan 02 — /convention skill entry point"
+last_updated: "2026-04-04T12:36:31Z"
+last_activity: 2026-04-04
 progress:
   total_phases: 8
   completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  total_plans: 2
+  completed_plans: 2
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-03)
 
 **Core value:** Encode behavioral quality standards as installable artifacts — project-type agnostic.
-**Current focus:** Phase 17 — convention-architecture
+**Current focus:** Phase 18 — convention-skill
 
 ## Current Position
 
-Phase: 19.1
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-04-03
+Phase: 18-convention-skill
+Plan: 02 complete (03 next)
+Status: In progress — plan 02 of 18 completed
+Last activity: 2026-04-04
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -48,6 +48,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 17-convention-architecture P01 | 3min | 2 tasks | 2 files |
+| Phase 18-convention-skill P02 | 5min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -61,6 +62,8 @@ Recent decisions affecting current work:
 - [Phase 17-convention-architecture]: Convention files are Claude Code rules (.claude/rules/), not skills — rules are passive behavioral guidance
 - [Phase 17-convention-architecture]: Base convention (CONVENTION.md) is optional — only created when it passes the delta test
 - [Phase 17-convention-architecture]: paths frontmatter requires unquoted CSV format plus alwaysApply: false for lazy loading (Claude Code known behavior)
+- [Phase 18-convention-skill]: /convention skill uses publisher flag from .claude/cckit.json to route output to conventions/ (cckit) or .claude/rules/ (consumer)
+- [Phase 18-convention-skill]: step-init covers all routing: args, config, path resolution, mode, naming, missing-base, flow selection
 
 ### Pending Todos
 
@@ -77,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T15:13:11.816Z
-Stopped at: Phase 18 context gathered
-Resume file: .planning/phases/18-convention-skill/18-CONTEXT.md
+Last session: 2026-04-04T12:36:31Z
+Stopped at: Completed /convention skill entry point — SKILL.md, step-init.md, .claude/cckit.json
+Resume file: .planning/phases/18-convention-skill/18-03-PLAN.md

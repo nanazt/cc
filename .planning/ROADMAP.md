@@ -72,7 +72,7 @@ Plans:
   3. The skill generates convention files that follow ARCH rules -- base and tech pack are separate files in correct locations
   4. The skill identifies what the LLM already knows vs. what needs explicit teaching, and the generated convention only includes the delta
   5. The skill works when invoked from any project, not just cckit
-**Plans**: TBD
+**Plans**: Plan 01 (research, complete), Plan 02 (/convention skill entry point, complete), Plan 03+ (researcher/generator agents, remaining step files — in progress)
 **UI hint**: yes
 **Discuss notes**: Revisit D-01 boundary — are all conventions rules, or do some need to be skills (e.g., conventions requiring tool access or interactive workflows)?
 
