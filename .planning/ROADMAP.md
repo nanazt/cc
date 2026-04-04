@@ -72,12 +72,9 @@ Plans:
   3. The skill generates convention files that follow ARCH rules -- base and tech pack are separate files in correct locations
   4. The skill identifies what the LLM already knows vs. what needs explicit teaching, and the generated convention only includes the delta
   5. The skill works when invoked from any project, not just cckit
-**Plans**: 3 plans
-
-Plans:
-- [ ] 18-01-PLAN.md — Convention researcher and generator agent definitions
-- [ ] 18-02-PLAN.md — SKILL.md orchestrator, step-init, and cckit.json config
-- [ ] 18-03-PLAN.md — Step files for research, preferences, generation, and update workflows
+**Plans**: Plan 01 (research, complete), Plan 02 (/convention skill entry point, complete), Plan 03+ (researcher/generator agents, remaining step files — in progress)
+**UI hint**: yes
+**Discuss notes**: Revisit D-01 boundary — are all conventions rules, or do some need to be skills (e.g., conventions requiring tool access or interactive workflows)?
 
 ### Phase 19: First Convention — Commit
 **Goal**: A complete commit message convention exists (base + no tech pack needed), authored via `/convention`, validating the entire authoring pipeline end-to-end
@@ -170,7 +167,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22 -> 23
 | 15. Fix Artifact Paths and Remove Stale Doc | v0.1.0 | 1/1 | Complete | 2026-04-02 |
 | 16. Align E2E Flows Dispatch Contract | v0.1.0 | 1/1 | Complete | 2026-04-02 |
 | 17. Convention Architecture | v0.2.0 | 1/1 | Complete    | 2026-04-03 |
-| 18. /convention Skill | v0.2.0 | 0/3 | Planning | - |
+| 18. /convention Skill | v0.2.0 | 0/? | Not started | - |
 | 19. First Convention — Commit | v0.2.0 | 0/? | Not started | - |
 | 20. Installation Infrastructure | v0.2.0 | 0/? | Not started | - |
 | 21. Code Convention + Rust Code Tech Pack | v0.2.0 | 0/? | Not started | - |

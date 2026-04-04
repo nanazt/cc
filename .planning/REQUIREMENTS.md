@@ -25,13 +25,13 @@ Requirements for the Portable Conventions milestone. Each maps to roadmap phases
 
 ### /convention Skill (SKILL)
 
-- [x] **SKILL-01**: Skill researches best practices for a given convention area
-- [x] **SKILL-02**: Skill compares and recommends libraries for language-specific conventions
-- [x] **SKILL-03**: Skill identifies what LLM already knows vs what needs explicit teaching
-- [ ] **SKILL-04**: Skill collects user's personal style preferences via interactive questioning
-- [ ] **SKILL-05**: Skill generates convention file following ARCH rules (base/language-specific separation)
-- [x] **SKILL-06**: Skill validates tech-neutrality for base conventions
-- [ ] **SKILL-07**: Skill works in any project, not just cckit (for project-specific conventions)
+- [ ] **SKILL-01**: Skill researches best practices for a given convention area
+- [ ] **SKILL-02**: Skill compares and recommends libraries for language-specific conventions
+- [ ] **SKILL-03**: Skill identifies what LLM already knows vs what needs explicit teaching
+- [x] **SKILL-04**: Skill collects user's personal style preferences via interactive questioning
+- [x] **SKILL-05**: Skill generates convention file following ARCH rules (base/language-specific separation)
+- [ ] **SKILL-06**: Skill validates tech-neutrality for base conventions
+- [x] **SKILL-07**: Skill works in any project, not just cckit (for project-specific conventions)
 
 ### Conventions — Base (authored via /convention)
 
@@ -90,13 +90,13 @@ Deferred to later phases in this open milestone or subsequent milestones.
 | ARCH-02 | Phase 17 | Complete |
 | ARCH-03 | Phase 17 | Complete |
 | ARCH-04 | Phase 17 | Complete |
-| SKILL-01 | Phase 18 | Complete |
-| SKILL-02 | Phase 18 | Complete |
-| SKILL-03 | Phase 18 | Complete |
-| SKILL-04 | Phase 18 | Pending |
-| SKILL-05 | Phase 18 | Pending |
-| SKILL-06 | Phase 18 | Complete |
-| SKILL-07 | Phase 18 | Pending |
+| SKILL-01 | Phase 18 | Pending |
+| SKILL-02 | Phase 18 | Pending |
+| SKILL-03 | Phase 18 | Pending |
+| SKILL-04 | Phase 18 | Complete |
+| SKILL-05 | Phase 18 | Complete |
+| SKILL-06 | Phase 18 | Pending |
+| SKILL-07 | Phase 18 | Complete |
 | COMMIT-01 | Phase 19 | Pending |
 | INST-01 | Phase 20 | Pending |
 | INST-02 | Phase 20 | Pending |
