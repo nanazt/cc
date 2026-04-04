@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.2.0
 milestone_name: Portable Conventions
 status: verifying
-stopped_at: "Completed 18-convention-skill plan 02 — /convention skill entry point"
-last_updated: "2026-04-04T12:36:31Z"
+stopped_at: "Completed 18-convention-skill plan 03 — /convention skill step files"
+last_updated: "2026-04-04T12:47:00Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 8
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 3
+  completed_plans: 3
   percent: 0
 ---
 
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-03)
 ## Current Position
 
 Phase: 18-convention-skill
-Plan: 02 complete (03 next)
-Status: In progress — plan 02 of 18 completed
+Plan: 03 complete (phase complete)
+Status: In progress — all plans of phase 18 completed
 Last activity: 2026-04-04
 
 Progress: [░░░░░░░░░░] 0%
@@ -49,6 +49,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 17-convention-architecture P01 | 3min | 2 tasks | 2 files |
 | Phase 18-convention-skill P02 | 5min | 2 tasks | 3 files |
+| Phase 18-convention-skill P03 | 4min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -64,6 +65,10 @@ Recent decisions affecting current work:
 - [Phase 17-convention-architecture]: paths frontmatter requires unquoted CSV format plus alwaysApply: false for lazy loading (Claude Code known behavior)
 - [Phase 18-convention-skill]: /convention skill uses publisher flag from .claude/cckit.json to route output to conventions/ (cckit) or .claude/rules/ (consumer)
 - [Phase 18-convention-skill]: step-init covers all routing: args, config, path resolution, mode, naming, missing-base, flow selection
+- [Phase 18-convention-skill]: step-research builds host project context before research dispatch; insufficient coverage surfaces to user with explicit options
+- [Phase 18-convention-skill]: step-preferences uses adaptive loop (no fixed question count); conflicts with research recommendations disclosed with trade-off explanation
+- [Phase 18-convention-skill]: step-generate is convergence point for both flows; orchestrator light review catches generator misses without blocking; empty convention handled with force-create/skip/adjust options
+- [Phase 18-convention-skill]: step-update offers full-rewrite (delegates to create flow) vs surgical-edit with structured diff preview; revert on cancel
 
 ### Pending Todos
 
@@ -80,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T12:36:31Z
-Stopped at: Completed /convention skill entry point — SKILL.md, step-init.md, .claude/cckit.json
-Resume file: .planning/phases/18-convention-skill/18-03-PLAN.md
+Last session: 2026-04-04T12:47:00Z
+Stopped at: Completed /convention skill step files — step-research.md, step-preferences.md, step-generate.md, step-update.md
+Resume file: .planning/phases/18-convention-skill/18-03-SUMMARY.md

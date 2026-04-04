@@ -39,7 +39,7 @@ Full details: [milestones/v0.1.0-ROADMAP.md](milestones/v0.1.0-ROADMAP.md)
 **Milestone Goal:** Research-driven, high-quality conventions packaged as installable artifacts with selective project installation. Open milestone -- convention phases can be added later.
 
 - [x] **Phase 17: Convention Architecture** — Define layered convention file structure (base + language-specific) and authoring principles (completed 2026-04-03)
-- [ ] **Phase 18: /convention Skill** — Build the research-driven convention authoring tool
+- [x] **Phase 18: /convention Skill** — Build the research-driven convention authoring tool (completed 2026-04-04)
 - [ ] **Phase 19: First Convention — Commit** — Validate skill + architecture end-to-end with commit conventions
 - [ ] **Phase 20: Installation Infrastructure** — Plugin manifest and convention distribution mechanism
 - [ ] **Phase 21: Code Convention + Rust Code Tech Pack** — Coding conventions (base + Rust) via /convention skill
@@ -72,9 +72,14 @@ Plans:
   3. The skill generates convention files that follow ARCH rules -- base and tech pack are separate files in correct locations
   4. The skill identifies what the LLM already knows vs. what needs explicit teaching, and the generated convention only includes the delta
   5. The skill works when invoked from any project, not just cckit
-**Plans**: Plan 01 (research, complete), Plan 02 (/convention skill entry point, complete), Plan 03+ (researcher/generator agents, remaining step files — in progress)
+**Plans**: Plan 01 (research, complete), Plan 02 (/convention skill entry point, complete), Plan 03 (step files — complete)
 **UI hint**: yes
 **Discuss notes**: Revisit D-01 boundary — are all conventions rules, or do some need to be skills (e.g., conventions requiring tool access or interactive workflows)?
+
+Plans:
+- [x] 18-01-PLAN.md — Convention researcher and generator agents
+- [x] 18-02-PLAN.md — SKILL.md orchestrator and step-init
+- [x] 18-03-PLAN.md — step-research, step-preferences, step-generate, step-update
 
 ### Phase 19: First Convention — Commit
 **Goal**: A complete commit message convention exists (base + no tech pack needed), authored via `/convention`, validating the entire authoring pipeline end-to-end
@@ -167,7 +172,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22 -> 23
 | 15. Fix Artifact Paths and Remove Stale Doc | v0.1.0 | 1/1 | Complete | 2026-04-02 |
 | 16. Align E2E Flows Dispatch Contract | v0.1.0 | 1/1 | Complete | 2026-04-02 |
 | 17. Convention Architecture | v0.2.0 | 1/1 | Complete    | 2026-04-03 |
-| 18. /convention Skill | v0.2.0 | 0/? | Not started | - |
+| 18. /convention Skill | v0.2.0 | 3/3 | Complete | 2026-04-04 |
 | 19. First Convention — Commit | v0.2.0 | 0/? | Not started | - |
 | 20. Installation Infrastructure | v0.2.0 | 0/? | Not started | - |
 | 21. Code Convention + Rust Code Tech Pack | v0.2.0 | 0/? | Not started | - |
