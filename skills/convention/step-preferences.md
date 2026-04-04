@@ -19,7 +19,7 @@ Identify which preference areas are relevant to this convention area by examinin
 - Research findings (if available): specific practices, library options, configurable behaviors
 - Whether the convention is base (tech-neutral) or language-specific
 
-The number and depth of questions vary by convention area — some areas need 2-3 questions, others need 8-10. Never hardcode a question count. Ask what the situation requires.
+The number and depth of questions vary by convention area — some areas need 2-3 questions, others need 8-10. This is an adaptive question loop: never hardcode a question count. Ask what the situation requires.
 
 ---
 
