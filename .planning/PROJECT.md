@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A personal Claude Code toolkit that packages skills, agents, and behavioral directives for installation into arbitrary host projects. Ships `/case` (behavioral case discovery) and `/consolidate` (spec consolidation after phase ship) as GSD workflow extensions: `discuss -> /case -> plan -> execute -> verify -> ship -> /consolidate`.
+A personal Claude Code toolkit that packages skills, agents, and behavioral directives for installation into arbitrary host projects. Ships `/case` (behavioral case discovery), `/consolidate` (spec consolidation after phase ship), and `/convention` (research-driven convention authoring) as GSD workflow extensions: `discuss -> /case -> plan -> execute -> verify -> ship -> /consolidate`.
 
 ## Core Value
 
@@ -63,7 +63,7 @@ Encode behavioral quality standards as installable artifacts — so projects get
 ## Constraints
 
 - **Runtime**: Deno required for hash-sections.ts (npm:unified, npm:remark-parse)
-- **Agent models**: consolidation agents (spec-consolidator, e2e-flows) and case-briefer use sonnet; case-validator and spec-verifier use opus
+- **Agent models**: consolidation agents (spec-consolidator, e2e-flows), case-briefer, and convention-generator use sonnet; case-validator, spec-verifier, and convention-researcher use opus
 - **No hardcoded project references**: Skills and agents must be technology-neutral and project-neutral
 - **GSD conventions**: Depends on CONTEXT.md, CASES.md, ROADMAP.md, PROJECT.md phase directory structure
 - **Content language**: All code, docs, commit messages in English (per CLAUDE.md)
@@ -105,4 +105,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after Phase 17 (Convention Architecture) complete*
+*Last updated: 2026-04-04 after Phase 18 (/convention Skill) complete*
