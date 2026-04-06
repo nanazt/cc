@@ -11,7 +11,7 @@ CWD=$(echo "$INPUT" | jq -r '.cwd')
 
 # Only process commit commands
 case "$CMD" in
-  *git\ commit*|*gsd-tools*commit*) ;;
+  *git\ commit*|*gsd-tools*\ commit*) ;;
   *) exit 0 ;;
 esac
 
