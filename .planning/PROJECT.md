@@ -83,7 +83,7 @@ Encode behavioral quality standards as installable artifacts — so projects get
 | Structural placeholders over domain examples | Teaches format/quality bar; Claude adapts to host project | ✓ Good |
 | IMPL-SPEC.md deleted | MODEL.md and agent frontmatter are authoritative; IMPL-SPEC was stale | ✓ Good |
 | Installation method deferred | Need research on global vs project install options | — Pending |
-| Convention architecture uses Claude Code rules (not skills) | Rules enable path-scoped loading, skills require user invocation | ✓ Good |
+| Convention architecture uses Claude Code rules or skills | Binary classification: rules for continuous guidance, skills for event-driven guidance. Three-criteria test determines type. | ✓ Good |
 | Base convention is optional (must pass delta test) | Avoids empty/redundant base files when all content is language-specific | ✓ Good |
 | No manifest file — directory scan is discovery mechanism | Simpler, self-describing; presence of convention files = existence | ✓ Good |
 
@@ -105,4 +105,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 after Phase 18 (/convention Skill) complete*
+*Last updated: 2026-04-07 after Phase 19.1 (Convention Skill Improvements) complete*
