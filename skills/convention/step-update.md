@@ -16,6 +16,34 @@ Display the full file content in a markdown code block.
 
 Store the file content as `existing_convention_content` for use in subsequent steps.
 
+Detect the artifact type from the file:
+- If `resolved_path` ends with `SKILL.md`: `artifact_type = "skill"`
+- If `resolved_path` ends with `CONVENTION.md`: `artifact_type = "rule"`
+- If `resolved_path` is a consumer path (`.claude/rules/`): `artifact_type = "rule"`
+- If `resolved_path` is a consumer path (`.claude/skills/`): `artifact_type = "skill"`
+
+Store `artifact_type` for use in generator dispatch.
+
+Check if hooks exist for this convention area:
+
+**Publisher mode:**
+```bash
+ls conventions/{area}/hooks/validate.sh 2>/dev/null && echo "HOOKS_EXIST" || echo "NO_HOOKS"
+```
+
+**Consumer mode:**
+```bash
+ls .claude/hooks/cckit-{area}-validate.sh 2>/dev/null && echo "HOOKS_EXIST" || echo "NO_HOOKS"
+```
+
+Store `hooks_exist` (true/false).
+
+If hooks exist, display a note:
+```
+This convention has enforcement hooks at {hook_path}. When you update the convention,
+hooks and tests will be automatically regenerated to match the new rules.
+```
+
 ---
 
 ## Step 2: Update Strategy Choice
@@ -30,10 +58,12 @@ How would you like to update this convention?
 Full rewrite: Re-research the area, re-collect preferences, and generate a
 completely new version. The delta test is re-validated. Best when conventions
 have drifted significantly or you want a fresh start with current best practices.
+{if hooks_exist:}Hooks and tests will be regenerated alongside the convention.{end if}
 
 Surgical edit: Modify specific rules only. Add new rules, change existing ones,
 or remove rules you no longer want. Best for targeted changes with minimal
 disruption to existing rules.
+{if hooks_exist:}Hooks will be regenerated after edits to stay in sync.{end if}
 ```
 
 AskUserQuestion: "Update approach?" with options:
@@ -76,6 +106,9 @@ Pass forward:
 - `mode` = "update" (preserves the existing_convention tag in research dispatch)
 - `selected_flow` = "Research first"
 - `create_base_first` = false
+- `artifact_type` -- "rule" or "skill" (detected from existing file)
+- `hooks_exist` -- boolean
+- `state_dir` -- path to .state/ directory (if .state/ was initialized)
 
 **Preferences-first:**
 Read `$CLAUDE_SKILL_DIR/step-preferences.md`.
@@ -85,8 +118,13 @@ Pass forward:
 - `mode` = "update"
 - `selected_flow` = "Preferences first"
 - `create_base_first` = false
+- `artifact_type` -- "rule" or "skill" (detected from existing file)
+- `hooks_exist` -- boolean
+- `state_dir` -- path to .state/ directory (if .state/ was initialized)
 
 The rewrite uses `mode = "create"` in the generator dispatch (step-generate.md overwrites the file). The existing convention is context for the researcher, not a constraint on the generator.
+
+Note: The full rewrite path passes through step-research and step-preferences which will initialize .state/ and collect hook confirmation. step-generate handles hook regeneration as part of its standard flow when hook_confirmed is true.
 
 ---
 
@@ -209,6 +247,65 @@ AskUserQuestion: "Generation failed. How would you like to proceed?" with option
 
 ---
 
+## Step 4c: Hook Regeneration on Surgical Edit
+
+If `hooks_exist` is true:
+
+After the surgical edit generator returns successfully, re-dispatch the generator
+to regenerate hooks. The generator needs the updated convention content to generate
+hooks that match the new rules.
+
+Present in conversation text:
+```
+Updating enforcement hooks to match the edited convention...
+```
+
+Read the hook recommendation data. If the convention was previously generated with
+research data, read `{state_dir}/research.md` if available. Otherwise, identify
+[HOOK:yes] rules from the updated convention by scanning for rules that are
+mechanically verifiable (format patterns, naming rules, structural requirements).
+
+Dispatch the generator:
+```
+Agent(
+  subagent_type: "convention-generator",
+  prompt: "<objective>
+Regenerate the enforcement hook and test suite for the '{area}' convention
+to match the updated convention rules.
+</objective>
+
+<convention_spec>
+Read docs/CONVENTIONS.md for the authoritative convention file format specification.
+</convention_spec>
+
+<artifact_type>{artifact_type}</artifact_type>
+
+<hook_confirmed>true</hook_confirmed>
+<hook_rules>{list of mechanically verifiable rules from the updated convention}</hook_rules>
+<hook_trigger>{original trigger event -- read from existing validate.sh case pattern}</hook_trigger>
+
+<existing_content>
+{updated convention file content after surgical edit}
+</existing_content>
+
+<output_path>{resolved_path}</output_path>
+<mode>hook-regenerate</mode>",
+  run_in_background: false
+)
+```
+
+If hook regeneration fails:
+```
+AskUserQuestion: "Hook regeneration failed. Hooks may be out of sync." with options:
+1. "Retry hook regeneration"
+2. "Skip hooks (update convention only)"
+```
+
+Skip option leaves the old hooks in place. Note in output that hooks may be
+out of sync with convention rules.
+
+---
+
 ## Step 5b: Diff Preview and Approval
 
 When the generator returns `## GENERATION COMPLETE`:
@@ -234,9 +331,26 @@ Rules removed ({count}):
 {for each removed rule: - {rule name}: removed}
 
 Unchanged rules: {count}
+
+{if hooks_exist and hook regenerated:}
+Hook status: Regenerated to match updated rules
+- Hookable rules: {list}
+- Test fixtures: {count} updated
+{end if}
+{if hooks_exist and hook NOT regenerated:}
+Hook status: NOT updated -- may be out of sync with convention changes
+{end if}
 ```
 
 Extract the change summary from the generator's `## Changes Made` section in its return message.
+
+If hooks were regenerated, optionally show hook diff:
+```
+{hook changes}
+```
+
+But do NOT add a separate approval gate for hooks -- the hook approval is bundled
+with the convention approval. Hooks are artifacts of the convention, not independent.
 
 AskUserQuestion: "Update preview" with options:
 1. "Approve changes"
@@ -268,6 +382,15 @@ Stop.
 When the user approves the changes:
 
 Display: "Convention updated at {resolved_path}."
+
+{if hooks_exist and hooks regenerated:}
+Display: "Hooks regenerated at {hook_path}."
+Display: "Run `bash {test_path}` to verify hook behavior."
+{end if}
+
+{if hooks_exist and hooks NOT regenerated:}
+Display: "Warning: Hooks at {hook_path} were not regenerated and may be out of sync."
+{end if}
 
 Done. Update complete.
 
