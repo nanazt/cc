@@ -82,6 +82,9 @@ assert_silent "no-convention-file.json"     "no convention file is silent"
 
 # --- Allow tests ---
 printf "\nAllow (valid commits with convention injection)\n"
+# Note: valid-commit.json uses __CWD__ pointing to project root.
+# After migration, conventions/commit/SKILL.md is discovered (not CONVENTION.md).
+# The unified discovery path checks SKILL.md first.
 assert_allow      "valid-commit.json"       "valid commit allows"
 assert_has_context "valid-commit.json"      "valid commit injects convention"
 assert_allow      "gsd-tools-commit.json"   "gsd-tools commit allows"
