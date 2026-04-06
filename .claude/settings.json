@@ -41,7 +41,6 @@
       "Bash(cargo fmt:*)",
       "Bash(cargo +nightly fmt:*)",
       "Bash(cargo outdated:*)",
-      "Bash(cargo clean -p madome-proto)",
       "Bash(npm view:*)",
       "Bash(npx gaji:*)",
       "WebFetch(domain:docs.rs)",
