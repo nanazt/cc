@@ -1,7 +1,7 @@
 #!/bin/sh
 # Convention injection + mechanical validation for commit messages.
 # Registered as PreToolUse hook on Bash matcher.
-# Reads convention file at runtime and injects via additionalContext.
+# Discovers convention file (skill or rule) at runtime and injects via additionalContext.
 # Mechanically validates commit format, scope, and GSD references.
 # Subsumes .claude/hooks/validate-commit-scope.sh.
 
@@ -15,13 +15,18 @@ case "$CMD" in
   *) exit 0 ;;
 esac
 
-# --- Convention file discovery (publisher then consumer) ---
+# --- Convention file discovery (unified: skill first, then rule) ---
 CONV_FILE=""
-if [ -f "$CWD/conventions/commit/CONVENTION.md" ]; then
-  CONV_FILE="$CWD/conventions/commit/CONVENTION.md"
-elif [ -f "$CWD/.claude/rules/cckit-commit.md" ]; then
-  CONV_FILE="$CWD/.claude/rules/cckit-commit.md"
-fi
+for path in \
+  "$CWD/conventions/commit/SKILL.md" \
+  "$CWD/conventions/commit/CONVENTION.md" \
+  "$CWD/.claude/skills/cckit-commit/SKILL.md" \
+  "$CWD/.claude/rules/cckit-commit.md"; do
+  if [ -f "$path" ]; then
+    CONV_FILE="$path"
+    break
+  fi
+done
 
 # No convention file: silent passthrough
 if [ -z "$CONV_FILE" ]; then
