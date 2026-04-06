@@ -68,8 +68,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/validate-commit-scope.sh",
-            "statusMessage": "Validating commit scope..."
+            "command": "conventions/commit/hooks/validate.sh",
+            "statusMessage": "Checking commit convention..."
           }
         ]
       }
