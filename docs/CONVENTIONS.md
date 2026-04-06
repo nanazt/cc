@@ -12,7 +12,15 @@ This document defines the architecture for cckit conventions — installable beh
 
 **Scope:** File structure, naming, frontmatter format, delta test definition, hook architecture, installer discovery contract, and content principles. Not in scope: convention content (Phase 19+), `/convention` skill implementation (Phase 18), installer implementation (Phase 20).
 
-**What conventions are:** Claude Code rules (`.claude/rules/*.md` files) — passive behavioral guidance that Claude loads automatically. Not skills, not agents. Rules are the correct mechanism for passive, always-on behavioral directives.
+**What conventions are:** Claude Code rules or skills. Rule-type conventions are passive behavioral guidance loaded automatically (always-on). Skill-type conventions are on-demand behavioral guidance loaded when relevant (event-driven). The choice between rule and skill is a binary classification per convention area.
+
+| Property | Rule-Type | Skill-Type |
+|----------|-----------|------------|
+| Format | `.claude/rules/` file | `.claude/skills/{name}/SKILL.md` |
+| Loading | Always in context | Description always visible; body loaded on-demand |
+| Context cost | Full content every session | Description only (~1 line) until invoked |
+| Tool access | None | Optional via allowed-tools |
+| Best for | Continuous guidance (coding, security) | Event-driven guidance (commit, workflow) |
 
 ---
 
@@ -26,26 +34,24 @@ Within each area directory:
 
 | File | Purpose | Required? |
 |------|---------|----------|
-| `CONVENTION.md` | Base convention — tech-neutral, always-loading | Optional (see Delta Test) |
+| `CONVENTION.md` | Base convention (rule-type) — tech-neutral, always-loading | Optional (see Delta Test) |
+| `SKILL.md` | Base convention (skill-type) — tech-neutral, on-demand loading | Optional (see Delta Test) |
 | `{lang}.md` | Language-specific convention — e.g., `rust.md`, `typescript.md` | Optional |
 | `hooks/` | Enforcement scripts for this convention area | Optional |
+
+Each area has either `CONVENTION.md` (rule-type) or `SKILL.md` (skill-type), never both. The filename signals the artifact type without reading frontmatter.
 
 **Canonical source structure example:**
 
 ```
 conventions/
 +-- commit/
-|   +-- CONVENTION.md              # base only (no language-specific needed)
+|   +-- SKILL.md                   # skill-type (event-driven)
 |   +-- hooks/
 |       +-- validate.sh            # enforcement hook
 +-- coding/
-|   +-- CONVENTION.md              # base
+|   +-- CONVENTION.md              # rule-type (continuous)
 |   +-- rust.md                    # language-specific
-+-- test/
-|   +-- CONVENTION.md              # base
-|   +-- rust.md                    # language-specific
-+-- error/
-    +-- rust.md                    # language-specific only (no base)
 ```
 
 Directory names (`commit/`, `coding/`, `test/`, `error/`) are decided per-convention at creation time. Use the most intuitive name — there is no prescribed vocabulary.
@@ -79,6 +85,24 @@ description: "Commit message format and quality standards"
 ```
 
 When `paths` is absent, the convention loads for all files. `alwaysApply` can be explicitly set to `true`, but is not required — omitting it has the same effect.
+
+### Skill-Type Convention (On-Demand)
+
+A skill-type convention loads only when Claude determines it is relevant to the current task. Example frontmatter:
+
+```markdown
+---
+name: cckit-{area}
+description: >
+  {description of what this convention covers and when to apply it}.
+  Use when: {specific trigger events or contexts}.
+user-invocable: false
+---
+```
+
+Skill-type conventions use Claude Code skill frontmatter: `name`, `description`, `user-invocable`. The `user-invocable: false` field means Claude auto-invokes when relevant — users do not invoke directly.
+
+Optional: `allowed-tools` field when tool access adds value (e.g., Read for context-aware validation). Not all skill-type conventions need tools — some are skills purely for on-demand loading efficiency.
 
 ### Language-Specific Convention (Path-Scoped)
 
@@ -176,9 +200,11 @@ The installer copies convention files from `conventions/` to the host project's 
 | Source File | Installed As | Rule |
 |-------------|-------------|------|
 | `conventions/commit/CONVENTION.md` | `.claude/rules/cckit-commit.md` | `cckit-{area}.md` |
+| `conventions/commit/SKILL.md` | `.claude/skills/cckit-commit/SKILL.md` | `cckit-{area}/SKILL.md` |
 | `conventions/coding/CONVENTION.md` | `.claude/rules/cckit-coding.md` | `cckit-{area}.md` |
 | `conventions/coding/rust.md` | `.claude/rules/cckit-coding-rust.md` | `cckit-{area}-{lang}.md` |
-| `conventions/error/rust.md` | `.claude/rules/cckit-error-rust.md` | `cckit-{area}-{lang}.md` |
+
+Skill-type conventions install as directories (Claude Code skills require `{name}/SKILL.md` structure). Rule-type conventions install as flat files.
 
 ### Installed Structure (host project)
 
@@ -281,6 +307,17 @@ fi
 exit 0
 ```
 
+### Unified Convention Discovery
+
+Hook scripts discover convention files using a unified search that checks both skill-type and rule-type locations, in both publisher and consumer modes:
+
+1. `$CWD/conventions/{area}/SKILL.md` (publisher, skill-type)
+2. `$CWD/conventions/{area}/CONVENTION.md` (publisher, rule-type)
+3. `$CWD/.claude/skills/cckit-{area}/SKILL.md` (consumer, skill-type)
+4. `$CWD/.claude/rules/cckit-{area}.md` (consumer, rule-type)
+
+First match wins. This ensures hooks work regardless of convention type or installation mode.
+
 ### Hook Registration
 
 The installer must register hooks in the host project's `.claude/settings.json`. The required settings.json structure for a PreToolUse hook:
@@ -341,8 +378,8 @@ Convention file internal organization is not prescribed. The `/convention` skill
 
 | Anti-Pattern | Why Avoid | Correct Approach |
 |--------------|-----------|-----------------|
-| Convention-as-skill | Skills (`skills/`) are action workflows with tool access. Conventions are passive behavioral guidance. | Use `.claude/rules/` files, not skills. |
-| Custom frontmatter fields | `type: convention`, `technology: rust`, or other cckit-specific fields break convention file portability and violate D-11. | Use only `description`, `paths`, `alwaysApply`. |
+| Wrong artifact type | Using a rule for event-driven conventions wastes context. Using a skill for continuous conventions adds invocation overhead. | Apply the three-criteria test: event-driven loading, tool access need, context size. |
+| Custom frontmatter fields | `type: convention`, `technology: rust`, or other cckit-specific fields break convention file portability. | Use only `description`, `paths`, `alwaysApply` (rule-type) or `name`, `description`, `user-invocable` (skill-type). |
 | Manifest file | A `conventions.json` or similar registry file creates sync issues and adds complexity with no benefit. | Installer discovers conventions by directory scanning. Presence = convention exists. |
 | Prescribed content structure | Requiring fixed sections (e.g., "### Overview", "### Rules") across all conventions forces inappropriate uniformity. | No prescribed structure. Each convention's internal organization is skill-determined. |
 | Monolithic convention file | One large file with all conventions (e.g., `all-conventions.md`) makes selective installation impossible. | One file per convention area and language. |
@@ -367,14 +404,16 @@ Convention file internal organization is not prescribed. The `/convention` skill
 
 | Property | Value |
 |----------|-------|
-| Convention format | Claude Code rules (`.claude/rules/` files) |
+| Convention format | Claude Code rules or skills |
 | Source directory | `conventions/{area}/` |
-| Base file name | `CONVENTION.md` |
+| Base file name | `CONVENTION.md` (rule-type) or `SKILL.md` (skill-type) |
 | Language-specific file name | `{lang}.md` (e.g., `rust.md`, `typescript.md`) |
+| Artifact type decision | Three-criteria test: event-driven loading, tool access, context size |
 | Base optional? | Yes — only when delta test justifies it |
-| Installed prefix | `cckit-` |
+| Installed prefix | `cckit-` (rules: flat file, skills: directory) |
 | Discovery mechanism | Directory scan (no manifest) |
 | Frontmatter fields | `description`, `paths` (opt), `alwaysApply` (required when paths present) |
+| Skill frontmatter fields | `name`, `description`, `user-invocable` |
 | Custom cckit frontmatter fields | None |
 | Conventions independent across areas | Yes — each installable alone |
 | Override mechanism | Claude Code built-in (CLAUDE.md > rules) |
@@ -384,4 +423,4 @@ Convention file internal organization is not prescribed. The `/convention` skill
 
 ---
 
-*Last updated: 2026-04-03*
+*Last updated: 2026-04-07*
