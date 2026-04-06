@@ -97,6 +97,35 @@ Plans:
 - [ ] 19-01-PLAN.md — PROJECT.md identity update + commit convention via /convention skill
 - [ ] 19-02-PLAN.md — PreToolUse convention injection and validation hook
 
+### Phase 19.1: Convention Skill Improvements (INSERTED)
+
+**Goal:** The /convention skill handles hooks, detects CLAUDE.md conflicts, maintains convention-hook sync on updates, scaffolds test infrastructure, and chooses the right output artifact type (rule vs skill) — addressing gaps discovered during Phase 19 execution.
+**Requirements**: CONV-01 through CONV-11 (phase-local, mapped to scope items below)
+**Depends on:** Phase 19
+**Plans:** 4 plans
+
+Scope:
+1. Output artifact type selection -- skill judges whether convention is best expressed as a rule or skill; three-criteria test
+2. Hook awareness + scaffolding integrated into step-generate -- generator produces hook + test + fixtures alongside convention
+3. CLAUDE.md conflict detection -- step-generate light review cross-references existing project rules
+4. Update-mode hook sync -- step-update auto-regenerates hook + test alongside convention
+5. Research-to-Generator structured delta transfer -- [DELTA:new/known/varies] + [HOOK:yes/no] classification tags
+6. Test infrastructure scaffolding -- auto-generated test.sh + fixtures/ when hooks are created
+7. Post-generation user preferences verification -- step-generate validates output against collected preferences
+8. convention_tools config activation -- step-init reads MCP tool names from cckit.json, passes to researcher
+9. Step-to-step variable persistence -- .state/ directory with init.json, research.md, preferences.json
+10. docs/CONVENTIONS.md full architecture update -- rule/skill binary, unified discovery, anti-pattern correction
+11. Commit convention migration -- CONVENTION.md to SKILL.md with content preserved
+12. Hook unified discovery path -- SKILL.md -> CONVENTION.md -> skills/ -> rules/
+13. writing-skills integration -- generator invokes writing-skills for skill-type output
+14. Filename convention -- Rule-type = CONVENTION.md, Skill-type = SKILL.md
+
+Plans:
+- [ ] 19.1-01-PLAN.md — Architecture doc, orchestrator, and step-init foundation
+- [ ] 19.1-02-PLAN.md — Research pipeline: researcher agent, step-research, step-preferences
+- [ ] 19.1-03-PLAN.md — Generate pipeline: generator agent, step-generate overhaul
+- [ ] 19.1-04-PLAN.md — Update mode, commit migration, hook discovery, test fixtures
+
 ### Phase 20: Installation Infrastructure
 **Goal**: Users can install, select, preview, and update cckit conventions in their projects
 **Depends on**: Phase 19 (needs at least one convention to test against)
@@ -146,7 +175,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22 -> 23
+Phases execute in numeric order: 17 -> 18 -> 19 -> 19.1 -> 20 -> 21 -> 22 -> 23
 (Phases 21, 22, 23 can execute in any order after their dependencies are met)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -164,6 +193,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22 -> 23
 | 17. Convention Architecture | v0.2.0 | 1/1 | Complete    | 2026-04-03 |
 | 18. /convention Skill | v0.2.0 | 3/3 | Complete    | 2026-04-04 |
 | 19. First Convention — Commit | v0.2.0 | 0/2 | Not started | - |
+| 19.1. Convention Skill Improvements | v0.2.0 | 0/4 | Planned | - |
 | 20. Installation Infrastructure | v0.2.0 | 0/? | Not started | - |
 | 21. Code Convention + Rust Code Tech Pack | v0.2.0 | 0/? | Not started | - |
 | 22. Test & Error Conventions + Rust Tech Packs | v0.2.0 | 0/? | Not started | - |
