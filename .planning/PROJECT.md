@@ -2,11 +2,11 @@
 
 ## What This Is
 
-A personal Claude Code toolkit that packages skills, agents, and behavioral directives for installation into arbitrary host projects. Ships `/case` (behavioral case discovery), `/consolidate` (spec consolidation after phase ship), and `/convention` (research-driven convention authoring) as GSD workflow extensions: `discuss -> /case -> plan -> execute -> verify -> ship -> /consolidate`.
+A personal Claude Code toolkit that packages skills, agents, and behavioral directives for installation into host projects using the GSD workflow. Ships `/case` (behavioral case discovery), `/consolidate` (spec consolidation after phase ship), and `/convention` (research-driven convention authoring) as GSD workflow extensions: `discuss -> /case -> plan -> execute -> verify -> ship -> /consolidate`.
 
 ## Core Value
 
-Encode behavioral quality standards as installable artifacts — so projects get consistent case discovery, spec consolidation, and code conventions without reinventing them. All artifacts must be project-type agnostic.
+Encode behavioral quality standards as installable artifacts — so projects get consistent case discovery, spec consolidation, and code conventions without reinventing them. All artifacts must be project-type agnostic. Skills require the GSD workflow; conventions work standalone.
 
 ## Current Milestone: v0.2.0 Portable Conventions
 
@@ -65,7 +65,7 @@ Encode behavioral quality standards as installable artifacts — so projects get
 - **Runtime**: Deno required for hash-sections.ts (npm:unified, npm:remark-parse)
 - **Agent models**: consolidation agents (spec-consolidator, e2e-flows), case-briefer, and convention-generator use sonnet; case-validator, spec-verifier, and convention-researcher use opus
 - **No hardcoded project references**: Skills and agents must be technology-neutral and project-neutral
-- **GSD conventions**: Depends on CONTEXT.md, CASES.md, ROADMAP.md, PROJECT.md phase directory structure
+- **GSD conventions**: Skills require GSD workflow (CONTEXT.md, CASES.md, ROADMAP.md, PROJECT.md phase directory structure). Conventions are standalone Claude Code rules.
 - **Content language**: All code, docs, commit messages in English (per CLAUDE.md)
 
 ## Key Decisions

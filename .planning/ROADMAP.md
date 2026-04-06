@@ -82,7 +82,7 @@ Plans:
 - [x] 18-03-PLAN.md — step-research, step-preferences, step-generate, step-update
 
 ### Phase 19: First Convention — Commit
-**Goal**: A complete commit message convention exists (base + no tech pack needed), authored via `/convention`, validating the entire authoring pipeline end-to-end
+**Goal**: A complete commit message convention exists (base + no tech pack needed), authored via `/convention`, validating the entire authoring pipeline end-to-end. A PreToolUse hook enforces convention rules on commit messages.
 **Depends on**: Phase 18
 **Requirements**: COMMIT-01
 **Success Criteria** (what must be TRUE):
@@ -90,26 +90,12 @@ Plans:
   2. The convention provides real value -- it teaches commit structure, scope conventions, and message quality rules that improve Claude's commit output
   3. The convention passes the ARCH-03 delta test -- it does not restate what the LLM already knows about conventional commits
   4. The convention is technology-neutral -- any project type can use it without modification
+  5. A PreToolUse hook exists that injects convention content and mechanically validates commit messages
 **Plans**: 2 plans
 
 Plans:
 - [ ] 19-01-PLAN.md — PROJECT.md identity update + commit convention via /convention skill
 - [ ] 19-02-PLAN.md — PreToolUse convention injection and validation hook
-
-### Phase 19.1: GSD Commit Convention Injection (INSERTED)
-
-**Goal:** Make GSD toolkit's commit command (`node gsd-tools commit`) automatically respect the host project's commit conventions. Currently GSD uses its own commit templates verbatim, conflicting with host CLAUDE.md commit rules — a recurring problem (memory: "GSD commit templates must be rewritten").
-**Context:** Mechanism to inject the commit convention content (from Phase 19) into GSD's commit process. Implementation approach (e.g., detecting `node gsd-toolkit commit` and injecting conventions) to be decided during discuss.
-**Requirements**: TBD (defined during discuss)
-**Depends on:** Phase 19 (commit convention content must exist first)
-**Success Criteria** (preliminary, finalized during discuss):
-  1. GSD commit command output reflects the host project's commit conventions
-  2. Self-application verified on cckit itself
-  3. Projects without conventions keep GSD default behavior
-**Plans:** 3/3 plans complete
-
-Plans:
-- [ ] TBD (run /gsd:plan-phase 19.1 to break down)
 
 ### Phase 20: Installation Infrastructure
 **Goal**: Users can install, select, preview, and update cckit conventions in their projects
