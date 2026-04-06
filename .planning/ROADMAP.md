@@ -102,7 +102,7 @@ Plans:
 **Goal:** The /convention skill handles hooks, detects CLAUDE.md conflicts, maintains convention-hook sync on updates, scaffolds test infrastructure, and chooses the right output artifact type (rule vs skill) — addressing gaps discovered during Phase 19 execution.
 **Requirements**: CONV-01 through CONV-14 (phase-local, mapped to scope items below)
 **Depends on:** Phase 19
-**Plans:** 4 plans
+**Plans:** 4/4 plans complete
 
 Scope:
 1. Output artifact type selection -- skill judges whether convention is best expressed as a rule or skill; three-criteria test
@@ -121,10 +121,10 @@ Scope:
 14. Filename convention -- Rule-type = CONVENTION.md, Skill-type = SKILL.md
 
 Plans:
-- [ ] 19.1-01-PLAN.md — Architecture doc, orchestrator, and step-init foundation
-- [ ] 19.1-02-PLAN.md — Research pipeline: researcher agent, step-research, step-preferences
-- [ ] 19.1-03-PLAN.md — Generate pipeline: generator agent, step-generate overhaul
-- [ ] 19.1-04-PLAN.md — Update mode, commit migration, hook discovery, test fixtures
+- [x] 19.1-01-PLAN.md — Architecture doc, orchestrator, and step-init foundation
+- [x] 19.1-02-PLAN.md — Research pipeline: researcher agent, step-research, step-preferences
+- [x] 19.1-03-PLAN.md — Generate pipeline: generator agent, step-generate overhaul
+- [x] 19.1-04-PLAN.md — Update mode, commit migration, hook discovery, test fixtures
 
 ### Phase 20: Installation Infrastructure
 **Goal**: Users can install, select, preview, and update cckit conventions in their projects
@@ -193,7 +193,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 19.1 -> 20 -> 21 -> 22 -> 23
 | 17. Convention Architecture | v0.2.0 | 1/1 | Complete    | 2026-04-03 |
 | 18. /convention Skill | v0.2.0 | 3/3 | Complete    | 2026-04-04 |
 | 19. First Convention — Commit | v0.2.0 | 0/2 | Not started | - |
-| 19.1. Convention Skill Improvements | v0.2.0 | 0/4 | Planned | - |
+| 19.1. Convention Skill Improvements | v0.2.0 | 4/4 | Complete    | 2026-04-06 |
 | 20. Installation Infrastructure | v0.2.0 | 0/? | Not started | - |
 | 21. Code Convention + Rust Code Tech Pack | v0.2.0 | 0/? | Not started | - |
 | 22. Test & Error Conventions + Rust Tech Packs | v0.2.0 | 0/? | Not started | - |
