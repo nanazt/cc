@@ -40,32 +40,48 @@ Store both values for use throughout this and subsequent steps.
 
 ## Step 3: Resolve Output Path
 
-Based on the `publisher` flag:
+Path resolution for base conventions depends on `artifact_type` (determined in Step 7a).
+For initial mode detection (Step 4), check BOTH possible filenames.
+
+### Step 3a: Preliminary Path Check (for mode detection only)
 
 **Publisher mode (`publisher == true`):**
-- Base path: `conventions/{area}/CONVENTION.md`
-- Lang path: `conventions/{area}/{lang}.md`
+- Check both: `conventions/{area}/CONVENTION.md` and `conventions/{area}/SKILL.md`
 
 **Consumer mode (`publisher == false` or absent):**
-- Base path: `.claude/rules/cckit-{area}.md`
-- Lang path: `.claude/rules/cckit-{area}-{lang}.md`
+- Check both: `.claude/rules/cckit-{area}.md` and `.claude/skills/cckit-{area}/SKILL.md`
 
-If `lang` was provided, the target file is the lang path. Otherwise, the target file is the base path.
+If `lang` was provided, the target file is the lang path (always rule-type):
+- Publisher: `conventions/{area}/{lang}.md`
+- Consumer: `.claude/rules/cckit-{area}-{lang}.md`
 
-Store the resolved target path as `resolved_path` for use in subsequent steps.
+Store these candidate paths for mode detection in Step 4. Final path is resolved after artifact type is determined in Step 7b.
 
 ---
 
 ## Step 4: Detect Mode (Create vs Update)
 
-Check whether the target file already exists:
+Check whether a convention file already exists for this area. For lang-specific invocations, check the lang path. For base conventions, check BOTH filenames:
 
+**Lang-specific:**
 ```bash
-test -f {resolved_path} && echo "UPDATE" || echo "CREATE"
+test -f {lang_path} && echo "UPDATE" || echo "CREATE"
 ```
 
-- File exists → `mode = "update"`
-- File does not exist → `mode = "create"`
+**Base convention (publisher mode):**
+```bash
+test -f conventions/{area}/CONVENTION.md && echo "UPDATE" || \
+test -f conventions/{area}/SKILL.md && echo "UPDATE" || echo "CREATE"
+```
+
+**Base convention (consumer mode):**
+```bash
+test -f .claude/rules/cckit-{area}.md && echo "UPDATE" || \
+test -f .claude/skills/cckit-{area}/SKILL.md && echo "UPDATE" || echo "CREATE"
+```
+
+- Any file found → `mode = "update"`, `resolved_path` = the existing file path
+- No file found → `mode = "create"`, final `resolved_path` determined in Step 7b
 
 Store `mode` for routing.
 
@@ -118,12 +134,14 @@ Check whether a base convention already exists for this area:
 
 **Publisher mode:**
 ```bash
-test -f conventions/{area}/CONVENTION.md && echo "BASE_EXISTS" || echo "NO_BASE"
+test -f conventions/{area}/CONVENTION.md && echo "BASE_EXISTS" || \
+test -f conventions/{area}/SKILL.md && echo "BASE_EXISTS" || echo "NO_BASE"
 ```
 
 **Consumer mode:**
 ```bash
-test -f .claude/rules/cckit-{area}.md && echo "BASE_EXISTS" || echo "NO_BASE"
+test -f .claude/rules/cckit-{area}.md && echo "BASE_EXISTS" || \
+test -f .claude/skills/cckit-{area}/SKILL.md && echo "BASE_EXISTS" || echo "NO_BASE"
 ```
 
 If the base convention already exists, skip this step and continue.
@@ -181,6 +199,106 @@ Store the selection as `selected_flow`.
 
 ---
 
+## Step 7a: Artifact Type Detection (Create Mode Only)
+
+Skip this step entirely if `mode == "update"` (artifact type is determined by the existing file).
+Skip this step if `lang` is present (language-specific conventions are always rule-type).
+
+Apply the three-criteria test to determine whether this convention should be a rule or a skill:
+
+**Criterion 1: Event-Driven Loading** — Does this convention primarily apply during a
+specific action or event (commit, PR, deploy, test run) rather than continuously?
+- YES → Skill candidate. Context cost is wasted when the event is not happening.
+- NO → Rule candidate. Continuous applicability justifies always-on loading.
+
+**Criterion 2: Tool Access Need** — Would this convention benefit from Claude having
+tool access (Read, Bash, Grep) when applying it?
+- YES → Skill. Rules cannot grant tool access.
+- NO → Continue to next criterion.
+
+**Criterion 3: Context Size** — Is the convention content large enough (>50 lines) that
+always-loading it wastes significant context?
+- YES → Skill candidate. On-demand loading preserves context budget.
+- NO → Rule. Small conventions have negligible context cost.
+
+Present the recommendation in conversation text:
+
+```
+Based on the {area} convention area:
+- Event-driven: {yes/no — reasoning}
+- Tool access needed: {yes/no — reasoning}
+- Expected size: {small/large — reasoning}
+
+Recommendation: {Rule / Skill} — {one-sentence reasoning}
+```
+
+Then ask via AskUserQuestion:
+
+> Convention type?
+
+Options:
+1. "Rule (always-loaded, passive)"
+2. "Skill (on-demand, context-aware)"
+
+Store the selection as `artifact_type` ("rule" or "skill").
+
+---
+
+## Step 7b: Final Path Resolution (Create Mode Only)
+
+Skip this step if `mode == "update"` (resolved_path already set in Step 4).
+
+Resolve the definitive output path using `artifact_type`:
+
+**Publisher mode:**
+- Rule-type base: `conventions/{area}/CONVENTION.md`
+- Skill-type base: `conventions/{area}/SKILL.md`
+- Lang: `conventions/{area}/{lang}.md`
+
+**Consumer mode:**
+- Rule-type base: `.claude/rules/cckit-{area}.md`
+- Skill-type base: `.claude/skills/cckit-{area}/SKILL.md`
+- Lang: `.claude/rules/cckit-{area}-{lang}.md`
+
+Store the resolved target path as `resolved_path`.
+
+---
+
+## Step 8: Initialize .state/ Directory (Create Mode Only)
+
+Skip this step entirely if `mode == "update"`.
+
+Create the .state/ directory and write init.json:
+
+If publisher mode:
+  `state_dir = conventions/{area}/.state/`
+If consumer mode:
+  `state_dir = .convention-state/{area}/`
+
+```bash
+mkdir -p {state_dir}
+```
+
+Write the following JSON to `{state_dir}/init.json`:
+
+```json
+{
+  "area": "{area}",
+  "lang": "{lang or null}",
+  "publisher": {publisher},
+  "convention_tools": {convention_tools array},
+  "resolved_path": "{resolved_path}",
+  "mode": "{mode}",
+  "artifact_type": "{rule or skill}",
+  "selected_flow": "{selected_flow}",
+  "create_base_first": {create_base_first}
+}
+```
+
+Store `state_dir` for use in subsequent steps.
+
+---
+
 ## Transition
 
 When all applicable steps above are complete, pass the following values forward to the next step:
@@ -191,6 +309,8 @@ When all applicable steps above are complete, pass the following values forward 
 - `convention_tools` — string list, from config detection
 - `resolved_path` — final output path
 - `mode` — "create" or "update"
+- `artifact_type` — "rule" or "skill" (create mode only; update mode reads from existing file)
+- `state_dir` — path to .state/ directory (create mode only)
 - `selected_flow` — "Research first" or "Preferences first" (create mode only)
 - `create_base_first` — boolean (lang-specific create mode only)
 

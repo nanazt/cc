@@ -2,7 +2,7 @@
 name: convention
 description: >
   Research-driven convention authoring tool. Creates and updates convention
-  files (Claude Code rules) following the cckit convention architecture.
+  files (Claude Code rules or skills) following the cckit convention architecture.
   Use for: convention creation, convention update, best practice research,
   style preference collection.
 argument-hint: "{area} [lang]"
@@ -20,7 +20,7 @@ disable-model-invocation: true
 ---
 
 <purpose>
-Research and author convention files (Claude Code rules) that follow the cckit convention architecture (docs/CONVENTIONS.md). Create new conventions through research and user preference collection, or update existing conventions via full rewrite or surgical edit. One convention per invocation. Convention area is required, language is optional.
+Research and author convention files (Claude Code rules or skills) that follow the cckit convention architecture (docs/CONVENTIONS.md). Create new conventions through research and user preference collection, or update existing conventions via full rewrite or surgical edit. One convention per invocation. Output is either a rule (always-loaded, passive) or a skill (on-demand, context-aware) — determined during init. Convention area is required, language is optional.
 </purpose>
 
 <philosophy>
@@ -35,6 +35,8 @@ Research and author convention files (Claude Code rules) that follow the cckit c
 **Conventions are directives, not documentation.** Every line is an instruction to Claude. No rationale, no history, no explanations.
 
 **Technology neutrality for base conventions.** If a rule mentions a specific language, framework, or tool, it belongs in a language-specific file, not in the base convention.
+
+**Right artifact type for the job.** Event-driven conventions (commit, workflow) are skills — loaded only when the event occurs. Continuous conventions (coding, security) are rules — loaded every session. The three-criteria test in step-init determines the type.
 
 **Adaptive interaction.** Ask as many or as few questions as the convention area requires. Never hardcode question counts. The skill asks what the situation demands.
 
@@ -87,14 +89,27 @@ Read `.claude/cckit.json` if it exists to determine publisher mode:
 cat .claude/cckit.json 2>/dev/null
 ```
 
-Resolve target file path based on publisher flag and area/lang:
-- publisher == true: Base path = `conventions/{area}/CONVENTION.md`, Lang path = `conventions/{area}/{lang}.md`
-- publisher == false or absent: Base path = `.claude/rules/cckit-{area}.md`, Lang path = `.claude/rules/cckit-{area}-{lang}.md`
+Resolve target file path based on publisher flag, area/lang, and artifact type:
+- publisher == true:
+  - Rule-type base: `conventions/{area}/CONVENTION.md`
+  - Skill-type base: `conventions/{area}/SKILL.md`
+  - Lang: `conventions/{area}/{lang}.md` (unchanged, always rule-type)
+- publisher == false or absent:
+  - Rule-type base: `.claude/rules/cckit-{area}.md`
+  - Skill-type base: `.claude/skills/cckit-{area}/SKILL.md`
+  - Lang: `.claude/rules/cckit-{area}-{lang}.md` (unchanged)
 
-Check if target file exists to determine create vs update mode:
+Note: Artifact type (rule vs skill) is determined in step-init.md. The orchestrator's
+file state detection checks for BOTH CONVENTION.md and SKILL.md to detect update mode.
+
+Check if target file exists to determine create vs update mode.
+For publisher mode base conventions, check BOTH filenames:
 ```bash
-test -f {resolved_path} && echo "UPDATE" || echo "CREATE"
+test -f conventions/{area}/CONVENTION.md  # rule-type exists?
+test -f conventions/{area}/SKILL.md       # skill-type exists?
 ```
+If either exists -> mode = "update", resolved_path = the existing file.
+If neither -> mode = "create", resolved_path determined after artifact type selection in step-init.
 
 ### Routing table
 
@@ -126,6 +141,8 @@ Read "$CLAUDE_SKILL_DIR/step-research.md"
 - Config detected (publisher mode or consumer mode)
 - Output path resolved correctly for the detected mode
 - Create/update mode detected correctly based on file existence
+- Artifact type (rule or skill) determined correctly for the convention area
+- Step output persisted to .state/ directory for downstream step consumption
 - Research completed and presented to user (create mode, research-first flow)
 - User preferences collected via adaptive questioning
 - Convention file generated following docs/CONVENTIONS.md format
