@@ -100,7 +100,7 @@ Plans:
 ### Phase 19.1: Convention Skill Improvements (INSERTED)
 
 **Goal:** The /convention skill handles hooks, detects CLAUDE.md conflicts, maintains convention-hook sync on updates, scaffolds test infrastructure, and chooses the right output artifact type (rule vs skill) — addressing gaps discovered during Phase 19 execution.
-**Requirements**: CONV-01 through CONV-11 (phase-local, mapped to scope items below)
+**Requirements**: CONV-01 through CONV-14 (phase-local, mapped to scope items below)
 **Depends on:** Phase 19
 **Plans:** 4 plans
 
