@@ -29,6 +29,7 @@ The dispatch prompt contains these XML tags:
 | `<target_language>` | Yes | Language name (e.g., "rust", "typescript") or "none" for base-only research |
 | `<host_project_context>` | Yes | Summary of host project — CLAUDE.md content, technology stack, existing conventions — so research is project-aware |
 | `<research_tools>` | No | Additional MCP tool names from the host project's cckit.json `convention.tools` config, merged with default tools |
+| `<convention_tools>` | No | Additional MCP tool names from cckit.json for enhanced research capability |
 | `<existing_convention>` | No | Content of the existing convention file when researching for an update; allows research to focus on gaps and improvements |
 
 ## Methodology
@@ -61,6 +62,8 @@ For each discovered practice, record:
 - **Source:** URL or document name (authoritative citation)
 - **Delta assessment:** HIGH-DELTA, LOW-DELTA, or NO-DELTA (see Step 4)
 
+If `<convention_tools>` contains MCP tool names (e.g., `mcp__context7__resolve_library_id`), use those tools alongside the default WebSearch/WebFetch for enhanced research. These tools may provide access to additional documentation sources configured by the host project.
+
 ### Step 3: Evaluate Libraries (Language-Specific Only)
 
 When `<target_language>` is not "none", research available tooling and libraries for the convention area.
@@ -79,15 +82,53 @@ For each candidate library (cover at least the top 3 by adoption):
 
 After evaluation, provide a recommendation with reasoning. Note that the user makes the final selection; the recommendation is guidance only.
 
-### Step 4: Identify Delta Test Candidates
+### Step 4: Classify Practices with Structured Tags
 
-For each discovered best practice, assess its delta value:
+For each discovered best practice, assign two tags inline with the practice name:
 
-- **HIGH-DELTA:** Claude would NOT follow this by default without explicit instruction. Must be taught — adds real behavioral value.
-- **LOW-DELTA:** Claude might follow this inconsistently across sessions. Worth codifying for consistency even if Claude sometimes does it already.
-- **NO-DELTA:** Claude reliably follows this already in every session without instruction. Removing this rule from the convention loses nothing.
+**Delta Classification Tag** `[DELTA:class]` — one of three classes:
+- `[DELTA:new]` — Claude would NOT follow this by default without explicit instruction. Must be taught.
+- `[DELTA:known]` — Claude reliably follows this already in every session. Including this rule adds noise.
+- `[DELTA:varies]` — Claude follows this inconsistently across sessions. Worth codifying for consistency.
 
-Mark every practice with one of these three categories. This allows the downstream generator to apply the delta test efficiently.
+**Hook Classification Tag** `[HOOK:class]` — one of two classes:
+- `[HOOK:yes]` — This rule is mechanically verifiable. A script can check compliance with regex, string matching, or structural analysis. Examples: commit format patterns, naming conventions, required sections.
+- `[HOOK:no]` — This rule requires human or AI judgment to verify. A script cannot reliably check compliance. Examples: "explain why in body", "use imperative mood" (ambiguous detection), quality judgments.
+
+Both tags appear on the same line as the practice name heading, enclosed in square brackets:
+
+```
+1. **Subject Line Format** [DELTA:new] [HOOK:yes]
+   - **Description:** Use Conventional Commits 1.0.0 format
+   - **Source:** conventionalcommits.org
+   - **Reasoning:** Claude does not default to CC format without instruction. Mechanically verifiable via regex.
+```
+
+Classification principles:
+- Style divergence (user wants something different from Claude's default) is handled in the preferences step, not by the researcher. The researcher classifies based on Claude's default behavior only.
+- For hook classification, err on the side of `[HOOK:no]` when mechanical verification is ambiguous. False negatives (missing a hookable rule) are better than false positives (generating unreliable hooks).
+
+### Step 4a: Recommend Hook Necessity
+
+After classifying all practices, assess whether the convention area would benefit from a PreToolUse enforcement hook.
+
+A hook is recommended when:
+- At least 2 practices are tagged `[HOOK:yes]`
+- The convention area has a clear trigger event (e.g., commits trigger on `git commit`, PRs trigger on `gh pr create`)
+- Mechanical validation is meaningful for the area (format/structure checking, not quality judgment)
+
+Include a `## Hook Recommendation` section in the output report:
+
+```markdown
+## Hook Recommendation
+
+**Recommended:** {Yes / No}
+**Trigger event:** {the command or event pattern, e.g., "git commit", or "none identified"}
+**Hookable rules:** {count} of {total} practices tagged [HOOK:yes]
+**Reasoning:** {one-sentence explanation}
+```
+
+If hook is not recommended, still include the section with reasoning (e.g., "No — only 1 of 8 practices is mechanically verifiable").
 
 ### Step 5: Compile Report
 
@@ -118,12 +159,12 @@ Return the research report directly in your response using this format:
 
 ## Best Practices
 
-1. **{Practice Name}**
+1. **{Practice Name}** [DELTA:new|known|varies] [HOOK:yes|no]
    - **Description:** {what the rule requires}
    - **Source:** {URL or document name}
-   - **Delta:** HIGH-DELTA | LOW-DELTA | NO-DELTA — {one-sentence reasoning}
+   - **Reasoning:** {one-sentence explaining both delta classification and hook classification}
 
-2. **{Practice Name}**
+2. **{Practice Name}** [DELTA:known] [HOOK:no]
    ...
 
 ---
@@ -160,14 +201,25 @@ Return the research report directly in your response using this format:
 
 ---
 
+## Hook Recommendation
+
+**Recommended:** {Yes / No}
+**Trigger event:** {command pattern or "none identified"}
+**Hookable rules:** {N} of {M} tagged [HOOK:yes]
+**Reasoning:** {explanation}
+
+---
+
 ## Delta Test Summary
 
 | Category | Count |
 |----------|-------|
 | Total practices | {N} |
-| HIGH-DELTA | {N} |
-| LOW-DELTA | {N} |
-| NO-DELTA | {N} |
+| [DELTA:new] | {N} |
+| [DELTA:varies] | {N} |
+| [DELTA:known] | {N} |
+| [HOOK:yes] | {N} |
+| [HOOK:no] | {N} |
 
 ---
 
@@ -184,7 +236,7 @@ On success, end your final message with:
 
 ```
 ## RESEARCH COMPLETE
-Area: {area} | Language: {language} | Practices: {count} | Sources: {count}
+Area: {area} | Language: {language} | Practices: {count} | Sources: {count} | Hook recommended: {yes/no}
 ```
 
 On failure, end with:
@@ -199,7 +251,11 @@ Reason: {what went wrong}
 Before returning, verify each item. If an item fails, fix the report and re-check.
 
 - [ ] All best practices have source attribution (URL or document name)
-- [ ] Delta assessment provided for every practice with one-sentence reasoning
+- [ ] Every practice has both [DELTA:class] and [HOOK:class] tags inline with the practice name
+- [ ] Delta tags use exactly one of: [DELTA:new], [DELTA:known], [DELTA:varies]
+- [ ] Hook tags use exactly one of: [HOOK:yes], [HOOK:no]
+- [ ] Hook Recommendation section present with recommended/trigger/count/reasoning
+- [ ] Tags appear on the same line as the practice name heading (parseable by generator)
 - [ ] Library evaluation includes health and soundness table (if language-specific)
 - [ ] Library evaluation includes feature comparison table (if language-specific)
 - [ ] Recommendation provided with reasoning (if language-specific)
