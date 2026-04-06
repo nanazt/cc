@@ -66,6 +66,38 @@ Not every area applies to every convention — use judgment based on the area.
 
 ---
 
+## Step 2a: Hook Confirmation (When Research Recommends Hook)
+
+Skip this step if `research_results` does not contain a `## Hook Recommendation` section, or if the recommendation is "No".
+
+When the researcher recommends a hook:
+
+Present in conversation text:
+
+```
+The research identified {N} mechanically verifiable rules in this convention area.
+A PreToolUse hook can enforce these rules automatically:
+
+Hookable rules:
+{list each [HOOK:yes] rule from research by name}
+
+Trigger event: {trigger event from hook recommendation}
+```
+
+Then ask via AskUserQuestion:
+
+> Generate an enforcement hook for this convention?
+
+Options:
+1. "Yes, generate hook + tests"
+2. "No, convention only"
+
+Store the selection as `hook_confirmed` (true or false).
+
+If `hook_confirmed` is true, also store the list of [HOOK:yes] rule names as `hook_rules` for the generator.
+
+---
+
 ## Step 3: Preference Summary and Confirmation
 
 After collecting all preferences, present a summary in conversation text:
@@ -76,6 +108,8 @@ Here's what I'll use to generate your convention:
 - {Preference 1}: {value}
 - {Preference 2}: {value}
 - ...
+{if hook_confirmed is set:}
+- Hook generation: {Yes — {N} hookable rules / No}
 ```
 
 AskUserQuestion: "Preferences look correct?" with options:
@@ -93,6 +127,27 @@ Store all collected preferences as a structured `user_preferences` summary.
 
 ---
 
+## Step 3a: Persist Preferences
+
+Write all collected preferences to `.state/preferences.json`:
+
+```json
+{
+  "preferences": [
+    { "key": "{preference_key}", "value": "{value}", "source": "{user/research-confirmed}" }
+  ],
+  "hook_confirmed": {true/false},
+  "hook_rules": ["{rule_name}", ...],
+  "artifact_type": "{rule or skill from init}"
+}
+```
+
+Use the Write tool to write preferences JSON to `{state_dir}/preferences.json`.
+
+This makes preferences available to step-generate for post-generation verification without relying on implicit context.
+
+---
+
 ## Step 4: Transition
 
 **If selected_flow == "Research first" (research already completed):**
@@ -102,6 +157,10 @@ Read `$CLAUDE_SKILL_DIR/step-generate.md`.
 Pass forward:
 - `area`, `lang`, `publisher`, `convention_tools`, `resolved_path`, `mode`, `create_base_first`
 - `selected_flow`
+- `state_dir` — path to .state/ directory
+- `artifact_type` — "rule" or "skill"
+- `hook_confirmed` — boolean (whether to generate hook)
+- `hook_rules` — list of hookable rule names (if hook_confirmed)
 - `research_results` — full research report text
 - `user_preferences` — structured summary of all collected preferences
 - `additional_context` — any user-provided context (may be empty)
@@ -113,6 +172,10 @@ Read `$CLAUDE_SKILL_DIR/step-research.md`.
 Pass forward:
 - `area`, `lang`, `publisher`, `convention_tools`, `resolved_path`, `mode`, `create_base_first`
 - `selected_flow`
+- `state_dir` — path to .state/ directory
+- `artifact_type` — "rule" or "skill"
+- `hook_confirmed` — boolean (whether to generate hook)
+- `hook_rules` — list of hookable rule names (if hook_confirmed)
 - `user_preferences` — structured summary of all collected preferences (researcher will use preferences to focus research)
 
 After step-research.md completes, it transitions directly to step-generate.md (not back here) with research_results + user_preferences combined.
