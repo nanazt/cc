@@ -1,0 +1,1 @@
+{"tool_name":"Bash","tool_input":{"command":"node /path/to/gsd-tools.cjs state complete-phase --name first-convention-commit"},"cwd":"__CWD__"}

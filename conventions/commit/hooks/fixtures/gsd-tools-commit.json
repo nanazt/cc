@@ -1,0 +1,1 @@
+{"tool_name":"Bash","tool_input":{"command":"node /path/to/gsd-tools.cjs commit \"feat(parser): add support\" --files src/parser.rs"},"cwd":"__CWD__"}
