@@ -90,7 +90,11 @@ Plans:
   2. The convention provides real value -- it teaches commit structure, scope conventions, and message quality rules that improve Claude's commit output
   3. The convention passes the ARCH-03 delta test -- it does not restate what the LLM already knows about conventional commits
   4. The convention is technology-neutral -- any project type can use it without modification
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 19-01-PLAN.md — PROJECT.md identity update + commit convention via /convention skill
+- [ ] 19-02-PLAN.md — PreToolUse convention injection and validation hook
 
 ### Phase 19.1: GSD Commit Convention Injection (INSERTED)
 
@@ -173,7 +177,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22 -> 23
 | 16. Align E2E Flows Dispatch Contract | v0.1.0 | 1/1 | Complete | 2026-04-02 |
 | 17. Convention Architecture | v0.2.0 | 1/1 | Complete    | 2026-04-03 |
 | 18. /convention Skill | v0.2.0 | 3/3 | Complete    | 2026-04-04 |
-| 19. First Convention — Commit | v0.2.0 | 0/? | Not started | - |
+| 19. First Convention — Commit | v0.2.0 | 0/2 | Not started | - |
 | 20. Installation Infrastructure | v0.2.0 | 0/? | Not started | - |
 | 21. Code Convention + Rust Code Tech Pack | v0.2.0 | 0/? | Not started | - |
 | 22. Test & Error Conventions + Rust Tech Packs | v0.2.0 | 0/? | Not started | - |
